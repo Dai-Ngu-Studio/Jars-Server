@@ -67,4 +67,4 @@ jobs:
             sudo docker container rm jars-api-container
             sudo docker image rm ngianguyen81/jars:latest
             sudo docker pull ngianguyen81/jars:latest
-            sudo docker run -d -p 8080:8080 --name jars-api-container ngianguyen81/jars:latest
+            sudo docker run -d -p 8080:80 --name jars-api-container ngianguyen81/jars:latest
