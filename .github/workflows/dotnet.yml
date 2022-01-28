@@ -51,8 +51,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: ..
-          file: ./JARS/JARS-API/Dockerfile
+          context: ./JARS/JARS-API/
           push: true
           tags: ngianguyen81/jars:latest
       - name: SSH to Server
@@ -68,4 +67,4 @@ jobs:
             sudo docker container rm jars-api-container
             sudo docker image rm ngianguyen81/jars:latest
             sudo docker pull ngianguyen81/jars:latest
-            sudo docker run -d -p 8080:8080 --name jars-api-container ngianguyen81/jars:latest
+            sudo docker run -d -p 8080:80 -p 8084:443 --name jars-api-container ngianguyen81/jars:latest
