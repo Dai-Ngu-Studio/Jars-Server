@@ -16,7 +16,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ./JARS/JARS-API
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build ./JARS/JARS-API --no-restore
     - uses: actions/upload-artifact@main
       with:
         name: dotnet build artifacts
@@ -35,7 +35,7 @@ jobs:
         name: dotnet build artifacts
         path: JARS-API
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test ./JARS/JARS-API --no-build --verbosity normal
   deploy:
     needs: test
     runs-on: ubuntu-latest
