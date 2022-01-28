@@ -7,8 +7,8 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["JARS/JARS-API/JARS-API.csproj", "JARS-API/"]
-RUN dotnet restore "JARS/JARS-API/JARS-API.csproj"
+COPY ["./JARS/JARS-API/JARS-API.csproj", "JARS-API/"]
+RUN dotnet restore "./JARS/JARS-API/JARS-API.csproj"
 COPY . .
 WORKDIR "/src/JARS-API"
 RUN dotnet build "JARS-API.csproj" -c Release -o /app/build
