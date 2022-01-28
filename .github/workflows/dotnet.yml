@@ -53,7 +53,7 @@ jobs:
         with:
           context: ./JARS/JARS-API/
           push: true
-          tags: ${{ secrets.SSH_USERNAME }}/jars:latest
+          tags: ngianguyen81/jars:latest
       - name: SSH to Server
         uses: appleboy/ssh-action@master
         with:
@@ -65,6 +65,6 @@ jobs:
             sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
             sudo docker stop jars-api-container
             sudo docker container rm jars-api-container
-            sudo docker image rm ${{ secrets.SSH_USERNAME }}/jars:latest
-            sudo docker pull ${{ secrets.SSH_USERNAME }}/jars:latest
-            sudo docker run -d --name jars-api-container ${{ secrets.SSH_USERNAME }}/jars:latest
+            sudo docker image rm ngianguyen81/jars:latest
+            sudo docker pull ngianguyen81/jars:latest
+            sudo docker run -d --name jars-api-container ngianguyen81/jars:latest
