@@ -30,7 +30,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:8080/swagger",
+      "launchUrl": "{Scheme}://14.225.254.190:8080/swagger",
       "publishAllPorts": true,
       "useSSL": true
     }
