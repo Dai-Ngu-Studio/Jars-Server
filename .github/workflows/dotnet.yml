@@ -63,7 +63,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
-            sudo docker stop jars-api-container
+            sudo docker stop jars-api-container -f
             sudo docker container rm jars-api-container
             sudo docker image rm ngianguyen81/jars:latest
             sudo docker pull ngianguyen81/jars:latest
