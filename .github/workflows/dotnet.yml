@@ -2,40 +2,40 @@ name: .NET
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore ./JARS/JARS-API
-    - name: Build
-      run: dotnet build ./JARS/JARS-API --no-restore
-    - uses: actions/upload-artifact@main
-      with:
-        name: dotnet build artifacts
-        path: ./JARS/JARS-API/
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore ./JARS/JARS-API
+      - name: Build
+        run: dotnet build ./JARS/JARS-API --no-restore
+      - uses: actions/upload-artifact@main
+        with:
+          name: dotnet build artifacts
+          path: ./JARS/JARS-API/
   test:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - uses: actions/download-artifact@main
-      with:
-        name: dotnet build artifacts
-        path: ./JARS/JARS-API
-    - name: Test
-      run: dotnet test ./JARS/JARS-API --no-build --verbosity normal
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - uses: actions/download-artifact@main
+        with:
+          name: dotnet build artifacts
+          path: ./JARS/JARS-API
+      - name: Test
+        run: dotnet test ./JARS/JARS-API --no-build --verbosity normal
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -67,4 +67,4 @@ jobs:
             sudo docker container rm jars-api-container
             sudo docker image rm ngianguyen81/jars:latest
             sudo docker pull ngianguyen81/jars:latest
-            sudo docker run -d -p 8080:80 -p 8084:443 --name jars-api-container ngianguyen81/jars:latest
+            docker run --rm -it -p 8000:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -e ASPNETCORE_Kestrel__Certificates__Default__Password="daingu" -e ASPNETCORE_ENVIRONMENT=Development -v ${HOME}/.aspnet/https:/https/ --name jars-api-container ngianguyen81/jars:latest
