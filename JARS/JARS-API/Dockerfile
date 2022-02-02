@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+ARG SSL_PASSWORD
+ENV SSL_PASSWORD $SSL_PASSWORD
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -11,8 +13,7 @@ RUN dotnet restore
 # Copy everything else and build
 COPY ./ ./
 RUN dotnet publish -c Release -o out
-RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p daingu_ssl_password
-
+RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p ${SSL_PASSWORD}
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
