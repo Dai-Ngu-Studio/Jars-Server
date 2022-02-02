@@ -1,22 +1,25 @@
 version: "3.9"
 services:
-  web:
-    build: ./JARS/JARS-API/
+  api:
+    build:
+      context: ./JARS/JARS-API/
+      args:
+        SSL_PASSWORD: ${SSL_PASSWORD}
     ports:
       - 8000:80
       - 8001:443
     depends_on:
       - db
     environment:
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_HTTPS_PORT=8001
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=daingu_ssl_password
-      - ASPNETCORE_ENVIRONMENT=Development
+      ASPNETCORE_URLS: "https://+:443;http://+:80"
+      ASPNETCORE_HTTPS_PORT: "8001"
+      ASPNETCORE_Kestrel__Certificates__Default__Path: ${SSL_PATH}
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${SSL_PASSWORD}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
   db:
     image: "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04"
     ports:
       - 1433:1433
     environment:
-      SA_PASSWORD: "Daingu_sqlpassword123"
+      SA_PASSWORD: ${SA_PASSWORD}
       ACCEPT_EULA: "Y"
