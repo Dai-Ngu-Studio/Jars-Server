@@ -55,7 +55,7 @@ jobs:
           push: true
           tags: ngianguyen81/jars:latest
           build-args:
-            SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
+            - SSL_PASSWORD=${{ secrets.SSL_PASSWORD }}
       - name: SSH to Server
         uses: appleboy/ssh-action@master
         with:
