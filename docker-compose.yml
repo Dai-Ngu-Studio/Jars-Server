@@ -17,9 +17,13 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${SSL_PASSWORD}
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
   db:
-    image: "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04"
+    build: ./SQL/Setup/
+    user: root
     ports:
       - 1433:1433
     environment:
       SA_PASSWORD: ${SA_PASSWORD}
       ACCEPT_EULA: "Y"
+    restart: always
+    volumes:
+      - ./SQL/Data:/var/opt/mssql/data
