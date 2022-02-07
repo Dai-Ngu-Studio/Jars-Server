@@ -7,11 +7,14 @@ EXPOSE 80
 EXPOSE 443
 
 # Copy csproj and restore as distinct layers
-COPY *.csproj ./
+COPY *.sln ./
+COPY JARS-API/*.csproj ./JARS-API/
+COPY JARS-DAL/*.csproj ./JARS-DAL/
 RUN dotnet restore
 
 # Copy everything else and build
-COPY ./ ./
+COPY JARS-API/. ./JARS-API/
+COPY JARS-DAL/. ./JARS-DAL/
 RUN dotnet publish -c Release -o out
 RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p ${SSL_PASSWORD}
 # Build runtime image

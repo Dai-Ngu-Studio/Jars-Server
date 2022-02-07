@@ -2,7 +2,7 @@ version: "3.9"
 services:
   api:
     build:
-      context: ./JARS/JARS-API/
+      context: ./JARS/
       args:
         SSL_PASSWORD: ${SSL_PASSWORD}
     ports:
