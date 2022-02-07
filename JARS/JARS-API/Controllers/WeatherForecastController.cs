@@ -1,4 +1,3 @@
-using JARS_DAL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JARS_API.Controllers
@@ -22,7 +21,6 @@ namespace JARS_API.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
-            Class1 class1 = new Class1();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
