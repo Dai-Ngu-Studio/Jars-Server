@@ -15,7 +15,7 @@ CREATE TABLE [AccountType] (
 );
 
 CREATE TABLE [Account] (
-  [ID] int,							--PK--
+  [ID] varchar,							--PK--
   [AccountTypeID] int,				--FK--
   [UserName] varchar,
   [FirstName] nvarchar,
@@ -33,7 +33,7 @@ CREATE TABLE [Wallet] (
   [StartDate] DateTime,
   [WalletAmount] money,
   [Percentage] Decimal,
-  [AccountID] int,					--FK--
+  [AccountID] varchar,					--FK--
 
   PRIMARY KEY ([ID]),
 
@@ -124,7 +124,7 @@ CREATE TABLE [ScheduleType] (
 
 CREATE TABLE [Contract] (
   [ID] int,							--PK--
-  [AccountID] int,
+  [AccountID] varchar,
   [ScheduleTypeID] int,				--FK--
   [CategoryID] int,
   [NoteID] int,						--FK--
