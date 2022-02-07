@@ -8,7 +8,7 @@ USE [JarsDatabase]
 GO
 
 CREATE TABLE [AccountType] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [Name] nvarchar,
 
   PRIMARY KEY ([ID])
@@ -28,7 +28,7 @@ CREATE TABLE [Account] (
 );
 
 CREATE TABLE [Wallet] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [Name] nvarchar,
   [StartDate] DateTime,
   [WalletAmount] money,
@@ -41,7 +41,7 @@ CREATE TABLE [Wallet] (
 );
 
 CREATE TABLE [CategoryWallet] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [WalletID] int,					--FK--
   [Name] nvarchar,
   [ParentCategoryID] int,
@@ -54,7 +54,7 @@ CREATE TABLE [CategoryWallet] (
 );
 
 CREATE TABLE [Category] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [Name] nvarchar,
   [ParentCategoryID] int,
   [CurrentCategoryLevel] int,
@@ -65,7 +65,7 @@ CREATE TABLE [Category] (
 );
 
 CREATE TABLE [Bill] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [Date] DateTime,
   [Name] nvarchar,
   [Amount] money,
@@ -79,7 +79,7 @@ CREATE TABLE [Bill] (
 );
 
 CREATE TABLE [BillDetail] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [ItemName] nvarchar,
   [Price] money,
   [Quantity] int,
@@ -91,7 +91,7 @@ CREATE TABLE [BillDetail] (
 );
 
 CREATE TABLE [Note] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [AddedDate] DateTime,
   [Comments] nvarchar,
   [Image] varchar,
@@ -100,7 +100,7 @@ CREATE TABLE [Note] (
 );
 
 CREATE TABLE [Transaction] (
-  [ID] int,
+  [ID] int IDENTITY(1, 1),
   [WalletID] int,
   [TransactionDate] DateTime,
   [CategoryID] int,					--FK--
@@ -116,14 +116,14 @@ CREATE TABLE [Transaction] (
 );
 
 CREATE TABLE [ScheduleType] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [Name] nvarchar,
 
   PRIMARY KEY ([ID])
 );
 
 CREATE TABLE [Contract] (
-  [ID] int,							--PK--
+  [ID] int IDENTITY(1, 1),							--PK--
   [AccountID] varchar,
   [ScheduleTypeID] int,				--FK--
   [CategoryID] int,
