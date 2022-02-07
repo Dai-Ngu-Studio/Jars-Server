@@ -30,9 +30,10 @@ namespace JARS_DAL.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            string DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("server=localhost,1433;database=JarsDatabase;uid=sa;pwd=THEMPASSWORD;");
+                optionsBuilder.UseSqlServer("server=localhost,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
             }
         }
 
