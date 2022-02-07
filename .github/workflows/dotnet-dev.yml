@@ -1,0 +1,38 @@
+name: .NET, Development
+
+on:
+  push:
+    branches: [development]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore ./JARS/JARS-API
+      - name: Build
+        run: dotnet build ./JARS/JARS-API --no-restore
+      - uses: actions/upload-artifact@main
+        with:
+          name: dotnet build artifacts
+          path: ./JARS/JARS-API/
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - uses: actions/download-artifact@main
+        with:
+          name: dotnet build artifacts
+          path: ./JARS/JARS-API
+      - name: Test
+        run: dotnet test ./JARS/JARS-API --no-build --verbosity normal
