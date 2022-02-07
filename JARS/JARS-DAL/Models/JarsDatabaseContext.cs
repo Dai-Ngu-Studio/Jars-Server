@@ -70,9 +70,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("AccountType");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Name).HasMaxLength(1);
             });
@@ -81,9 +79,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Bill");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Amount).HasColumnType("money");
 
@@ -107,9 +103,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("BillDetail");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.BillId).HasColumnName("BillID");
 
@@ -127,9 +121,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Category");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Name).HasMaxLength(1);
 
@@ -140,9 +132,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("CategoryWallet");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Name).HasMaxLength(1);
 
@@ -160,9 +150,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Contract");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
                     .HasMaxLength(1)
@@ -203,9 +191,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Note");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AddedDate).HasColumnType("datetime");
 
@@ -220,9 +206,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("ScheduleType");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Name).HasMaxLength(1);
             });
@@ -231,15 +215,11 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Transaction");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Amount).HasColumnType("money");
 
                 entity.Property(e => e.BillId).HasColumnName("BillID");
-
-                entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
 
                 entity.Property(e => e.NoteId).HasColumnName("NoteID");
 
@@ -267,9 +247,7 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("Wallet");
 
-                entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
                     .HasMaxLength(1)

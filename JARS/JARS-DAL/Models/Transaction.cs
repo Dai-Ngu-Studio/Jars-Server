@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JARS_DAL.Models
 {
     public partial class Transaction
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int? WalletId { get; set; }
         public DateTime? TransactionDate { get; set; }
-        public int? CategoryId { get; set; }
         public int? NoteId { get; set; }
         public int? BillId { get; set; }
         public decimal? Amount { get; set; }

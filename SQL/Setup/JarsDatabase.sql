@@ -103,7 +103,6 @@ CREATE TABLE [Transaction] (
   [ID] int IDENTITY(1, 1),
   [WalletID] int,
   [TransactionDate] DateTime,
-  [CategoryID] int,					--FK--
   [NoteID] int,						--FK--
   [BillID] int,						--FK--
   [Amount] money,

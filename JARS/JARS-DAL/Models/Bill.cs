@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JARS_DAL.Models
 {
@@ -12,6 +13,7 @@ namespace JARS_DAL.Models
             Transactions = new HashSet<Transaction>();
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public DateTime? Date { get; set; }
         public string? Name { get; set; }
