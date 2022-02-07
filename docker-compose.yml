@@ -16,6 +16,7 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Path: ${SSL_PATH}
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${SSL_PASSWORD}
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      SA_PASSWORD: ${SA_PASSWORD}
   db:
     build: ./SQL/Setup/
     user: root
