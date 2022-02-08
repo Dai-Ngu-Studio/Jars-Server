@@ -15,11 +15,11 @@ CREATE TABLE [AccountType] (
 );
 
 CREATE TABLE [Account] (
-  [ID] varchar(28),							--PK--
+  [ID] varchar(128),							--PK--
   [AccountTypeID] int,				--FK--
-  [UserName] varchar(max),
-  [FirstName] nvarchar(max),
-  [LastName] nvarchar(max),
+  [Email] varchar(max),
+  [DisplayName] nvarchar(max),
+  [PhotoUrl] varchar(max),
   [LastLoginDate] DateTime,
 
   PRIMARY KEY ([ID]),
@@ -33,7 +33,7 @@ CREATE TABLE [Wallet] (
   [StartDate] DateTime,
   [WalletAmount] money,
   [Percentage] Decimal,
-  [AccountID] varchar(28),					--FK--
+  [AccountID] varchar(128),					--FK--
 
   PRIMARY KEY ([ID]),
 
@@ -64,6 +64,39 @@ CREATE TABLE [Category] (
   FOREIGN KEY ([ID]) REFERENCES Category([ID]),
 );
 
+CREATE TABLE [Note] (
+  [ID] int IDENTITY(1, 1),							--PK--
+  [AddedDate] DateTime,
+  [Comments] nvarchar(max),
+  [Image] varchar(max),
+
+  PRIMARY KEY ([ID]),
+);
+
+CREATE TABLE [ScheduleType] (
+  [ID] int IDENTITY(1, 1),							--PK--
+  [Name] nvarchar(max),
+
+  PRIMARY KEY ([ID])
+);
+
+CREATE TABLE [Contract] (
+  [ID] int IDENTITY(1, 1),							--PK--
+  [AccountID] varchar(128),
+  [ScheduleTypeID] int,				--FK--
+  [CategoryID] int,
+  [NoteID] int,						--FK--
+  [StartDate] DateTime,
+  [EndDate] DateTime,
+  [Amount] Money,
+
+  PRIMARY KEY ([ID]),
+
+  FOREIGN KEY ([AccountID]) REFERENCES Account([ID]),
+  FOREIGN KEY ([NoteID]) REFERENCES Note([ID]),
+  FOREIGN KEY ([ScheduleTypeID]) REFERENCES ScheduleType([ID]),
+);
+
 CREATE TABLE [Bill] (
   [ID] int IDENTITY(1, 1),							--PK--
   [Date] DateTime,
@@ -72,31 +105,12 @@ CREATE TABLE [Bill] (
   [RecurringTransactionID] int,		
   [LeftAmount] money,
   [CategoryID] int,					--FK--
+  [ContractID] int,                 --FK--
 
   PRIMARY KEY ([ID]),
 
   FOREIGN KEY ([CategoryID]) REFERENCES Category([ID]),
-);
-
-CREATE TABLE [BillDetail] (
-  [ID] int IDENTITY(1, 1),							--PK--
-  [ItemName] nvarchar(max),
-  [Price] money,
-  [Quantity] int,
-  [BillID] int,						--FK--
-
-  PRIMARY KEY ([ID]),
-
-  FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
-);
-
-CREATE TABLE [Note] (
-  [ID] int IDENTITY(1, 1),							--PK--
-  [AddedDate] DateTime,
-  [Comments] nvarchar(max),
-  [Image] varchar(max),
-
-  PRIMARY KEY ([ID]),
+  FOREIGN KEY ([ContractID]) REFERENCES Contract([ID]),
 );
 
 CREATE TABLE [Transaction] (
@@ -114,27 +128,14 @@ CREATE TABLE [Transaction] (
   FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
 );
 
-CREATE TABLE [ScheduleType] (
+CREATE TABLE [BillDetail] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [Name] nvarchar(max),
-
-  PRIMARY KEY ([ID])
-);
-
-CREATE TABLE [Contract] (
-  [ID] int IDENTITY(1, 1),							--PK--
-  [AccountID] varchar(max),
-  [ScheduleTypeID] int,				--FK--
-  [CategoryID] int,
-  [NoteID] int,						--FK--
-  [StartDate] DateTime,
-  [EndDate] DateTime,
-  [Amount] Money,
+  [ItemName] nvarchar(max),
+  [Price] money,
+  [Quantity] int,
   [BillID] int,						--FK--
 
   PRIMARY KEY ([ID]),
 
-  FOREIGN KEY ([NoteID]) REFERENCES Note([ID]),
-  FOREIGN KEY ([ScheduleTypeID]) REFERENCES ScheduleType([ID]),
   FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
 );

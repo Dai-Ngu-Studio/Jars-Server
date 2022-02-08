@@ -44,15 +44,17 @@ namespace JARS_DAL.Models
                 entity.ToTable("Account");
 
                 entity.Property(e => e.Id)
-                    .HasMaxLength(28)
+                    .HasMaxLength(128)
                     .IsUnicode(false)
                     .HasColumnName("ID");
 
                 entity.Property(e => e.AccountTypeId).HasColumnName("AccountTypeID");
 
+                entity.Property(e => e.Email).IsUnicode(false);
+
                 entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
 
-                entity.Property(e => e.UserName).IsUnicode(false);
+                entity.Property(e => e.PhotoUrl).IsUnicode(false);
 
                 entity.HasOne(d => d.AccountType)
                     .WithMany(p => p.Accounts)
@@ -77,6 +79,8 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
 
+                entity.Property(e => e.ContractId).HasColumnName("ContractID");
+
                 entity.Property(e => e.Date).HasColumnType("datetime");
 
                 entity.Property(e => e.LeftAmount).HasColumnType("money");
@@ -86,7 +90,12 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__Bill__CategoryID__32E0915F");
+                    .HasConstraintName("FK__Bill__CategoryID__3B75D760");
+
+                entity.HasOne(d => d.Contract)
+                    .WithMany(p => p.Bills)
+                    .HasForeignKey(d => d.ContractId)
+                    .HasConstraintName("FK__Bill__ContractID__3C69FB99");
             });
 
             modelBuilder.Entity<BillDetail>(entity =>
@@ -102,7 +111,7 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.BillDetails)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__BillDetai__BillI__35BCFE0A");
+                    .HasConstraintName("FK__BillDetai__BillI__440B1D61");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -137,12 +146,11 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
+                    .HasMaxLength(128)
                     .IsUnicode(false)
                     .HasColumnName("AccountID");
 
                 entity.Property(e => e.Amount).HasColumnType("money");
-
-                entity.Property(e => e.BillId).HasColumnName("BillID");
 
                 entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
 
@@ -154,20 +162,20 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.Bill)
+                entity.HasOne(d => d.Account)
                     .WithMany(p => p.Contracts)
-                    .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__Contract__BillID__4316F928");
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK__Contract__Accoun__36B12243");
 
                 entity.HasOne(d => d.Note)
                     .WithMany(p => p.Contracts)
                     .HasForeignKey(d => d.NoteId)
-                    .HasConstraintName("FK__Contract__NoteID__412EB0B6");
+                    .HasConstraintName("FK__Contract__NoteID__37A5467C");
 
                 entity.HasOne(d => d.ScheduleType)
                     .WithMany(p => p.Contracts)
                     .HasForeignKey(d => d.ScheduleTypeId)
-                    .HasConstraintName("FK__Contract__Schedu__4222D4EF");
+                    .HasConstraintName("FK__Contract__Schedu__38996AB5");
             });
 
             modelBuilder.Entity<Note>(entity =>
@@ -207,17 +215,17 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__Transacti__BillI__3C69FB99");
+                    .HasConstraintName("FK__Transacti__BillI__412EB0B6");
 
                 entity.HasOne(d => d.Note)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.NoteId)
-                    .HasConstraintName("FK__Transacti__NoteI__3A81B327");
+                    .HasConstraintName("FK__Transacti__NoteI__3F466844");
 
                 entity.HasOne(d => d.Wallet)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.WalletId)
-                    .HasConstraintName("FK__Transacti__Walle__3B75D760");
+                    .HasConstraintName("FK__Transacti__Walle__403A8C7D");
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -227,7 +235,7 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
-                    .HasMaxLength(28)
+                    .HasMaxLength(128)
                     .IsUnicode(false)
                     .HasColumnName("AccountID");
 

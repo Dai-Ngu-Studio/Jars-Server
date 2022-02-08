@@ -9,7 +9,6 @@ namespace JARS_DAL.Models
         public Bill()
         {
             BillDetails = new HashSet<BillDetail>();
-            Contracts = new HashSet<Contract>();
             Transactions = new HashSet<Transaction>();
         }
 
@@ -21,10 +20,11 @@ namespace JARS_DAL.Models
         public int? RecurringTransactionId { get; set; }
         public decimal? LeftAmount { get; set; }
         public int? CategoryId { get; set; }
+        public int? ContractId { get; set; }
 
         public virtual Category? Category { get; set; }
+        public virtual Contract? Contract { get; set; }
         public virtual ICollection<BillDetail> BillDetails { get; set; }
-        public virtual ICollection<Contract> Contracts { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

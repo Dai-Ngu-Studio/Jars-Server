@@ -6,6 +6,11 @@ namespace JARS_DAL.Models
 {
     public partial class Contract
     {
+        public Contract()
+        {
+            Bills = new HashSet<Bill>();
+        }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string? AccountId { get; set; }
@@ -15,10 +20,10 @@ namespace JARS_DAL.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public decimal? Amount { get; set; }
-        public int? BillId { get; set; }
 
-        public virtual Bill? Bill { get; set; }
+        public virtual Account? Account { get; set; }
         public virtual Note? Note { get; set; }
         public virtual ScheduleType? ScheduleType { get; set; }
+        public virtual ICollection<Bill> Bills { get; set; }
     }
 }
