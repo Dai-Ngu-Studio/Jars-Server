@@ -33,7 +33,7 @@ namespace JARS_DAL.Models
             string DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("server=localhost,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
+                optionsBuilder.UseSqlServer("server=localhost,1433;database=JarsDatabase;uid=sa;pwd=" + "Daingu_Sql!%Password12345678" + ";");
             }
         }
 
@@ -44,21 +44,15 @@ namespace JARS_DAL.Models
                 entity.ToTable("Account");
 
                 entity.Property(e => e.Id)
-                    .HasMaxLength(1)
+                    .HasMaxLength(28)
                     .IsUnicode(false)
                     .HasColumnName("ID");
 
                 entity.Property(e => e.AccountTypeId).HasColumnName("AccountTypeID");
 
-                entity.Property(e => e.FirstName).HasMaxLength(1);
-
                 entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
 
-                entity.Property(e => e.LastName).HasMaxLength(1);
-
-                entity.Property(e => e.UserName)
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
+                entity.Property(e => e.UserName).IsUnicode(false);
 
                 entity.HasOne(d => d.AccountType)
                     .WithMany(p => p.Accounts)
@@ -71,8 +65,6 @@ namespace JARS_DAL.Models
                 entity.ToTable("AccountType");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name).HasMaxLength(1);
             });
 
             modelBuilder.Entity<Bill>(entity =>
@@ -88,8 +80,6 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Date).HasColumnType("datetime");
 
                 entity.Property(e => e.LeftAmount).HasColumnType("money");
-
-                entity.Property(e => e.Name).HasMaxLength(1);
 
                 entity.Property(e => e.RecurringTransactionId).HasColumnName("RecurringTransactionID");
 
@@ -107,8 +97,6 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.BillId).HasColumnName("BillID");
 
-                entity.Property(e => e.ItemName).HasMaxLength(1);
-
                 entity.Property(e => e.Price).HasColumnType("money");
 
                 entity.HasOne(d => d.Bill)
@@ -123,8 +111,6 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
-                entity.Property(e => e.Name).HasMaxLength(1);
-
                 entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
             });
 
@@ -133,8 +119,6 @@ namespace JARS_DAL.Models
                 entity.ToTable("CategoryWallet");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name).HasMaxLength(1);
 
                 entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
 
@@ -153,7 +137,6 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
-                    .HasMaxLength(1)
                     .IsUnicode(false)
                     .HasColumnName("AccountID");
 
@@ -195,11 +178,7 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.AddedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Comments).HasMaxLength(1);
-
-                entity.Property(e => e.Image)
-                    .HasMaxLength(1)
-                    .IsUnicode(false);
+                entity.Property(e => e.Image).IsUnicode(false);
             });
 
             modelBuilder.Entity<ScheduleType>(entity =>
@@ -207,8 +186,6 @@ namespace JARS_DAL.Models
                 entity.ToTable("ScheduleType");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Name).HasMaxLength(1);
             });
 
             modelBuilder.Entity<Transaction>(entity =>
@@ -250,11 +227,9 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.AccountId)
-                    .HasMaxLength(1)
+                    .HasMaxLength(28)
                     .IsUnicode(false)
                     .HasColumnName("AccountID");
-
-                entity.Property(e => e.Name).HasMaxLength(1);
 
                 entity.Property(e => e.Percentage).HasColumnType("decimal(18, 0)");
 
