@@ -33,7 +33,7 @@ namespace JARS_DAL.Models
             string DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("server=localhost,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
+                optionsBuilder.UseSqlServer("server=db,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
             }
         }
 
