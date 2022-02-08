@@ -19,7 +19,7 @@ RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p ${SSL_PASSWORD}
 
 # Run dotnet project
 WORKDIR /app/JARS-API
-CMD dotnet run --no-restore
+CMD echo "$FIREBASE_SECRET" > jars-c19f8-firebase-adminsdk.json && dotnet run --no-restore
 
 # # Build runtime image
 # FROM mcr.microsoft.com/dotnet/aspnet:6.0
