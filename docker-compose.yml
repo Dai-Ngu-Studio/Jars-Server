@@ -18,6 +18,8 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Password: ${SSL_PASSWORD}
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       SA_PASSWORD: ${SA_PASSWORD}
+      FIREBASE_SECRET: ${FIREBASE_SECRET}
+      GOOGLE_APPLICATION_CREDENTIALS: "./jars-c19f8-firebase-adminsdk.json"
   db:
     build: ./SQL/Setup/
     user: root
