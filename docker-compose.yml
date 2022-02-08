@@ -3,6 +3,7 @@ services:
   api:
     build:
       context: ./JARS/
+      dockerfile: Dockerfile.dev
       args:
         SSL_PASSWORD: ${SSL_PASSWORD}
     ports:
