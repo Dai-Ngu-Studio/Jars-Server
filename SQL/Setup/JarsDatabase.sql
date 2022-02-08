@@ -9,17 +9,17 @@ GO
 
 CREATE TABLE [AccountType] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [Name] nvarchar,
+  [Name] nvarchar(max),
 
   PRIMARY KEY ([ID])
 );
 
 CREATE TABLE [Account] (
-  [ID] varchar,							--PK--
+  [ID] varchar(28),							--PK--
   [AccountTypeID] int,				--FK--
-  [UserName] varchar,
-  [FirstName] nvarchar,
-  [LastName] nvarchar,
+  [UserName] varchar(max),
+  [FirstName] nvarchar(max),
+  [LastName] nvarchar(max),
   [LastLoginDate] DateTime,
 
   PRIMARY KEY ([ID]),
@@ -29,11 +29,11 @@ CREATE TABLE [Account] (
 
 CREATE TABLE [Wallet] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [Name] nvarchar,
+  [Name] nvarchar(max),
   [StartDate] DateTime,
   [WalletAmount] money,
   [Percentage] Decimal,
-  [AccountID] varchar,					--FK--
+  [AccountID] varchar(28),					--FK--
 
   PRIMARY KEY ([ID]),
 
@@ -43,7 +43,7 @@ CREATE TABLE [Wallet] (
 CREATE TABLE [CategoryWallet] (
   [ID] int IDENTITY(1, 1),							--PK--
   [WalletID] int,					--FK--
-  [Name] nvarchar,
+  [Name] nvarchar(max),
   [ParentCategoryID] int,
   [CurrentCategoryLevel] int,
 
@@ -55,7 +55,7 @@ CREATE TABLE [CategoryWallet] (
 
 CREATE TABLE [Category] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [Name] nvarchar,
+  [Name] nvarchar(max),
   [ParentCategoryID] int,
   [CurrentCategoryLevel] int,
 
@@ -67,7 +67,7 @@ CREATE TABLE [Category] (
 CREATE TABLE [Bill] (
   [ID] int IDENTITY(1, 1),							--PK--
   [Date] DateTime,
-  [Name] nvarchar,
+  [Name] nvarchar(max),
   [Amount] money,
   [RecurringTransactionID] int,		
   [LeftAmount] money,
@@ -80,7 +80,7 @@ CREATE TABLE [Bill] (
 
 CREATE TABLE [BillDetail] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [ItemName] nvarchar,
+  [ItemName] nvarchar(max),
   [Price] money,
   [Quantity] int,
   [BillID] int,						--FK--
@@ -93,8 +93,8 @@ CREATE TABLE [BillDetail] (
 CREATE TABLE [Note] (
   [ID] int IDENTITY(1, 1),							--PK--
   [AddedDate] DateTime,
-  [Comments] nvarchar,
-  [Image] varchar,
+  [Comments] nvarchar(max),
+  [Image] varchar(max),
 
   PRIMARY KEY ([ID]),
 );
@@ -116,14 +116,14 @@ CREATE TABLE [Transaction] (
 
 CREATE TABLE [ScheduleType] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [Name] nvarchar,
+  [Name] nvarchar(max),
 
   PRIMARY KEY ([ID])
 );
 
 CREATE TABLE [Contract] (
   [ID] int IDENTITY(1, 1),							--PK--
-  [AccountID] varchar,
+  [AccountID] varchar(max),
   [ScheduleTypeID] int,				--FK--
   [CategoryID] int,
   [NoteID] int,						--FK--
