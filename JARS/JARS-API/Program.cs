@@ -19,10 +19,10 @@ builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotr
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-FirebaseApp.Create(new AppOptions()
-{
-    Credential = GoogleCredential.GetApplicationDefault(),
-});
+// FirebaseApp.Create(new AppOptions()
+// {
+//     // Credential = GoogleCredential.GetApplicationDefault(),
+// });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
