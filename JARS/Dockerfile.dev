@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:6.0
+ARG SSL_PASSWORD
+ENV SSL_PASSWORD $SSL_PASSWORD
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# Copy csproj and restore as distinct layers
+COPY *.sln ./
+COPY JARS-API/*.csproj ./JARS-API/
+COPY JARS-DAL/*.csproj ./JARS-DAL/
+RUN dotnet restore
+
+# Copy everything else and build SSL certificate
+COPY JARS-API/. ./JARS-API/
+COPY JARS-DAL/. ./JARS-DAL/
+RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p ${SSL_PASSWORD}
+
+# Run dotnet project
+WORKDIR /app/JARS-API
+CMD echo "$FIREBASE_SECRET" > jars-c19f8-firebase-adminsdk.json && dotnet run --no-restore
+
+# # Build runtime image
+# FROM mcr.microsoft.com/dotnet/aspnet:6.0
+# WORKDIR /app
+# EXPOSE 80
+# EXPOSE 443
+# COPY --from=build-env /app/out .
+# COPY --from=build-env /https/ /https/
+# ENTRYPOINT ["dotnet", "JARS-API.dll"]

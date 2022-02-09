@@ -1,8 +1,8 @@
-name: .NET
+name: .NET, Development
 
 on:
   push:
-    branches: [main]
+    branches: [development]
 
 jobs:
   build:
@@ -52,21 +52,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./JARS/
-          push: true
+          push: false
           tags: ngianguyen81/jars:latest
           build-args: |
             SSL_PASSWORD=${{ secrets.SSL_PASSWORD }}
-      - name: SSH to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOSTNAME }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATEKEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
-            sudo docker stop jars-api-container
-            sudo docker container rm jars-api-container
-            sudo docker image rm ngianguyen81/jars:latest
-            sudo docker pull ngianguyen81/jars:latest
-            docker run -d -p 8000:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -e ASPNETCORE_Kestrel__Certificates__Default__Password=${{ secrets.SSL_PASSWORD }} -e ASPNETCORE_ENVIRONMENT=Development -e SA_PASSWORD=${{secrets.SA_PASSWORD}} -e FIREBASE_SECRET=${{secrets.FIREBASE_SECRET}} -e GOOGLE_APPLICATION_CREDENTIALS="./jars-c19f8-firebase-adminsdk.json" --name jars-api-container ngianguyen81/jars:latest
