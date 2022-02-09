@@ -10,7 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IBillRepository, BillRepository>();
+//builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
+builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
