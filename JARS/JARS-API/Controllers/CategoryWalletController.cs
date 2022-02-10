@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using JARS_API.Dtos;
 namespace JARS_API.Controllers
 {
-    [Route("api/category_wallet")]
+    [Route("api/category-wallet")]
     [ApiController]
     public class CategoryWalletController : ControllerBase
     {
