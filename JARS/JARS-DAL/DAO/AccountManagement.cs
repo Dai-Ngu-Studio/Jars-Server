@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace JARS_DAL.DAO
 {
-    public class AccountDAO
+    public class AccountManagement
     {
-        private static AccountDAO instance = null;
+        private static AccountManagement instance = null;
         private static readonly object instanceLock = new object();
-        private AccountDAO() { }
-        public static AccountDAO Instance
+        private AccountManagement() { }
+        public static AccountManagement Instance
         {
             get
             {
@@ -21,7 +21,7 @@ namespace JARS_DAL.DAO
                 {
                     if (instance == null)
                     {
-                        instance = new AccountDAO();
+                        instance = new AccountManagement();
                     }
                     return instance;
                 }
