@@ -3,7 +3,13 @@ FROM sys.databases
 WHERE name = 'JarsDatabase')
   BEGIN
   CREATE DATABASE JarsDatabase
-  USE [JarsDatabase]
+
+END;
+GO
+USE [JarsDatabase]
+GO
+IF OBJECT_ID('AccountType', 'U') IS NULL
+BEGIN
   CREATE TABLE [AccountType]
   (
     [ID] int IDENTITY(1, 1),
@@ -12,7 +18,10 @@ WHERE name = 'JarsDatabase')
 
     PRIMARY KEY ([ID])
   );
-
+END;
+GO
+IF OBJECT_ID('Account', 'U') IS NULL
+BEGIN
   CREATE TABLE [Account]
   (
     [ID] varchar(128),
@@ -28,7 +37,10 @@ WHERE name = 'JarsDatabase')
 
     FOREIGN KEY ([AccountTypeID]) REFERENCES AccountType([ID]),
   );
-
+END;
+GO
+IF OBJECT_ID('Wallet', 'U') IS NULL
+BEGIN
   CREATE TABLE [Wallet]
   (
     [ID] int IDENTITY(1, 1),
@@ -44,7 +56,10 @@ WHERE name = 'JarsDatabase')
 
     FOREIGN KEY ([AccountID]) REFERENCES Account([ID]),
   );
-
+END;
+GO
+IF OBJECT_ID('CategoryWallet', 'U') IS NULL
+BEGIN
   CREATE TABLE [CategoryWallet]
   (
     [ID] int IDENTITY(1, 1),
@@ -60,7 +75,10 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([WalletID]) REFERENCES [Wallet]([ID]),
     FOREIGN KEY ([ID]) REFERENCES CategoryWallet([ID]),
   );
-
+END;
+GO
+IF OBJECT_ID('Category', 'U') IS NULL
+BEGIN
   CREATE TABLE [Category]
   (
     [ID] int IDENTITY(1, 1),
@@ -74,6 +92,11 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([ID]) REFERENCES Category([ID]),
   );
 
+END;
+GO
+IF OBJECT_ID('Note', 'U') IS NULL
+BEGIN
+
   CREATE TABLE [Note]
   (
     [ID] int IDENTITY(1, 1),
@@ -84,7 +107,10 @@ WHERE name = 'JarsDatabase')
 
     PRIMARY KEY ([ID]),
   );
-
+END;
+GO
+IF OBJECT_ID('ScheduleType', 'U') IS NULL
+BEGIN
   CREATE TABLE [ScheduleType]
   (
     [ID] int IDENTITY(1, 1),
@@ -93,7 +119,10 @@ WHERE name = 'JarsDatabase')
 
     PRIMARY KEY ([ID])
   );
-
+END;
+GO
+IF OBJECT_ID('Contract', 'U') IS NULL
+BEGIN
   CREATE TABLE [Contract]
   (
     [ID] int IDENTITY(1, 1),
@@ -115,6 +144,10 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([ScheduleTypeID]) REFERENCES ScheduleType([ID]),
   );
 
+END;
+GO
+IF OBJECT_ID('Bill', 'U') IS NULL
+BEGIN
   CREATE TABLE [Bill]
   (
     [ID] int IDENTITY(1, 1),
@@ -134,7 +167,9 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([CategoryID]) REFERENCES Category([ID]),
     FOREIGN KEY ([ContractID]) REFERENCES Contract([ID]),
   );
-
+END;
+IF OBJECT_ID('Transaction', 'U') IS NULL
+BEGIN
   CREATE TABLE [Transaction]
   (
     [ID] int IDENTITY(1, 1),
@@ -152,7 +187,9 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([WalletID]) REFERENCES Wallet([ID]),
     FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
   );
-
+END;
+IF OBJECT_ID('BillDetail', 'U') IS NULL
+BEGIN
   CREATE TABLE [BillDetail]
   (
     [ID] int IDENTITY(1, 1),
@@ -168,5 +205,3 @@ WHERE name = 'JarsDatabase')
     FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
   );
 END;
-
-
