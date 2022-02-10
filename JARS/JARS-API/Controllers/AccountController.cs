@@ -30,7 +30,7 @@ namespace JARS_API.Controllers
         [HttpGet("{id}")]
         [Authorize]
         public async Task<ActionResult<Account>> GetAccount(
-            [FromHeader(Name = "Authorization")] string authorization, 
+            [FromHeader(Name = "Authorization")] string authorization,
             string id)
         {
             var account = await _accountRepository.GetAsync(id);
@@ -71,39 +71,6 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Create account.
-        /// </summary>
-        /// <param name="authorization">Format: Bearer <token></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<Account>> PostAccount(
-            [FromHeader(Name = "Authorization")] string authorization, 
-            Account account)
-        {
-            try
-            {
-                await _accountRepository.AddAsync(account);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                // to-do logging
-                return StatusCode(500);
-            }
-            catch (DbUpdateException)
-            {
-                // to-do logging
-                return StatusCode(500);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
-            return CreatedAtAction(nameof(GetAccount), new { id = account.Id }, account);
-        }
-
-        /// <summary>
         /// This method has not been implemented yet.
         /// </summary>
         /// <param name="id"></param>
@@ -115,7 +82,7 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// This method is used for signing in.
+        /// This method is used for signing in/ creating an account.
         /// </summary>
         /// <param name="authorization">Format: Bearer <token></param>
         /// <returns></returns>
@@ -137,25 +104,42 @@ namespace JARS_API.Controllers
                     }
                     else
                     {
-                        Console.WriteLine($"api/Account/login: Creating account for user {uid} ...");
-                        UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-                        bool isUserRecordExisted = userRecord != null;
-                        string? displayName = isUserRecordExisted ? userRecord?.DisplayName : uid;
-                        string? email = userRecord?.Email;
-                        string? photoUrl = userRecord?.PhotoUrl;
-                        DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
-                        Account newAccount = new Account
+                        try
                         {
-                            Id = uid,
-                            DisplayName = displayName,
-                            Email = email,
-                            PhotoUrl = photoUrl,
-                            LastLoginDate = tokenCreatedTime,
-                        };
-                        await _accountRepository.AddAsync(newAccount);
-                        return Ok(newAccount);
+                            return CreatedAtAction(nameof(GetAccount), new { id = account.Id }, account);
+                            Console.WriteLine($"api/Account/login: Creating account for user {uid} ...");
+                            UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+                            bool isUserRecordExisted = userRecord != null;
+                            string? displayName = isUserRecordExisted ? userRecord?.DisplayName : uid;
+                            string? email = userRecord?.Email;
+                            string? photoUrl = userRecord?.PhotoUrl;
+                            DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                            Account newAccount = new Account
+                            {
+                                Id = uid,
+                                DisplayName = displayName,
+                                Email = email,
+                                PhotoUrl = photoUrl,
+                                LastLoginDate = tokenCreatedTime,
+                            };
+                            await _accountRepository.AddAsync(newAccount);
+                            return Ok(newAccount);
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            // to-do logging
+                            return StatusCode(500);
+                        }
+                        catch (DbUpdateException)
+                        {
+                            // to-do logging
+                            return StatusCode(500);
+                        }
+                        catch (Exception ex)
+                        {
+                            return BadRequest(ex);
+                        }
                     }
-
                 }
                 catch (Exception)
                 {
