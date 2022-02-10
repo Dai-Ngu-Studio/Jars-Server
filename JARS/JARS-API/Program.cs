@@ -3,6 +3,8 @@ using Google.Apis.Auth.OAuth2;
 using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +15,15 @@ builder.Services.AddControllers();
 //builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
 builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
-//builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Allows summary/documentation for API endpoints.
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 FirebaseApp.Create(new AppOptions()
 {
