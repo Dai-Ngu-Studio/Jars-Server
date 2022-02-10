@@ -15,13 +15,13 @@ namespace JARS_API.Controllers
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<CategoryWalletDto> Getwallets()
+        public IEnumerable<CategoryWalletDto> GetWallets()
         {
             var wallets = repository.GetAllCategoryWallets().Select(categorywallet => categorywallet.AsCateWalletDto());
             return wallets;
         }
         [HttpGet("{id}")]
-        public ActionResult<CategoryWalletDto> Getwallet(int id)
+        public ActionResult<CategoryWalletDto> GetWallet(int id)
         {
             var categoryWallet = repository.GetCategoryWallet(id);
             if (categoryWallet is null)
@@ -47,7 +47,7 @@ namespace JARS_API.Controllers
 
                 };
                 repository.AddCategoryWallet(categoryWallet);
-                return CreatedAtAction(nameof(Getwallet), new { id = categoryWallet.Id }, categoryWallet.AsCateWalletDto());
+                return CreatedAtAction(nameof(GetWallet), new { id = categoryWallet.Id }, categoryWallet.AsCateWalletDto());
             }
             catch (Exception ex)
             {
@@ -59,7 +59,7 @@ namespace JARS_API.Controllers
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
-        public ActionResult Updatewallet(int id, CUCategoryWalletDto cUCategoryWalletDto)
+        public ActionResult UpdateWallet(int id, CUCategoryWalletDto cUCategoryWalletDto)
         {
             CategoryWallet existedCategoryWallet = repository.GetCategoryWallet(id);
             if (existedCategoryWallet is null)
@@ -83,11 +83,10 @@ namespace JARS_API.Controllers
         }
         //Delete /wallets/{id}
         [HttpDelete]
-        public ActionResult Deletewallet(int id)
+        public ActionResult DeleteWallet(int id)
         {
             repository.DeleteCategoryWallet(id);
             return NoContent();
-
         }
 
     }
