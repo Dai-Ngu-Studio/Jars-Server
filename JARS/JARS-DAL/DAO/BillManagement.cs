@@ -68,5 +68,19 @@ namespace JARS_DAL.DAO
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task DeleteBillAsync(Bill bill)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                jarsDB.Bills.Remove(bill);
+                await jarsDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

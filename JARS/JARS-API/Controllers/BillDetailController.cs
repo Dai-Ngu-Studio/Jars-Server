@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace JARS_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class BillDetailController : ControllerBase
     {
         private readonly IBillDetailRepository _repository;
@@ -132,7 +132,7 @@ namespace JARS_API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTransaction(int id)
+        public async Task<IActionResult> DeleteBillDetail(int id)
         {
             BillDetail billDetail = new BillDetail
             {

@@ -13,5 +13,6 @@ namespace JARS_DAL.Repository
         Task<Bill> GetBillByBillIdAsync(int billId);
         Task UpdateBillAsync(Bill bill);
         Task CreateBillAsync(Bill bill);
+        Task DeleteBillAsync(Bill bill);
     }
 }

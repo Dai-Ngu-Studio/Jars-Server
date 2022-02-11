@@ -19,6 +19,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 });
 
 builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
 builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
 builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace JARS_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class BillController : ControllerBase
     {
         private readonly IBillRepository _repository;
@@ -19,7 +19,6 @@ namespace JARS_API.Controllers
         }
 
         [HttpPost]
-        // Need help
         public async Task<ActionResult> CreateBill(Bill bill)
         {
             if (bill.BillDetails.Count > 0)
@@ -96,6 +95,33 @@ namespace JARS_API.Controllers
                 }
                 else { throw; }
             }
+            return Ok(bill);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBilll(int id)
+        {
+            Bill bill = new Bill
+            {
+                Id = id
+            };
+            try
+            {
+                var billDetail = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(bill.Id);
+                if (billDetail.Count == 0)
+                {
+                    await _repository.DeleteBillAsync(bill);
+                } else
+                {
+                    return BadRequest("Bill detail still remain for this bill");
+                }
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
             return Ok(bill);
         }
 

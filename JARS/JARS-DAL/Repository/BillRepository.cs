@@ -14,5 +14,6 @@ namespace JARS_DAL.Repository
         public Task<Bill> GetBillByBillIdAsync(int billId) => BillManagement.Instance.GetBillByBillIdAsync(billId);
         public Task UpdateBillAsync(Bill bill) => BillManagement.Instance.UpdateBillAsync(bill);
         public Task CreateBillAsync(Bill bill) => BillManagement.Instance.CreateBillAsync(bill);
+        public Task DeleteBillAsync(Bill bill) => BillManagement.Instance.DeleteBillAsync(bill);
     }
 }
