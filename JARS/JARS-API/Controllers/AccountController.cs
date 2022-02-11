@@ -101,6 +101,7 @@ namespace JARS_API.Controllers
                     if (account != null)
                     {
                         Console.WriteLine($"api/Account/login: User {uid} had already created an account.");
+                        return Ok(account);
                     }
                     else
                     {
