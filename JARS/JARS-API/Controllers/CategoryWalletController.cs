@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using JARS_API.Dtos;
 namespace JARS_API.Controllers
 {
-    [Route("api/category_wallet")]
+    [Route("api/category-wallet")]
     [ApiController]
     public class CategoryWalletController : ControllerBase
     {
@@ -15,13 +15,13 @@ namespace JARS_API.Controllers
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<CategoryWalletDto> Getwallets()
+        public IEnumerable<CategoryWalletDto> GetCategoryWallets()
         {
             var wallets = repository.GetAllCategoryWallets().Select(categorywallet => categorywallet.AsCateWalletDto());
             return wallets;
         }
         [HttpGet("{id}")]
-        public ActionResult<CategoryWalletDto> Getwallet(int id)
+        public ActionResult<CategoryWalletDto> GetCategoryWallet(int id)
         {
             var categoryWallet = repository.GetCategoryWallet(id);
             if (categoryWallet is null)
@@ -32,7 +32,7 @@ namespace JARS_API.Controllers
         }
         //POST /wallets/
         [HttpPost]
-        public ActionResult<CategoryWallet> AddWallet(CUCategoryWalletDto cUCategoryWalletDto)
+        public ActionResult<CategoryWallet> AddCategoryWallet(CUCategoryWalletDto cUCategoryWalletDto)
         {
 
             try
@@ -47,7 +47,7 @@ namespace JARS_API.Controllers
 
                 };
                 repository.AddCategoryWallet(categoryWallet);
-                return CreatedAtAction(nameof(Getwallet), new { id = categoryWallet.Id }, categoryWallet.AsCateWalletDto());
+                return CreatedAtAction(nameof(GetCategoryWallet), new { id = categoryWallet.Id }, categoryWallet.AsCateWalletDto());
             }
             catch (Exception ex)
             {
@@ -59,7 +59,7 @@ namespace JARS_API.Controllers
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
-        public ActionResult Updatewallet(int id, CUCategoryWalletDto cUCategoryWalletDto)
+        public ActionResult UpdateCategoryWallet(int id, CUCategoryWalletDto cUCategoryWalletDto)
         {
             CategoryWallet existedCategoryWallet = repository.GetCategoryWallet(id);
             if (existedCategoryWallet is null)
@@ -82,12 +82,11 @@ namespace JARS_API.Controllers
 
         }
         //Delete /wallets/{id}
-        [HttpDelete]
-        public ActionResult Deletewallet(int id)
+        [HttpDelete("{id}")]
+        public ActionResult DeleteCategoryWallet(int id)
         {
             repository.DeleteCategoryWallet(id);
             return NoContent();
-
         }
 
     }

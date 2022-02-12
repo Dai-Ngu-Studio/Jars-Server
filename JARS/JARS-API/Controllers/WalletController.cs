@@ -15,13 +15,13 @@ namespace JARS_API.Controllers
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<WalletDto> Getwallets()
+        public IEnumerable<WalletDto> GetWallets()
         {
             var wallets = repository.GetAllWallets().Select(wallet =>wallet.AsDto());
             return wallets;
         }
         [HttpGet("{id}")]
-        public ActionResult<WalletDto> Getwallet(int id)
+        public ActionResult<WalletDto> GetWallet(int id)
         {
             var wallet = repository.GetWallet(id);
             if (wallet is null)
@@ -46,7 +46,7 @@ namespace JARS_API.Controllers
                   
                };
                 repository.AddWallet(wallet);
-                return CreatedAtAction(nameof(Getwallet), new { id = wallet.Id }, wallet.AsDto());
+                return CreatedAtAction(nameof(GetWallet), new { id = wallet.Id }, wallet.AsDto());
             }
             catch (Exception ex)
             {
@@ -58,7 +58,7 @@ namespace JARS_API.Controllers
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
-        public ActionResult Updatewallet(int id,CreateWalletDto createWalletDto)
+        public ActionResult UpdateWallet(int id,CreateWalletDto createWalletDto)
         {
             Wallet existedWallet = repository.GetWallet(id);
             if(existedWallet is null)
@@ -81,8 +81,8 @@ namespace JARS_API.Controllers
             
         }
         //Delete /wallets/{id}
-        [HttpDelete]
-        public ActionResult Deletewallet(int id)
+        [HttpDelete("{id}")]
+        public ActionResult DeleteWallet(int id)
         {
            repository.DeleteWallet(id);
             return NoContent();

@@ -7,6 +7,8 @@
     <RootNamespace>JARS_API</RootNamespace>
     <UserSecretsId>ef12fe0e-d0ee-4538-9bb0-5be8a316041d</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
