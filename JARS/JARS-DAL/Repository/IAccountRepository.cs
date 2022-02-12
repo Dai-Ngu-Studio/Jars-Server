@@ -10,6 +10,7 @@ namespace JARS_DAL.Repository
     public interface IAccountRepository
     {
         public abstract Task<Account?> GetAsync(string id);
+        public abstract Task<Account?> GetIncludedAsync(string id);
         public abstract Task AddAsync(Account account);
         public abstract Task UpdateAsync(Account account);
         public abstract Task DeleteAsync(Account account);
