@@ -42,6 +42,25 @@ namespace JARS_DAL.DAO
             }
         }
 
+        public async Task<Account?> GetIncludedAsync(string id)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                var account = await jarsDB.Accounts
+                    .Include(account => account.Wallets).ThenInclude(wallet => wallet.CategoryWallets)
+                    .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions).ThenInclude(transaction => transaction.Note)
+                    .Include(account => account.Contracts).ThenInclude(contract => contract.Bills).ThenInclude(bill => bill.BillDetails)
+                    .Include(account => account.Contracts).ThenInclude(contract => contract.Bills).ThenInclude(bill => bill.Category)
+                    .FirstOrDefaultAsync(account => account.Id.Equals(id));
+                return account;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task AddAsync(Account account)
         {
             try
