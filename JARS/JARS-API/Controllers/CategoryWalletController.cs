@@ -82,7 +82,7 @@ namespace JARS_API.Controllers
 
         }
         //Delete /wallets/{id}
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public ActionResult DeleteCategoryWallet(int id)
         {
             repository.DeleteCategoryWallet(id);

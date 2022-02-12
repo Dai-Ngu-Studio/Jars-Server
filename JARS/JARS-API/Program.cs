@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-//builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddControllers().AddJsonOptions(x =>
+{
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
 builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
 builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();

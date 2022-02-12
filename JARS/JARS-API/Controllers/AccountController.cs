@@ -43,7 +43,7 @@ namespace JARS_API.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutAccount(string id, Account account)
+        public async Task<IActionResult> PutAccount([FromHeader(Name = "Authorization")] string authorization, string id, Account account)
         {
             if (!id.Equals(account.Id))
             {
@@ -76,7 +76,7 @@ namespace JARS_API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(string id)
+        public async Task<IActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
         {
             return NoContent();
         }
@@ -101,6 +101,7 @@ namespace JARS_API.Controllers
                     if (account != null)
                     {
                         Console.WriteLine($"api/Account/login: User {uid} had already created an account.");
+                        return Ok(account);
                     }
                     else
                     {
