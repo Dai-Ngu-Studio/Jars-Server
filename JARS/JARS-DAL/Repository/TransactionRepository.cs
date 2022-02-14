@@ -4,9 +4,9 @@ namespace JARS_DAL.Repository;
 
 public class TransactionRepository : ITransactionRepository
 {
-    public Task<IEnumerable<Transaction>> GetTransactions() => TransactionManagement.Instance.GetTransactions();
-    public Task<Transaction?> GetTransaction(int id) => TransactionManagement.Instance.GetTransaction(id);
-    public Task Delete(Transaction transaction) => TransactionManagement.Instance.Delete(transaction);
+    public Task<IEnumerable<Transaction>> GetTransactions(string uid) => TransactionManagement.Instance.GetTransactions(uid);
+    public Task<Transaction?> GetTransaction(int id, string uid) => TransactionManagement.Instance.GetTransaction(id, uid);
+    public Task Delete(Transaction transaction, string uid) => TransactionManagement.Instance.Delete(transaction, uid);
     public Task Update(Transaction transaction) => TransactionManagement.Instance.Update(transaction);
     public Task Add(Transaction transaction) => TransactionManagement.Instance.Add(transaction);
 }
