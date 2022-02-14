@@ -25,6 +25,8 @@ builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
 builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
