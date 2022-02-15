@@ -21,14 +21,9 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
-<<<<<<< HEAD
 builder.Services.AddScoped<IWalletReposiotry, WalletRepository>();
 builder.Services.AddScoped<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
-=======
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
-builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
-builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
->>>>>>> 4c778b2eec0bcc99fa616e99f8c1658425c610c6
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
