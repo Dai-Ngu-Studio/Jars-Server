@@ -3,9 +3,13 @@ using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using JARS_API.Dtos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 namespace JARS_API.Controllers
 {
-    [Route("api/wallets")]
+    [Route("api/v1/wallets")]
     [ApiController]
     public class WalletController : ControllerBase
     {
@@ -15,77 +19,74 @@ namespace JARS_API.Controllers
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<WalletDto> GetWallets()
+        [Authorize]
+        /// <summary>
+        /// This method will return list of wallets upon accountId
+        /// </summary>
+        /// <param name="authorization">Format: Bearer (token)</param>
+        public async Task<IEnumerable<Wallet>> GetWallets([FromHeader(Name = "Authorization")] string authorization)
         {
-            var wallets = repository.GetAllWallets().Select(wallet =>wallet.AsDto());
-            return wallets;
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                if (await repository.GetAllWallets(uid) != null)
+                {
+                    return await repository.GetAllWallets(uid);
+                }
+            }
+            return null;
         }
         [HttpGet("{id}")]
-        public ActionResult<WalletDto> GetWallet(int id)
+        public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
-            var wallet = repository.GetWallet(id);
-            if (wallet is null)
-            {
-                return NotFound();
-            }
-            return wallet.AsDto();
+            return await repository.GetWallet(id);
         }
         //POST /wallets/
         [HttpPost]
-        public ActionResult<Wallet> AddWallet(CreateWalletDto createWallet)
+        public async Task AddWallet(Wallet wallet)
         {
-            
-            try
-            {   Wallet wallet = new Wallet
-                {
-                  Name = createWallet.Name,   
-                  Percentage = createWallet.Percentage,
-                  StartDate = createWallet.StartDate,
-                  WalletAmount = createWallet.WalletAmount,  
-                  AccountId = createWallet.AccountId,
-                  
-               };
-                repository.AddWallet(wallet);
-                return CreatedAtAction(nameof(GetWallet), new { id = wallet.Id }, wallet.AsDto());
-            }
-            catch (Exception ex)
+            Wallet _wallet = new Wallet
             {
-
-                throw new Exception(ex.Message);
-            }
-           
+                AccountId = wallet.AccountId,
+                Name = wallet.Name,
+                StartDate = wallet.StartDate,
+                WalletAmount = wallet.WalletAmount,
+                Percentage = wallet.Percentage,
+            };
+                  await repository.AddWallet(_wallet);
         }
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateWallet(int id,CreateWalletDto createWalletDto)
+        public async Task<ActionResult> UpdateWallet(int id,Wallet wallet)
         {
-            Wallet existedWallet = repository.GetWallet(id);
-            if(existedWallet is null)
+
+            if (id != wallet.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            else
+            try
             {
-                Wallet updateWallet = new Wallet
-                {   Id = id,
-                    Name = createWalletDto.Name,
-                    Percentage = createWalletDto.Percentage,
-                    StartDate = createWalletDto.StartDate,
-                    WalletAmount = createWalletDto.WalletAmount,
-                    AccountId = createWalletDto.AccountId,
-                };
-                repository.UpdateWallet(updateWallet);
-                return NoContent();
+                await repository.UpdateWallet(wallet);
             }
-            
+            catch (DbUpdateConcurrencyException)
+            {
+                if (repository.GetWallet(wallet.Id) == null)
+                {
+                    return NotFound();
+                }
+                else { throw; }
+            }
+            return Ok(wallet);
+
         }
         //Delete /wallets/{id}
         [HttpDelete("{id}")]
-        public ActionResult DeleteWallet(int id)
+        public async Task<ActionResult> DeleteWallet(int id)
         {
            repository.DeleteWallet(id);
-            return NoContent();
+            return Ok();
 
         }
 
