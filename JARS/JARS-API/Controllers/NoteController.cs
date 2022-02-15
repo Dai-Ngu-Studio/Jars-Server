@@ -5,18 +5,21 @@ using JARS_DAL.Models;
 using JARS_DAL.Repository;
 namespace JARS_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]s")]
     [ApiController]
     public class NoteController : ControllerBase
     {
-        INoteRepository noteRepository = new NoteRepository();
-
-        // GET: api/Note
-        [HttpGet]
-        public async Task<IEnumerable<Note>> GetTransactions()
+        INoteRepository noteRepository;
+        public NoteController(INoteRepository noteRepository)
         {
-            return await noteRepository.GetNotes();
+            this.noteRepository = noteRepository;
         }
+        // GET: api/Note
+        // [HttpGet]
+        // public async Task<IEnumerable<Note>> GetTransactions()
+        // {
+        //     return await noteRepository.GetNotes();
+        // }
 
         // GET: api/Note/5
         [HttpGet("{id}")]

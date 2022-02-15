@@ -3,26 +3,52 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JARS_DAL.Models;
 using JARS_DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.Text;
+
 namespace JARS_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]s")]
+    [Authorize]
     [ApiController]
     public class TransactionController : ControllerBase
     {
-        ITransactionRepository _transactionRep = new TransactionRepository();
+        private ITransactionRepository _transactionRep;
+        public TransactionController(ITransactionRepository repository)
+        {
+            _transactionRep = repository;
+        }
+        // GET: api/Transaction
+        [HttpGet("files")]
+        public async Task<FileResult> GetFileTransactions()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("Amount,Wallet name,Date");
+
+            var list = await _transactionRep.GetTransactions(GetCurrentUID());
+            foreach (var transaction in list)
+            {
+                builder.AppendLine($"{transaction.Amount},{transaction.Wallet.Name},{transaction.TransactionDate}");
+            }
+            return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "Transaction_log.csv");
+
+        }
 
         // GET: api/Transaction
         [HttpGet]
         public async Task<IEnumerable<Transaction>> GetTransactions()
         {
-            return await _transactionRep.GetTransactions();
+            return await _transactionRep.GetTransactions(GetCurrentUID());
         }
 
         // GET: api/Transaction/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Transaction>> GetTransaction(int id)
         {
-            var transaction = await _transactionRep.GetTransaction(id);
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var transaction = await _transactionRep.GetTransaction(id, GetCurrentUID());
             if (transaction == null)
             {
                 return NotFound();
@@ -46,7 +72,7 @@ namespace JARS_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (_transactionRep.GetTransaction(transaction.Id) == null)
+                if (_transactionRep.GetTransaction(transaction.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
                 }
@@ -81,7 +107,7 @@ namespace JARS_API.Controllers
             };
             try
             {
-                await _transactionRep.Delete(transaction);
+                await _transactionRep.Delete(transaction, GetCurrentUID());
             }
             catch (Exception)
             {
@@ -89,6 +115,12 @@ namespace JARS_API.Controllers
             }
 
             return Ok(transaction);
+        }
+
+        private string GetCurrentUID()
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

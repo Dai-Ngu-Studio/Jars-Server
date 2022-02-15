@@ -9,6 +9,7 @@ namespace JARS_DAL.Repository
 {
     public interface IAccountRepository
     {
+        public abstract Task<IEnumerable<Account>> GetListAsync(int page, int size, string email, string displayName);
         public abstract Task<Account?> GetAsync(string id);
         public abstract Task<Account?> GetIncludedAsync(string id);
         public abstract Task AddAsync(Account account);

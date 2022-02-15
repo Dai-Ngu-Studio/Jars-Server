@@ -30,6 +30,7 @@ namespace JARS_DAL.DAO
             return await jarsDB.Bills
                 .Include(bdt => bdt.BillDetails)
                 .Include(cate => cate.Category)
+                .Include(contract => contract.Contract)
                 .ToListAsync(); 
         }
         public async Task<Bill> GetBillByBillIdAsync (int id)
@@ -38,6 +39,7 @@ namespace JARS_DAL.DAO
             return await jarsDB.Bills
                 .Include(bdt => bdt.BillDetails)
                 .Include(bdt => bdt.Category)
+                .Include(contract => contract.Contract)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 

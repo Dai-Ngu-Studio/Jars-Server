@@ -11,13 +11,11 @@ namespace JARS_DAL.Models
             BillDetails = new HashSet<BillDetail>();
             Transactions = new HashSet<Transaction>();
         }
-
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public DateTime? Date { get; set; }
         public string? Name { get; set; }
         public decimal? Amount { get; set; }
-        public int? RecurringTransactionId { get; set; }
         public decimal? LeftAmount { get; set; }
         public int? CategoryId { get; set; }
         public int? ContractId { get; set; }

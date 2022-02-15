@@ -22,24 +22,25 @@ public class TransactionManagement
             }
         }
     }
-    public async Task<IEnumerable<Transaction>> GetTransactions()
+    public async Task<IEnumerable<Transaction>> GetTransactions(string uid)
     {
         try
         {
             var context = new JarsDatabaseContext();
-            return await context.Transactions.ToListAsync();
+            return await context.Transactions.Where(t => t.Wallet.Account.Id == uid).ToListAsync();
         }
         catch (Exception)
         {
             throw;
         }
     }
-    public async Task<Transaction?> GetTransaction(int id)
+    public async Task<Transaction?> GetTransaction(int id, string uid)
     {
         try
         {
             var context = new JarsDatabaseContext();
-            return await context.Transactions.FindAsync(id);
+            return await context.Transactions
+                .FirstOrDefaultAsync(t => (t.Id == id)&&(t.Wallet.Account.Id == uid));
         }
         catch (Exception)
         {
@@ -72,11 +73,11 @@ public class TransactionManagement
             throw;
         }
     }
-    public async Task Delete(Transaction transaction)
+    public async Task Delete(Transaction transaction, string uid)
     {
         try
         {
-            Transaction? _transaction = await GetTransaction(transaction.Id);
+            Transaction? _transaction = await GetTransaction(transaction.Id, uid);
             var context = new JarsDatabaseContext();
             context.Transactions.Remove(transaction);
             await context.SaveChangesAsync();
