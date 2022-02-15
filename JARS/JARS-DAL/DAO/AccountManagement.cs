@@ -42,6 +42,26 @@ namespace JARS_DAL.DAO
             }
         }
 
+        public async Task<IEnumerable<Account>> GetListAsync(int page, int size, string email, string displayName)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                var accounts = await jarsDB.Accounts
+                    .OrderBy(account => account.Email)
+                    .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(email))
+                    .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(displayName))
+                    .Skip(page * size)
+                    .Take(size)
+                    .ToListAsync();
+                return accounts;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<Account?> GetIncludedAsync(string id)
         {
             try
