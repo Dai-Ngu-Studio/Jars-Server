@@ -22,6 +22,36 @@ namespace JARS_API.Controllers
             _accountRepository = accountRepository;
         }
 
+
+
+        /// <summary>
+        /// Get accounts with optional queries. Only the admin is authorized to use this method. (Note: Admin check is currently not implemented yet).
+        /// </summary>
+        /// <param name="authorization">Format: Bearer (token)</param>
+        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip.</param>
+        /// <param name="size">Maximum number of results to return</param>
+        /// <param name="email">Optional filter for account's email.</param>
+        /// <param name="displayName">Optional filter for account's displayName.</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<List<Account>>> GetAll([FromHeader] string authorization,
+            [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string email = "", [FromQuery] string displayName = "")
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                // to-do check if admin
+                var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
+                if (accounts != null && accounts.Count() > 0)
+                {
+                    return accounts.ToList();
+                }
+                return NotFound();
+            }
+            return Unauthorized();
+        }
+
         /// <summary>
         /// Get account with UID. Only the owner of the account/admin is authorized to use this method.
         /// </summary>
