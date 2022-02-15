@@ -73,7 +73,7 @@ BEGIN
     PRIMARY KEY ([ID]),
 
     FOREIGN KEY ([WalletID]) REFERENCES [Wallet]([ID]),
-    FOREIGN KEY ([ID]) REFERENCES CategoryWallet([ID]),
+    FOREIGN KEY ([ParentCategoryID]) REFERENCES CategoryWallet([ID]),
   );
 END;
 GO
@@ -89,7 +89,7 @@ BEGIN
 
     PRIMARY KEY ([ID]),
 
-    FOREIGN KEY ([ID]) REFERENCES Category([ID]),
+    FOREIGN KEY ([ParentCategoryID]) REFERENCES Category([ID]),
   );
 
 END;
@@ -155,7 +155,6 @@ BEGIN
     [Date] DateTime,
     [Name] nvarchar(max),
     [Amount] money,
-    [RecurringTransactionID] int,
     [LeftAmount] money,
     [CategoryID] int,
     --FK--

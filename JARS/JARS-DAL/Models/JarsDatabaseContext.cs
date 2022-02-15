@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace JARS_DAL.Models
 {
-    public partial class JarsDatabaseContext : DbContext
+        public partial class JarsDatabaseContext : DbContext
     {
         public JarsDatabaseContext()
         {
@@ -85,8 +85,6 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.LeftAmount).HasColumnType("money");
 
-                entity.Property(e => e.RecurringTransactionId).HasColumnName("RecurringTransactionID");
-
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.CategoryId)
@@ -121,6 +119,11 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
+
+                entity.HasOne(d => d.ParentCategory)
+                    .WithMany(p => p.InverseParentCategory)
+                    .HasForeignKey(d => d.ParentCategoryId)
+                    .HasConstraintName("FK__Category__Parent__300424B4");
             });
 
             modelBuilder.Entity<CategoryWallet>(entity =>
@@ -132,6 +135,11 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
 
                 entity.Property(e => e.WalletId).HasColumnName("WalletID");
+
+                entity.HasOne(d => d.ParentCategory)
+                    .WithMany(p => p.InverseParentCategory)
+                    .HasForeignKey(d => d.ParentCategoryId)
+                    .HasConstraintName("FK__CategoryW__Paren__2D27B809");
 
                 entity.HasOne(d => d.Wallet)
                     .WithMany(p => p.CategoryWallets)
@@ -256,4 +264,5 @@ namespace JARS_DAL.Models
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
+
 }
