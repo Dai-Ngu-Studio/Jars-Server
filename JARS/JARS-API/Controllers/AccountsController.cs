@@ -28,14 +28,14 @@ namespace JARS_API.Controllers
         /// Get accounts with optional queries. Only the admin is authorized to use this method. (Note: Admin check is currently not implemented yet).
         /// </summary>
         /// <param name="authorization">Format: Bearer (token)</param>
-        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip.</param>
-        /// <param name="size">Maximum number of results to return</param>
-        /// <param name="email">Optional filter for account's email.</param>
-        /// <param name="displayName">Optional filter for account's displayName.</param>
+        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
+        /// <param name="size">Maximum number of results to return. Default value: 20</param>
+        /// <param name="email">Optional filter for account's email. Default value: ""</param>
+        /// <param name="displayName">Optional filter for account's displayName. Default value: ""</param>
         /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAll([FromHeader] string authorization,
-            [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string email = "", [FromQuery] string displayName = "")
+            [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
             ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
