@@ -187,6 +187,11 @@ namespace JARS_API.Controllers
                 if (account != null)
                 {
                     Console.WriteLine($"api/Account/login: User {uid} had already created an account.");
+                    UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+                    bool isUserRecordExisted = userRecord != null;
+                    DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                    account.LastLoginDate = tokenCreatedTime;
+                    await _accountRepository.UpdateAsync(account);
                     return Ok(account);
                 }
                 else
