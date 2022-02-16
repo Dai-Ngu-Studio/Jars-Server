@@ -15,19 +15,24 @@ namespace JARS_API.Controllers
         private readonly IBillRepository _repository;
         private readonly IBillDetailRepository _billDetailRepository;
         private readonly IContractRepository _contractRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public BillController(IBillRepository repository, IBillDetailRepository billDetailRepository, 
-            IContractRepository contractRepository)
+            IContractRepository contractRepository, ICategoryRepository categoryRepository)
         {
             _repository = repository;
             _billDetailRepository = billDetailRepository;
             _contractRepository = contractRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        [HttpPost("WithContractId/{contractId}")]
-        public async Task<ActionResult> CreateBillForContract(int contractId, Bill bill)
+        //[HttpPost("?contract_id={contractId}")]
+        [HttpPost]
+        public async Task<ActionResult> CreateBillForContract([FromQuery]int contract_id,
+             [FromQuery] int category_id, Bill bill)
         {
-            var contract = await _contractRepository.GetContractByContractIdAsync(contractId, GetCurrentUID());
+            var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
+            var category = await _categoryRepository.GetCategoryByCategoryIdAsync(category_id);
 
             if (contract != null)
             {
@@ -37,6 +42,7 @@ namespace JARS_API.Controllers
                     {
                         Date = bill.Date,
                         Name = bill.Name,
+                        CategoryId = category != null ? category.Id : null,
                         ContractId = contract.Id,
                     };
 
@@ -94,7 +100,7 @@ namespace JARS_API.Controllers
         public async Task<ActionResult> UpdateBill(int id, Bill bill)
         {
             var result = await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
-            if (result.Id != bill.Id)
+            if (result == null)
             {
                 return BadRequest();
             }
@@ -114,9 +120,9 @@ namespace JARS_API.Controllers
                 Bill _bill = new Bill
                 {
                     Id = result.Id,
-                    Date = bill.Date,
+                    Date = bill.Date == null ? result.Date : bill.Date,
                     LeftAmount = leftAmount,
-                    Name = bill.Name,
+                    Name = bill.Name == null ? result.Name : bill.Name,
                     Amount = result.Amount,
                     CategoryId = result.CategoryId,
                     ContractId = result.ContractId,

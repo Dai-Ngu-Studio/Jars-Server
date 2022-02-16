@@ -13,10 +13,12 @@ namespace JARS_API.Controllers
     public class ContractController : ControllerBase
     {
         private readonly IContractRepository _repository;
+        private readonly INoteRepository _noteRepository;
 
-        public ContractController(IContractRepository repository)
+        public ContractController(IContractRepository repository, INoteRepository noteRepository)
         {
             _repository = repository;
+            _noteRepository = noteRepository;
         }
 
         [HttpGet]
@@ -43,14 +45,36 @@ namespace JARS_API.Controllers
         {
             try
             {
-                Contract _contract = new Contract
+                if (contract.Note == null)
                 {
-                    AccountId = GetCurrentUID(),
-                    StartDate = contract.StartDate,
-                    EndDate = contract.EndDate,
-                    Amount = contract.Amount,
-                };
-                await _repository.CreateContractAsync(_contract);
+                    Contract _contract = new Contract
+                    {
+                        AccountId = GetCurrentUID(),
+                        StartDate = contract.StartDate,
+                        EndDate = contract.EndDate,
+                        Amount = contract.Amount,
+                    };
+                    await _repository.CreateContractAsync(_contract);
+                } else
+                {
+                    Note note = new Note
+                    {
+                        AddedDate = contract.Note.AddedDate,
+                        Comments = contract.Note.Comments,
+                        Image = contract.Note.Image,
+                    };
+                    await _noteRepository.Add(note);
+
+                    Contract _contract = new Contract
+                    {
+                        StartDate = contract.StartDate,
+                        EndDate = contract.EndDate,
+                        Amount = contract.Amount,
+                        NoteId = note.Id,
+                        AccountId = GetCurrentUID(),
+                    };
+                    await _repository.UpdateContractAsync(_contract);
+                }                
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,9 +97,9 @@ namespace JARS_API.Controllers
                 Contract _contract = new Contract
                 {
                     Id = id,
-                    StartDate = contract.StartDate,
-                    EndDate = contract.EndDate,
-                    Amount = contract.Amount,
+                    StartDate = contract.StartDate == null ? result.StartDate : contract.StartDate,
+                    EndDate = contract.EndDate == null ? result.EndDate : contract.EndDate,
+                    Amount = contract.Amount == null ? result.Amount : contract.Amount,
                     AccountId = result.AccountId,
                 };
                 await _repository.UpdateContractAsync(_contract);

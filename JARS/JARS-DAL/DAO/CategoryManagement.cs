@@ -34,11 +34,11 @@ namespace JARS_DAL.DAO
             return await jarsDB.Categories
                 .ToListAsync();
         }
-        public async Task<Category> GetCategoryByCatrgoryIdAsync(int id)
+        public async Task<Category> GetCategoryByCatergoryIdAsync(int? id)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Categories
-                .SingleOrDefaultAsync(b => b.Id == id);
+                .FindAsync(id);
         }
 
         public async Task UpdateCategoryAsync(Category category)
@@ -65,7 +65,7 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task DeleteCategoryAsync(Category category)

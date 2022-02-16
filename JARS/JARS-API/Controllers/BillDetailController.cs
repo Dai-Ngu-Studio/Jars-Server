@@ -21,10 +21,11 @@ namespace JARS_API.Controllers
             _billRepository = billRepository;
         }
 
-        [HttpGet("WithBillId/{id}")]
-        public async Task<ActionResult<List<BillDetail>>> GetBillDetailsWithBillId(int id)
+        //[HttpGet("?bill_id={billId")]
+        [HttpGet]
+        public async Task<ActionResult<List<BillDetail>>> GetBillDetailsWithBillId([FromQuery]int bill_id)
         {
-            var result = await _repository.GetAllBillDetailWithBillIdAsync(id, GetCurrentUID());
+            var result = await _repository.GetAllBillDetailWithBillIdAsync(bill_id, GetCurrentUID());
             return Ok(result);
         }
 
@@ -53,9 +54,9 @@ namespace JARS_API.Controllers
                 BillDetail _billDetail = new BillDetail
                 {
                     Id = result.Id,
-                    ItemName = billDetail.ItemName,
-                    Price = billDetail.Price,
-                    Quantity = billDetail.Quantity,
+                    ItemName = billDetail.ItemName == null ? result.ItemName : billDetail.ItemName,
+                    Price = billDetail.Price == null ? result.Price : billDetail.Price,
+                    Quantity = billDetail.Quantity == null ? result.Quantity : billDetail.Quantity,
                     BillId = result.BillId
                 };
                 await _repository.UpdateBillDetailAsync(_billDetail);
@@ -64,7 +65,7 @@ namespace JARS_API.Controllers
                 if (result != null)
                 {                   
                     var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(_billDetail.BillId, GetCurrentUID());
-                    Bill bill = await _billRepository.GetBillByBillIdAsync((int)_billDetail.BillId, GetCurrentUID());
+                    Bill bill = await _billRepository.GetBillByBillIdAsync(_billDetail.BillId, GetCurrentUID());
 
                     if (getAllCreatedBillDetails != null && bill != null)
                     {
@@ -98,10 +99,10 @@ namespace JARS_API.Controllers
             }
             return Ok(billDetail);
         }
-        [HttpPost("{id}")]
-        public async Task<ActionResult> CreateBillDetail(int id, BillDetail billDetail)
+        [HttpPost]
+        public async Task<ActionResult> CreateBillDetail([FromQuery]int bill_id, BillDetail billDetail)
         {
-            Bill bill = await _billRepository.GetBillByBillIdAsync(id, GetCurrentUID());
+            Bill bill = await _billRepository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
 
             if (bill == null)
                 return NotFound();

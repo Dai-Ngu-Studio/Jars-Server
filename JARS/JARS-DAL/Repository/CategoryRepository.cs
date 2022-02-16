@@ -11,7 +11,7 @@ namespace JARS_DAL.Repository
     public class CategoryRepository : ICategoryRepository
     {
         public Task<IReadOnlyList<Category>> GetCategoriesAsync() => CategoryManagement.Instance.GetAllCategoryAsync();
-        public Task<Category> GetCategoryByCategoryIdAsync(int categoryId) => CategoryManagement.Instance.GetCategoryByCatrgoryIdAsync(categoryId);
+        public Task<Category> GetCategoryByCategoryIdAsync(int? categoryId) => CategoryManagement.Instance.GetCategoryByCatergoryIdAsync(categoryId);
         public Task UpdateCategoryAsync(Category category) => CategoryManagement.Instance.UpdateCategoryAsync(category);
         public Task CreateCategoryAsync(Category category) => CategoryManagement.Instance.CreateCategoryAsync(category);
         public Task DeleteCategoryAsync(Category category) => CategoryManagement.Instance.DeleteCategoryAsync(category);

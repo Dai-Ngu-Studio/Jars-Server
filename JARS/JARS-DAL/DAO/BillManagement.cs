@@ -23,7 +23,7 @@ namespace JARS_DAL.DAO
                 }
             } 
         }
-        public async Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int contractId, string uid)
+        public async Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int? contractId, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
@@ -34,7 +34,7 @@ namespace JARS_DAL.DAO
                 .ToListAsync(); 
         }
 
-        public async Task<Bill> GetBillByBillIdAsync (int id, string uid)
+        public async Task<Bill> GetBillByBillIdAsync (int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills

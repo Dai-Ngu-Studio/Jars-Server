@@ -15,11 +15,10 @@ namespace JARS_DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string? Name { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public int? ParentCategoryId { get; set; }
-        [JsonIgnore]
         public int? CurrentCategoryLevel { get; set; }
-
+        [JsonIgnore]
         public virtual Category? ParentCategory { get; set; }
         [JsonIgnore]
         public virtual ICollection<Bill> Bills { get; set; }

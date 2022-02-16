@@ -76,7 +76,7 @@ namespace JARS_DAL.DAO
                 .Where(bd => bd.BillId == billId && bd.Bill.Contract.AccountId == uid)
                 .ToListAsync();
         }
-        public async Task<BillDetail> GetBillDetailAsync(int id, string uid)
+        public async Task<BillDetail> GetBillDetailAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.BillDetails
