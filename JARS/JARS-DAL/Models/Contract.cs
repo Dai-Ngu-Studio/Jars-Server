@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace JARS_DAL.Models
 {
@@ -24,6 +25,7 @@ namespace JARS_DAL.Models
         public virtual Account? Account { get; set; }
         public virtual Note? Note { get; set; }
         public virtual ScheduleType? ScheduleType { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Bill> Bills { get; set; }
     }
 }

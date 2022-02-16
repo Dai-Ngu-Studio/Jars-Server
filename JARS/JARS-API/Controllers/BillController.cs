@@ -1,11 +1,14 @@
 ﻿using JARS_DAL.Models;
 using JARS_DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/v1/[controller]")]
     public class BillController : ControllerBase
     {
@@ -24,7 +27,7 @@ namespace JARS_API.Controllers
         [HttpPost("WithContractId/{contractId}")]
         public async Task<ActionResult> CreateBillForContract(int contractId, Bill bill)
         {
-            var contract = await _contractRepository.GetContractByContractIdAsync(contractId);
+            var contract = await _contractRepository.GetContractByContractIdAsync(contractId, GetCurrentUID());
 
             if (contract != null)
             {
@@ -32,7 +35,6 @@ namespace JARS_API.Controllers
                 {
                     Bill _bill = new Bill
                     {
-                        //Id = bill.Id,
                         Date = bill.Date,
                         Name = bill.Name,
                         ContractId = contract.Id,
@@ -51,8 +53,8 @@ namespace JARS_API.Controllers
                         await _billDetailRepository.CreateBillDetailAsync(billDetail);
                     }
 
-                    var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id);
-                    var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id);
+                    var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id, GetCurrentUID());
+                    var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id, GetCurrentUID());
                     decimal? amount = 0;
 
                     if (searchBillDetails != null && searchBill != null)
@@ -77,7 +79,7 @@ namespace JARS_API.Controllers
                         return NotFound();
                     }
 
-                    return CreatedAtAction("GetBill", new { id = bill.Id }, GetBill(_bill.Id));
+                    return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
                 }
                 else
                 {
@@ -91,7 +93,7 @@ namespace JARS_API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBill(int id, Bill bill)
         {
-            var result = await _repository.GetBillByBillIdAsync(id);
+            var result = await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
             if (result.Id != bill.Id)
             {
                 return BadRequest();
@@ -111,17 +113,19 @@ namespace JARS_API.Controllers
 
                 Bill _bill = new Bill
                 {
-                    Id = bill.Id,
+                    Id = result.Id,
                     Date = bill.Date,
                     LeftAmount = leftAmount,
                     Name = bill.Name,
                     Amount = result.Amount,
+                    CategoryId = result.CategoryId,
+                    ContractId = result.ContractId,
                 };
                 await _repository.UpdateBillAsync(_bill);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (_repository.GetBillByBillIdAsync(bill.Id) == null)
+                if (_repository.GetBillByBillIdAsync(bill.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
                 }
@@ -139,7 +143,7 @@ namespace JARS_API.Controllers
             };
             try
             {
-                var billDetail = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(bill.Id);
+                var billDetail = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(bill.Id, GetCurrentUID());
                 if (billDetail.Count == 0)
                 {
                     await _repository.DeleteBillAsync(bill);
@@ -160,13 +164,20 @@ namespace JARS_API.Controllers
         [HttpGet("{id}")] 
         public async Task<ActionResult<Bill>> GetBill(int id)
         {
-            return await _repository.GetBillByBillIdAsync(id);
+            return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
         }
-        [HttpGet]
-        public async Task<ActionResult<List<Bill>>> GetAllBill()
+
+        [HttpGet("WithContractId/{contractId}")]
+        public async Task<ActionResult<List<Bill>>> GetAllBillsForContract(int contractId)
         {
-            var result = await _repository.GetBillsAsync();
+            var result = await _repository.GetBillByContractIdAsync(contractId, GetCurrentUID());
             return Ok(result);
+        }
+
+        private string GetCurrentUID()
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

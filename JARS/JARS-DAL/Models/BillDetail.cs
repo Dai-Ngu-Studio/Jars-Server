@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace JARS_DAL.Models
 {
@@ -12,7 +13,7 @@ namespace JARS_DAL.Models
         public decimal? Price { get; set; }
         public int? Quantity { get; set; }
         public int? BillId { get; set; }
-
+        [JsonIgnore]
         public virtual Bill? Bill { get; set; }
     }
 }
