@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace JARS_DAL.DAO
 {
@@ -28,12 +29,12 @@ namespace JARS_DAL.DAO
                 return instance; 
             }
         }
-        public IEnumerable<Wallet> GetWallets()
-        {   List<Wallet> wallets;
+        public async Task<IEnumerable<Wallet>> GetWallets(string id)
+        {            
             try
             {
                 var jarsDB = new  JarsDatabaseContext();
-                wallets = jarsDB.Wallets.ToList();
+                return await jarsDB.Wallets.Where(wallet => wallet.AccountId == id).ToListAsync();
 
             }
             catch (Exception ex)
@@ -41,39 +42,28 @@ namespace JARS_DAL.DAO
 
                 throw new Exception(ex.Message);
             }
-            return wallets;
         }
-        public Wallet GetWallet(int id)
+        public async Task<Wallet> GetWallet(int id)
         {
-            Wallet wallet =null;
+            
             try
             {
                 var jarsDB = new JarsDatabaseContext();
-                wallet = jarsDB.Wallets.SingleOrDefault(wallet => wallet.Id == id);
-
+                return await jarsDB.Wallets.FindAsync(id);
             }
             catch (Exception ex)
             {
 
                 throw new Exception(ex.Message);
             }
-            return wallet;
         }
-        public void AddWallet(Wallet wallet)
+        public async Task AddWallet(Wallet wallet)
         {   
             try
             {
-                Wallet _wallet = GetWallet(wallet.Id);
-                if(_wallet == null)
-                {
-                    var jardDB = new JarsDatabaseContext();
-                    jardDB.Wallets.Add(wallet);
-                    jardDB.SaveChanges();
-                }
-                else
-                {
-                    throw new Exception("Wallet already existed");
-                }
+                var jarDB = new JarsDatabaseContext();
+                jarDB.Wallets.Add(wallet);
+                await jarDB.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -82,37 +72,30 @@ namespace JARS_DAL.DAO
 
             }
         }
-        public void UpdateWallet (Wallet wallet)
+        public async Task UpdateWallet (Wallet wallet)
         {
             try
             {
-                Wallet _wallet = GetWallet(wallet.Id);
-                if( _wallet != null)
-                {
-                    var jarsDB = new JarsDatabaseContext();
-                    jarsDB.Entry<Wallet>(wallet).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    jarsDB.SaveChanges();
-                }
-                else
-                {
-                    throw new Exception("this wallet does not already existed");
-                }
+
+                var jarDB = new JarsDatabaseContext();
+                jarDB.Wallets.Update(wallet);
+                await jarDB.SaveChangesAsync();
             }
             catch (Exception ex )
             {
                 throw new Exception(ex.Message);
             }
         }
-        public void RemoveWallet(int id)
+        public async Task RemoveWallet(int id)
         {
             try
             {
-                Wallet _wallet = GetWallet(id);
+                Wallet _wallet = await GetWallet(id);
                 if(_wallet != null)
                 {
                     var jarsDB = new JarsDatabaseContext();
                     jarsDB.Wallets.Remove(_wallet);
-                    jarsDB.SaveChanges();
+                    await jarsDB.SaveChangesAsync();
                 }
                 else
                 {

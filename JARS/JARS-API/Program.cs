@@ -21,9 +21,9 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
+builder.Services.AddScoped<IWalletReposiotry, WalletRepository>();
+builder.Services.AddScoped<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
-builder.Services.AddSingleton<IWalletReposiotry, WalletRepository>();
-builder.Services.AddSingleton<ICategoryWalletReposiotry, CategoryWalletReposiotry>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
@@ -35,7 +35,6 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
-
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.GetApplicationDefault(),

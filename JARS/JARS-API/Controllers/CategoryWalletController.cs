@@ -3,9 +3,11 @@ using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using JARS_API.Dtos;
+using Microsoft.EntityFrameworkCore;
+
 namespace JARS_API.Controllers
 {
-    [Route("api/category-wallet")]
+    [Route("api/v1/category-wallets")]
     [ApiController]
     public class CategoryWalletController : ControllerBase
     {
@@ -15,79 +17,60 @@ namespace JARS_API.Controllers
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<CategoryWalletDto> GetCategoryWallets()
+        public async Task<IEnumerable<CategoryWallet>> GetCategoryWallets()
         {
-            var wallets = repository.GetAllCategoryWallets().Select(categorywallet => categorywallet.AsCateWalletDto());
-            return wallets;
+            return await repository.GetAllCategoryWallets();
         }
         [HttpGet("{id}")]
-        public ActionResult<CategoryWalletDto> GetCategoryWallet(int id)
+        public async Task<ActionResult<CategoryWallet>> GetCategoryWallet(int id)
         {
-            var categoryWallet = repository.GetCategoryWallet(id);
-            if (categoryWallet is null)
-            {
-                return NotFound();
-            }
-            return categoryWallet.AsCateWalletDto();
+            return await repository.GetCategoryWallet(id);
         }
         //POST /wallets/
         [HttpPost]
-        public ActionResult<CategoryWallet> AddCategoryWallet(CUCategoryWalletDto cUCategoryWalletDto)
+        public async Task AddCategoryWallet(CategoryWallet categoryWallet)
         {
-
-            try
+            CategoryWallet _categoryWallet = new CategoryWallet
             {
-                CategoryWallet categoryWallet = new CategoryWallet
-                {
-                    Name = cUCategoryWalletDto.Name,
-                    WalletId = cUCategoryWalletDto.WalletId,
-                    CurrentCategoryLevel = cUCategoryWalletDto.CurrentCategoryLevel,
-                    ParentCategoryId = cUCategoryWalletDto.ParentCategoryId,
-
-
-                };
-                repository.AddCategoryWallet(categoryWallet);
-                return CreatedAtAction(nameof(GetCategoryWallet), new { id = categoryWallet.Id }, categoryWallet.AsCateWalletDto());
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-
+                Name = categoryWallet.Name,
+                CurrentCategoryLevel = categoryWallet.CurrentCategoryLevel,
+                ParentCategoryId = categoryWallet.ParentCategoryId,
+                WalletId = categoryWallet.WalletId,
+            };
+            await repository.AddCategoryWallet(categoryWallet);
         }
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateCategoryWallet(int id, CUCategoryWalletDto cUCategoryWalletDto)
+        public async Task<ActionResult> UpdateCategoryWallet(int id, CategoryWallet categoryWallet)
         {
-            CategoryWallet existedCategoryWallet = repository.GetCategoryWallet(id);
-            if (existedCategoryWallet is null)
+            if (id != categoryWallet.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
-            else
+            try
             {
-                CategoryWallet updateCategoryWallet = new CategoryWallet
+                await repository.UpdateCategoryWallet(categoryWallet);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (repository.GetCategoryWallet(categoryWallet.Id) == null)
                 {
-                    Id = id,
-                    Name = cUCategoryWalletDto.Name,
-                    WalletId = cUCategoryWalletDto.WalletId,
-                    CurrentCategoryLevel = cUCategoryWalletDto.CurrentCategoryLevel,
-                    ParentCategoryId = cUCategoryWalletDto.ParentCategoryId,
-                };
-                repository.UpdateCategoryWallet(updateCategoryWallet);
-                return NoContent();
+                    return NotFound();
+                }
+                else { throw; }
             }
-
+            return Ok(categoryWallet);
         }
         //Delete /wallets/{id}
         [HttpDelete("{id}")]
-        public ActionResult DeleteCategoryWallet(int id)
+        public async Task<ActionResult> DeleteCategoryWallet(int id)
         {
-            repository.DeleteCategoryWallet(id);
-            return NoContent();
+            await repository.DeleteCategoryWallet(id);
+            return Ok();
+
         }
+
 
     }
 }

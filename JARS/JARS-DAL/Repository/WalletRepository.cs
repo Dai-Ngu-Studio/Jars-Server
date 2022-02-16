@@ -10,20 +10,21 @@ namespace JARS_DAL.Repository
 {
     public class WalletRepository : IWalletReposiotry
     {
-        public void AddWallet(Wallet wallet) => WalletManagement.Instance.AddWallet(wallet);
+        public Task AddWallet(Wallet wallet) => WalletManagement.Instance.AddWallet(wallet);
 
 
-        public void DeleteWallet(int id) => WalletManagement.Instance.RemoveWallet(id);
+        public Task DeleteWallet(int id) => WalletManagement.Instance.RemoveWallet(id);
        
 
-        public IEnumerable<Wallet> GetAllWallets() =>WalletManagement.Instance.GetWallets();
+        public Task<IEnumerable<Wallet>> GetAllWallets(string id) =>WalletManagement.Instance.GetWallets(id);
 
         
 
-        public Wallet GetWallet(int id) =>WalletManagement.Instance.GetWallet(id);
+        public Task<Wallet> GetWallet(int id) =>WalletManagement.Instance.GetWallet(id);
       
 
-        public void UpdateWallet(Wallet wallet) =>WalletManagement.Instance.UpdateWallet(wallet);
-        
+        public Task UpdateWallet(Wallet wallet) =>WalletManagement.Instance.UpdateWallet(wallet);
+
+       
     }
 }

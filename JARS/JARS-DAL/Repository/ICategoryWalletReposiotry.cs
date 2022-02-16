@@ -9,12 +9,12 @@ namespace JARS_DAL.Repository
 {
     public interface ICategoryWalletReposiotry
     {
-        void UpdateCategoryWallet(CategoryWallet CategoryWallet);
-        CategoryWallet GetCategoryWallet(int id);
-        void DeleteCategoryWallet(int id);
+        Task UpdateCategoryWallet(CategoryWallet CategoryWallet);
+        Task<CategoryWallet> GetCategoryWallet(int id);
+        Task DeleteCategoryWallet(int id);
         
-        IEnumerable<CategoryWallet> GetAllCategoryWallets();
-        void AddCategoryWallet(CategoryWallet CategoryWallet);
+        Task<IEnumerable<CategoryWallet>> GetAllCategoryWallets();
+        Task AddCategoryWallet(CategoryWallet CategoryWallet);
 
     }
 }

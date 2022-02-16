@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace JARS_DAL.Models
 {
@@ -18,8 +19,11 @@ namespace JARS_DAL.Models
         public string? PhotoUrl { get; set; }
         public DateTime? LastLoginDate { get; set; }
 
+        [JsonIgnore]
         public virtual AccountType? AccountType { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Contract> Contracts { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }
