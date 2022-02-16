@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/category-wallets")]
+    [Route("api/v1/CategoryWallets")]
     [ApiController]
     public class CategoryWalletController : ControllerBase
     {

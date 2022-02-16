@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/wallets")]
+    [Route("api/v1/Wallets")]
     [ApiController]
     public class WalletController : ControllerBase
     {
