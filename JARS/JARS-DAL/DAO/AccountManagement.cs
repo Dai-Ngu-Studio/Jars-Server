@@ -10,7 +10,7 @@ namespace JARS_DAL.DAO
 {
     public class AccountManagement
     {
-        private static AccountManagement instance = null;
+        private static AccountManagement? instance = null;
         private static readonly object instanceLock = new object();
         private AccountManagement() { }
         public static AccountManagement Instance
@@ -105,6 +105,10 @@ namespace JARS_DAL.DAO
             {
                 throw;
             }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task UpdateAsync(Account account)
@@ -127,6 +131,10 @@ namespace JARS_DAL.DAO
                 throw;
             }
             catch (DbUpdateException)
+            {
+                throw;
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -153,6 +161,10 @@ namespace JARS_DAL.DAO
                 throw;
             }
             catch (DbUpdateException)
+            {
+                throw;
+            }
+            catch (Exception)
             {
                 throw;
             }
