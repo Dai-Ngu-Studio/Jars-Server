@@ -9,7 +9,7 @@ namespace JARS_API.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]s")]
     public class ContractController : ControllerBase
     {
         private readonly IContractRepository _repository;

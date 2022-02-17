@@ -9,7 +9,7 @@ namespace JARS_API.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]s")]
     public class BillController : ControllerBase
     {
         private readonly IBillRepository _repository;
@@ -173,10 +173,10 @@ namespace JARS_API.Controllers
             return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
         }
 
-        [HttpGet("WithContractId/{contractId}")]
-        public async Task<ActionResult<List<Bill>>> GetAllBillsForContract(int contractId)
+        [HttpGet]
+        public async Task<ActionResult<List<Bill>>> GetAllBillsForContract([FromQuery] int contract_id)
         {
-            var result = await _repository.GetBillByContractIdAsync(contractId, GetCurrentUID());
+            var result = await _repository.GetBillByContractIdAsync(contract_id, GetCurrentUID());
             return Ok(result);
         }
 
