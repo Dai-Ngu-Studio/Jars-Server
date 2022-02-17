@@ -10,7 +10,7 @@ namespace JARS_DAL.Repository
     public interface ICategoryRepository
     {
         Task<IReadOnlyList<Category>> GetCategoriesAsync();
-        Task<Category> GetCategoryByCategoryIdAsync(int categoryId);
+        Task<Category> GetCategoryByCategoryIdAsync(int? categoryId);
         Task UpdateCategoryAsync(Category category);
         Task CreateCategoryAsync(Category category);
         Task DeleteCategoryAsync(Category category);

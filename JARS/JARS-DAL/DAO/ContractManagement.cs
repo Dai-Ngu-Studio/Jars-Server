@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace JARS_DAL.DAO
@@ -28,17 +27,48 @@ namespace JARS_DAL.DAO
                 }
             }
         }
-        public async Task<IReadOnlyList<Contract>> GetAllContractAsync()
+        public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
+                .Where(c => c.AccountId == uid)
+                .Include(note => note.Note)
                 .ToListAsync();
         }
-        public async Task<Contract> GetContractByContractIdAsync(int id)
+        public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
-                .FindAsync(id);
+                .Include(note => note.Note)
+                .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
+        }
+
+        public async Task CreateContractAsync(Contract contract)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                jarsDB.Contracts.Add(contract);
+                await jarsDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.InnerException.Message);
+            }
+        }
+
+        public async Task UpdateContractAsync(Contract contract)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                jarsDB.Contracts.Update(contract);
+                await jarsDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

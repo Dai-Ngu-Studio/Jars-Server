@@ -9,12 +9,11 @@ namespace JARS_DAL.Repository
 {
     public interface IWalletReposiotry
     {
-        void UpdateWallet(Wallet wallet);
-        Wallet GetWallet(int id);
-        void DeleteWallet(int id);
-        
-        IEnumerable<Wallet> GetAllWallets();
-        void AddWallet(Wallet wallet);
+        Task UpdateWallet(Wallet wallet);
+        Task<Wallet> GetWallet(int id);
+        Task DeleteWallet(int id);     
+        Task<IEnumerable<Wallet>> GetAllWallets(string id);
+        Task AddWallet(Wallet wallet);
 
     }
 }

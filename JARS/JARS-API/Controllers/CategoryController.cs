@@ -1,12 +1,14 @@
 ﻿using JARS_DAL.Models;
 using JARS_DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace JARS_API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    //[Authorize]
+    [Route("api/v1/Categories")]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _repository;
@@ -38,19 +40,19 @@ namespace JARS_API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCategory(int id, Category category)
         {
+            var parentCategory = await _repository.GetCategoryByCategoryIdAsync(category.ParentCategoryId);
             var result = await _repository.GetCategoryByCategoryIdAsync(id);
-            if (result.Id != category.Id)
-            {
-                return BadRequest();
-            }
+
+            if (result == null)
+                return NotFound();
             try
             {
                 Category _category = new Category
                 {
                     Id = id,
-                    Name = category.Name,
-                    CurrentCategoryLevel = result.CurrentCategoryLevel,
-                    ParentCategoryId = result.ParentCategoryId,
+                    Name = category.Name == null ? result.Name : category.Name,
+                    CurrentCategoryLevel = category.ParentCategoryId == null ? result.CurrentCategoryLevel : category.ParentCategoryId,
+                    ParentCategoryId = parentCategory != null ? category.ParentCategoryId : id,
                 };
                 await _repository.UpdateCategoryAsync(_category);
             }
@@ -69,7 +71,22 @@ namespace JARS_API.Controllers
         {
             try
             {
-                await _repository.CreateCategoryAsync(category);
+                Category _category = new Category
+                {
+                    Name = category.Name,
+                    CurrentCategoryLevel = category.CurrentCategoryLevel
+                };
+                await _repository.CreateCategoryAsync(_category);
+
+                var categoryFound = await _repository.GetCategoryByCategoryIdAsync(category.ParentCategoryId);
+                Category addParentCategoryId = new Category
+                {
+                    Id = _category.Id,
+                    Name = _category.Name,
+                    CurrentCategoryLevel = _category.CurrentCategoryLevel,
+                    ParentCategoryId = categoryFound != null ? category.ParentCategoryId : _category.Id,
+                };
+                await _repository.UpdateCategoryAsync(addParentCategoryId);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -96,5 +113,7 @@ namespace JARS_API.Controllers
 
             return Ok(category);
         }
+
+
     }
 }

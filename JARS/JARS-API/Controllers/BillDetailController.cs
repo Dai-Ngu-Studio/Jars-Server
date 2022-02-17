@@ -1,12 +1,15 @@
 ﻿using JARS_DAL.Models;
 using JARS_DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]s")]
+    [Authorize]
     public class BillDetailController : ControllerBase
     {
         private readonly IBillDetailRepository _repository;
@@ -18,17 +21,18 @@ namespace JARS_API.Controllers
             _billRepository = billRepository;
         }
 
-        [HttpGet("WithBillId/{id}")]
-        public async Task<ActionResult<List<BillDetail>>> GetBillDetailsWithBillId(int id)
+        //[HttpGet("?bill_id={billId")]
+        [HttpGet]
+        public async Task<ActionResult<List<BillDetail>>> GetBillDetailsWithBillId([FromQuery]int bill_id)
         {
-            var result = await _repository.GetAllBillDetailWithBillIdAsync(id);
+            var result = await _repository.GetAllBillDetailWithBillIdAsync(bill_id, GetCurrentUID());
             return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<BillDetail>> GetBillDetail(int id)
         {
-            var billDetail = await _repository.GetBillDetailAsync(id);
+            var billDetail = await _repository.GetBillDetailAsync(id, GetCurrentUID());
             if (billDetail == null)
             {
                 return NotFound();
@@ -40,20 +44,28 @@ namespace JARS_API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBillDetail(int id, BillDetail billDetail)
         {
-            if (id != billDetail.Id)
+            var result = await _repository.GetBillDetailAsync(id, GetCurrentUID());
+            if (result.Id != billDetail.Id)
             {
                 return BadRequest();
             }
             try
             {
-                await _repository.UpdateBillDetailAsync(billDetail);
+                BillDetail _billDetail = new BillDetail
+                {
+                    Id = result.Id,
+                    ItemName = billDetail.ItemName == null ? result.ItemName : billDetail.ItemName,
+                    Price = billDetail.Price == null ? result.Price : billDetail.Price,
+                    Quantity = billDetail.Quantity == null ? result.Quantity : billDetail.Quantity,
+                    BillId = result.BillId
+                };
+                await _repository.UpdateBillDetailAsync(_billDetail);
 
-                decimal? amount = 0;
-                var _billDetail = await _repository.GetBillDetailAsync(billDetail.Id);
-                if (_billDetail != null)
+                decimal? amount = 0;              
+                if (result != null)
                 {                   
-                    var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(_billDetail.BillId);
-                    Bill bill = await _billRepository.GetBillByBillIdAsync((int)_billDetail.BillId);
+                    var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(_billDetail.BillId, GetCurrentUID());
+                    Bill bill = await _billRepository.GetBillByBillIdAsync(_billDetail.BillId, GetCurrentUID());
 
                     if (getAllCreatedBillDetails != null && bill != null)
                     {
@@ -79,7 +91,7 @@ namespace JARS_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (_repository.GetBillDetailAsync(billDetail.Id) == null)
+                if (_repository.GetBillDetailAsync(billDetail.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
                 }
@@ -87,10 +99,10 @@ namespace JARS_API.Controllers
             }
             return Ok(billDetail);
         }
-        [HttpPost("{id}")]
-        public async Task<ActionResult> CreateBillDetail(int id, BillDetail billDetail)
+        [HttpPost]
+        public async Task<ActionResult> CreateBillDetail([FromQuery]int bill_id, BillDetail billDetail)
         {
-            Bill bill = await _billRepository.GetBillByBillIdAsync(id);
+            Bill bill = await _billRepository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
 
             if (bill == null)
                 return NotFound();
@@ -107,7 +119,7 @@ namespace JARS_API.Controllers
                 await _repository.CreateBillDetailAsync(billDetail);
 
                 decimal? amount = 0;
-                var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(billDetail.BillId);
+                var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(billDetail.BillId, GetCurrentUID());
 
                 if (getAllCreatedBillDetails != null)
                 {
@@ -148,6 +160,12 @@ namespace JARS_API.Controllers
             }
 
             return Ok(billDetail);
+        }
+
+        private string GetCurrentUID()
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

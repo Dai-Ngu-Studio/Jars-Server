@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace JARS_DAL.DAO
@@ -24,23 +23,25 @@ namespace JARS_DAL.DAO
                 }
             } 
         }
-        public async Task<IReadOnlyList<Bill>> GetAllBillAsync()
+        public async Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int? contractId, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
+                .Where(b => b.ContractId == contractId && b.Contract.AccountId == uid)
                 .Include(bdt => bdt.BillDetails)
                 .Include(cate => cate.Category)
                 .Include(contract => contract.Contract)
                 .ToListAsync(); 
         }
-        public async Task<Bill> GetBillByBillIdAsync (int id)
+
+        public async Task<Bill> GetBillByBillIdAsync (int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
                 .Include(bdt => bdt.BillDetails)
                 .Include(bdt => bdt.Category)
                 .Include(contract => contract.Contract)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == id && b.Contract.AccountId == uid);
         }
 
         public async Task UpdateBillAsync(Bill bill)

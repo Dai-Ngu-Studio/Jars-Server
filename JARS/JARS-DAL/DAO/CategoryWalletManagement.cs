@@ -1,6 +1,7 @@
 ﻿using JARS_DAL.Models;
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,52 +29,42 @@ namespace JARS_DAL.DAO
                 return instance; 
             }
         }
-        public IEnumerable<CategoryWallet> GetCategoryWallets()
-        {   List<CategoryWallet> CategoryWallets;
-            try
-            {
-                var jarsDB = new  JarsDatabaseContext();
-                CategoryWallets = jarsDB.CategoryWallets.ToList();
-
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-            return CategoryWallets;
-        }
-        public CategoryWallet GetCategoryWallet(int id)
-        {
-            CategoryWallet CategoryWallet =null;
-            try
-            {
-                var jarsDB = new JarsDatabaseContext();
-                CategoryWallet = jarsDB.CategoryWallets.SingleOrDefault(CategoryWallet => CategoryWallet.Id == id);
-
-            }
-            catch (Exception ex)
-            {
-
-                throw new Exception(ex.Message);
-            }
-            return CategoryWallet;
-        }
-        public void AddCategoryWallet(CategoryWallet CategoryWallet)
+        public async Task<IEnumerable<CategoryWallet>> GetCategoryWallets()
         {   
             try
             {
-                CategoryWallet _CategoryWallet = GetCategoryWallet(CategoryWallet.Id);
-                if(_CategoryWallet == null)
-                {
-                    var jardDB = new JarsDatabaseContext();
-                    jardDB.CategoryWallets.Add(CategoryWallet);
-                    jardDB.SaveChanges();
-                }
-                else
-                {
-                    throw new Exception("CategoryWallet already exist");
-                }
+                var jarsDB = new  JarsDatabaseContext();
+                return await jarsDB.CategoryWallets.ToListAsync();
+                
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+            
+        }
+        public async Task<CategoryWallet> GetCategoryWallet(int id)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+               return await jarsDB.CategoryWallets.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
+            
+        }
+        public async  Task AddCategoryWallet(CategoryWallet CategoryWallet)
+        {   
+            try
+            {
+                var jarDB = new JarsDatabaseContext();
+                jarDB.CategoryWallets.Add(CategoryWallet);
+                await jarDB.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -82,37 +73,33 @@ namespace JARS_DAL.DAO
 
             }
         }
-        public void UpdateCategoryWallet (CategoryWallet CategoryWallet)
+        public async Task UpdateCategoryWallet (CategoryWallet CategoryWallet)
         {
             try
             {
-                CategoryWallet _CategoryWallet = GetCategoryWallet(CategoryWallet.Id);
-                if(_CategoryWallet != null)
-                {
-                    var jarsDB = new JarsDatabaseContext();
-                    jarsDB.Entry<CategoryWallet>(CategoryWallet).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    jarsDB.SaveChanges();
-                }
-                else
-                {
-                    throw new Exception("this CategoryWallet does not already existed");
-                }
+                var jarDB = new JarsDatabaseContext();
+                jarDB.CategoryWallets.Update(CategoryWallet);
+                await jarDB.SaveChangesAsync();
             }
             catch (Exception ex )
             {
                 throw new Exception(ex.Message);
             }
         }
-        public void RemoveCategoryWallet(int id)
+        public async Task RemoveCategoryWallet(int id)
         {
             try
             {
-                CategoryWallet _CategoryWallet = GetCategoryWallet(id);
-                if(_CategoryWallet != null)
+                CategoryWallet categoryWallet = await GetCategoryWallet(id);
+                if(categoryWallet != null)
                 {
-                    var jarsDB = new JarsDatabaseContext();
-                    jarsDB.CategoryWallets.Remove(_CategoryWallet);
-                    jarsDB.SaveChanges();
+                    var jarDB = new JarsDatabaseContext();
+                    jarDB.CategoryWallets.Remove(categoryWallet);
+                    await jarDB.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Category walet not found");
                 }
 
             }

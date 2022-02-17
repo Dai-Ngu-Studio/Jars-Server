@@ -11,22 +11,22 @@ namespace JARS_DAL.Repository
 {
     public class CategoryWalletReposiotry : ICategoryWalletReposiotry
     {
-        public void AddCategoryWallet(CategoryWallet CategoryWallet) => CategoryWalletManagement.Instance.AddCategoryWallet(CategoryWallet);
+        public Task AddCategoryWallet(CategoryWallet CategoryWallet) => CategoryWalletManagement.Instance.AddCategoryWallet(CategoryWallet);
        
 
 
-        public void DeleteCategoryWallet(int id)
+        public Task DeleteCategoryWallet(int id)
        => CategoryWalletManagement.Instance.RemoveCategoryWallet(id);
 
 
-        public IEnumerable<CategoryWallet> GetAllCategoryWallets()
+        public Task<IEnumerable<CategoryWallet>> GetAllCategoryWallets()
       => CategoryWalletManagement.Instance.GetCategoryWallets();
 
 
-        public CategoryWallet GetCategoryWallet(int id)
+        public Task<CategoryWallet> GetCategoryWallet(int id)
        => CategoryWalletManagement.Instance.GetCategoryWallet(id);
 
-        public void UpdateCategoryWallet(CategoryWallet CategoryWallet)
+        public Task UpdateCategoryWallet(CategoryWallet CategoryWallet)
         => CategoryWalletManagement.Instance.UpdateCategoryWallet(CategoryWallet);
 
         

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace JARS_DAL.DAO
@@ -47,21 +46,9 @@ namespace JARS_DAL.DAO
         {
             try
             {
-                BillDetail detail = await GetBillDetailAsync(billDetail.Id);
-                if (detail != null)
-                {
-                    BillDetail tmpDetail = new BillDetail
-                    {
-                        Id = billDetail.Id,
-                        ItemName = billDetail.ItemName,
-                        Price = billDetail.Price,
-                        Quantity = billDetail.Quantity,
-                        BillId = detail.BillId,
-                    };
-                    var jarsDB = new JarsDatabaseContext();
-                    jarsDB.BillDetails.Update(tmpDetail);
-                    await jarsDB.SaveChangesAsync();
-                }         
+                var jarsDB = new JarsDatabaseContext();
+                jarsDB.BillDetails.Update(billDetail);
+                await jarsDB.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -73,31 +60,27 @@ namespace JARS_DAL.DAO
         {
             try
             {
-                BillDetail detail = await GetBillDetailAsync(billDetail.Id);
-                if (detail != null)
-                {
-                    var jarsDB = new JarsDatabaseContext();
-                    jarsDB.BillDetails.Remove(billDetail);
-                    await jarsDB.SaveChangesAsync();
-                }
+                var jarsDB = new JarsDatabaseContext();
+                jarsDB.BillDetails.Remove(billDetail);
+                await jarsDB.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<IReadOnlyList<BillDetail>> GetAllBillDetailWithBillIdAsync(int? billId)
+        public async Task<IReadOnlyList<BillDetail>> GetAllBillDetailWithBillIdAsync(int? billId, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.BillDetails
-                .Where(bd => bd.BillId == billId)
+                .Where(bd => bd.BillId == billId && bd.Bill.Contract.AccountId == uid)
                 .ToListAsync();
         }
-        public async Task<BillDetail> GetBillDetailAsync(int id)
+        public async Task<BillDetail> GetBillDetailAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.BillDetails
-                .SingleOrDefaultAsync(bd => bd.Id == id);
+                .SingleOrDefaultAsync(bd => bd.Id == id && bd.Bill.Contract.AccountId == uid);
         }
     }
 }
