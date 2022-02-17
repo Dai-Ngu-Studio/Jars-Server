@@ -13,7 +13,7 @@ namespace JARS_DAL.Models
         }
 
         public string Id { get; set; } = null!;
-        public bool? IsAdmin { get; set; }
+        public bool IsAdmin { get; set; }
         public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public string? PhotoUrl { get; set; }

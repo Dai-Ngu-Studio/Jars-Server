@@ -20,10 +20,8 @@ namespace JARS_API.Controllers
             _accountRepository = accountRepository;
         }
 
-
-
         /// <summary>
-        /// Get accounts with optional queries. Only the admin is authorized to use this method. (Note: Admin check is currently not implemented yet).
+        /// Get accounts with optional queries. Only the admin is authorized to use this method.
         /// </summary>
         /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
@@ -32,20 +30,24 @@ namespace JARS_API.Controllers
         /// <param name="displayName">Optional filter for account's displayName. Default value: ""</param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<List<Account>>> GetAll([FromHeader] string authorization,
+        [Authorize]
+        public async Task<ActionResult<List<Account>>> GetList([FromHeader(Name = "Authorization")] string authorization,
             [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
             ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null && email != null && displayName != null)
             {
-                // to-do check if admin
-                var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
-                if (accounts != null && accounts.Count() > 0)
+                var user = await _accountRepository.GetAsync(uid);
+                if (user != null && user.IsAdmin)
                 {
-                    return accounts.ToList();
+                    var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
+                    if (accounts != null)
+                    {
+                        return accounts.ToList();
+                    }
+                    return NoContent();
                 }
-                return NotFound();
             }
             return Unauthorized();
         }
@@ -66,8 +68,8 @@ namespace JARS_API.Controllers
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                // to-do check if admin
-                if (uid.Equals(id))
+                var user = await _accountRepository.GetAsync(uid);
+                if (uid.Equals(id) || (user != null && user.IsAdmin))
                 {
                     var account = await _accountRepository.GetAsync(id);
                     if (account == null)
@@ -129,7 +131,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
+        public async Task<ActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
         {
             ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -174,7 +176,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpPost("login")]
         [Authorize]
-        public async Task<IActionResult> Login([FromHeader(Name = "Authorization")] string authorization)
+        public async Task<ActionResult> Login([FromHeader(Name = "Authorization")] string authorization)
         {
             ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -242,7 +244,7 @@ namespace JARS_API.Controllers
         /// <para>401 BAD REQUEST if token is invalid</para>
         /// </returns>
         [HttpPost("verify-token")]
-        public async Task<IActionResult> VerifyToken([FromBody] JsonElement json)
+        public async Task<ActionResult> VerifyToken([FromBody] JsonElement json)
         {
             var auth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
             string? token = json.GetProperty("token").GetString();
