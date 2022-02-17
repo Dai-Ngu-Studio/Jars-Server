@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace JARS_DAL.Models
 {
-        public partial class JarsDatabaseContext : DbContext
+    public partial class JarsDatabaseContext : DbContext
     {
         public JarsDatabaseContext()
         {
@@ -17,7 +17,6 @@ namespace JARS_DAL.Models
         }
 
         public virtual DbSet<Account> Accounts { get; set; } = null!;
-        public virtual DbSet<AccountType> AccountTypes { get; set; } = null!;
         public virtual DbSet<Bill> Bills { get; set; } = null!;
         public virtual DbSet<BillDetail> BillDetails { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
@@ -48,25 +47,11 @@ namespace JARS_DAL.Models
                     .IsUnicode(false)
                     .HasColumnName("ID");
 
-                entity.Property(e => e.AccountTypeId).HasColumnName("AccountTypeID");
-
                 entity.Property(e => e.Email).IsUnicode(false);
 
                 entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
 
                 entity.Property(e => e.PhotoUrl).IsUnicode(false);
-
-                entity.HasOne(d => d.AccountType)
-                    .WithMany(p => p.Accounts)
-                    .HasForeignKey(d => d.AccountTypeId)
-                    .HasConstraintName("FK__Account__Account__267ABA7A");
-            });
-
-            modelBuilder.Entity<AccountType>(entity =>
-            {
-                entity.ToTable("AccountType");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
             });
 
             modelBuilder.Entity<Bill>(entity =>
@@ -88,12 +73,12 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__Bill__CategoryID__3B75D760");
+                    .HasConstraintName("FK__Bill__CategoryID__38996AB5");
 
                 entity.HasOne(d => d.Contract)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.ContractId)
-                    .HasConstraintName("FK__Bill__ContractID__3C69FB99");
+                    .HasConstraintName("FK__Bill__ContractID__398D8EEE");
             });
 
             modelBuilder.Entity<BillDetail>(entity =>
@@ -109,7 +94,7 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.BillDetails)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__BillDetai__BillI__440B1D61");
+                    .HasConstraintName("FK__BillDetai__BillI__412EB0B6");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -123,7 +108,7 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.ParentCategory)
                     .WithMany(p => p.InverseParentCategory)
                     .HasForeignKey(d => d.ParentCategoryId)
-                    .HasConstraintName("FK__Category__Parent__300424B4");
+                    .HasConstraintName("FK__Category__Parent__2D27B809");
             });
 
             modelBuilder.Entity<CategoryWallet>(entity =>
@@ -134,17 +119,10 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
 
-                entity.Property(e => e.WalletId).HasColumnName("WalletID");
-
                 entity.HasOne(d => d.ParentCategory)
                     .WithMany(p => p.InverseParentCategory)
                     .HasForeignKey(d => d.ParentCategoryId)
-                    .HasConstraintName("FK__CategoryW__Paren__2D27B809");
-
-                entity.HasOne(d => d.Wallet)
-                    .WithMany(p => p.CategoryWallets)
-                    .HasForeignKey(d => d.WalletId)
-                    .HasConstraintName("FK__CategoryW__Walle__2C3393D0");
+                    .HasConstraintName("FK__CategoryW__Paren__267ABA7A");
             });
 
             modelBuilder.Entity<Contract>(entity =>
@@ -160,8 +138,6 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.Amount).HasColumnType("money");
 
-                entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
-
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.NoteId).HasColumnName("NoteID");
@@ -173,17 +149,17 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.Contracts)
                     .HasForeignKey(d => d.AccountId)
-                    .HasConstraintName("FK__Contract__Accoun__36B12243");
+                    .HasConstraintName("FK__Contract__Accoun__33D4B598");
 
                 entity.HasOne(d => d.Note)
                     .WithMany(p => p.Contracts)
                     .HasForeignKey(d => d.NoteId)
-                    .HasConstraintName("FK__Contract__NoteID__37A5467C");
+                    .HasConstraintName("FK__Contract__NoteID__34C8D9D1");
 
                 entity.HasOne(d => d.ScheduleType)
                     .WithMany(p => p.Contracts)
                     .HasForeignKey(d => d.ScheduleTypeId)
-                    .HasConstraintName("FK__Contract__Schedu__38996AB5");
+                    .HasConstraintName("FK__Contract__Schedu__35BCFE0A");
             });
 
             modelBuilder.Entity<Note>(entity =>
@@ -194,7 +170,21 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.AddedDate).HasColumnType("datetime");
 
+                entity.Property(e => e.ContractId).HasColumnName("ContractID");
+
                 entity.Property(e => e.Image).IsUnicode(false);
+
+                entity.Property(e => e.TransactionId).HasColumnName("TransactionID");
+
+                entity.HasOne(d => d.Contract)
+                    .WithMany(p => p.Notes)
+                    .HasForeignKey(d => d.ContractId)
+                    .HasConstraintName("FK_ContractID_ID_Contract");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.Notes)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_TransactionID_ID_Transaction");
             });
 
             modelBuilder.Entity<ScheduleType>(entity =>
@@ -223,17 +213,17 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__Transacti__BillI__412EB0B6");
+                    .HasConstraintName("FK__Transacti__BillI__3E52440B");
 
                 entity.HasOne(d => d.Note)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.NoteId)
-                    .HasConstraintName("FK__Transacti__NoteI__3F466844");
+                    .HasConstraintName("FK__Transacti__NoteI__3C69FB99");
 
                 entity.HasOne(d => d.Wallet)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.WalletId)
-                    .HasConstraintName("FK__Transacti__Walle__403A8C7D");
+                    .HasConstraintName("FK__Transacti__Walle__3D5E1FD2");
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -247,6 +237,8 @@ namespace JARS_DAL.Models
                     .IsUnicode(false)
                     .HasColumnName("AccountID");
 
+                entity.Property(e => e.CategoryWalletId).HasColumnName("CategoryWalletID");
+
                 entity.Property(e => e.Percentage).HasColumnType("decimal(18, 0)");
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
@@ -257,6 +249,11 @@ namespace JARS_DAL.Models
                     .WithMany(p => p.Wallets)
                     .HasForeignKey(d => d.AccountId)
                     .HasConstraintName("FK__Wallet__AccountI__29572725");
+
+                entity.HasOne(d => d.CategoryWallet)
+                    .WithMany(p => p.Wallets)
+                    .HasForeignKey(d => d.CategoryWalletId)
+                    .HasConstraintName("FK__Wallet__Category__2A4B4B5E");
             });
 
             OnModelCreatingPartial(modelBuilder);
@@ -264,5 +261,4 @@ namespace JARS_DAL.Models
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
-
 }

@@ -13,14 +13,12 @@ namespace JARS_DAL.Models
         }
 
         public string Id { get; set; } = null!;
-        public int? AccountTypeId { get; set; }
+        public bool? IsAdmin { get; set; }
         public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public string? PhotoUrl { get; set; }
         public DateTime? LastLoginDate { get; set; }
-
-        [JsonIgnore]
-        public virtual AccountType? AccountType { get; set; }
+        
         [JsonIgnore]
         public virtual ICollection<Contract> Contracts { get; set; }
         [JsonIgnore]

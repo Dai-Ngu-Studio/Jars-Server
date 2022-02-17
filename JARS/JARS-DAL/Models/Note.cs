@@ -18,6 +18,11 @@ namespace JARS_DAL.Models
         public DateTime? AddedDate { get; set; }
         public string? Comments { get; set; }
         public string? Image { get; set; }
+        public int? TransactionId { get; set; }
+        public int? ContractId { get; set; }
+
+        public virtual Contract? Contract { get; set; }
+        public virtual Transaction? Transaction { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Contract> Contracts { get; set; }

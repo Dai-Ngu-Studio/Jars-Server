@@ -6,6 +6,11 @@ namespace JARS_DAL.Models
 {
     public partial class Transaction
     {
+        public Transaction()
+        {
+            Notes = new HashSet<Note>();
+        }
+        
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int? WalletId { get; set; }
@@ -17,5 +22,6 @@ namespace JARS_DAL.Models
         public virtual Bill? Bill { get; set; }
         public virtual Note? Note { get; set; }
         public virtual Wallet? Wallet { get; set; }
+        public virtual ICollection<Note> Notes { get; set; }
     }
 }

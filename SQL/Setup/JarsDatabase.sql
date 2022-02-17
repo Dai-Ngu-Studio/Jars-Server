@@ -8,34 +8,35 @@ END;
 GO
 USE [JarsDatabase]
 GO
-IF OBJECT_ID('AccountType', 'U') IS NULL
-BEGIN
-  CREATE TABLE [AccountType]
-  (
-    [ID] int IDENTITY(1, 1),
-    --PK--
-    [Name] nvarchar(max),
-
-    PRIMARY KEY ([ID])
-  );
-END;
-GO
 IF OBJECT_ID('Account', 'U') IS NULL
 BEGIN
   CREATE TABLE [Account]
   (
     [ID] varchar(128),
     --PK--
-    [AccountTypeID] int,
-    --FK--
+    [IsAdmin] bit,
     [Email] varchar(max),
     [DisplayName] nvarchar(max),
     [PhotoUrl] varchar(max),
     [LastLoginDate] DateTime,
 
     PRIMARY KEY ([ID]),
+  );
+END;
+GO
+IF OBJECT_ID('CategoryWallet', 'U') IS NULL
+BEGIN
+  CREATE TABLE [CategoryWallet]
+  (
+    [ID] int IDENTITY(1, 1),
+    --PK--
+    [Name] nvarchar(max),
+    [ParentCategoryID] int,
+    [CurrentCategoryLevel] int,
 
-    FOREIGN KEY ([AccountTypeID]) REFERENCES AccountType([ID]),
+    PRIMARY KEY ([ID]),
+
+    FOREIGN KEY ([ParentCategoryID]) REFERENCES CategoryWallet([ID]),
   );
 END;
 GO
@@ -51,29 +52,12 @@ BEGIN
     [Percentage] Decimal,
     [AccountID] varchar(128),
     --FK--
+    [CategoryWalletID] int,
 
     PRIMARY KEY ([ID]),
 
     FOREIGN KEY ([AccountID]) REFERENCES Account([ID]),
-  );
-END;
-GO
-IF OBJECT_ID('CategoryWallet', 'U') IS NULL
-BEGIN
-  CREATE TABLE [CategoryWallet]
-  (
-    [ID] int IDENTITY(1, 1),
-    --PK--
-    [WalletID] int,
-    --FK--
-    [Name] nvarchar(max),
-    [ParentCategoryID] int,
-    [CurrentCategoryLevel] int,
-
-    PRIMARY KEY ([ID]),
-
-    FOREIGN KEY ([WalletID]) REFERENCES [Wallet]([ID]),
-    FOREIGN KEY ([ParentCategoryID]) REFERENCES CategoryWallet([ID]),
+    FOREIGN KEY ([CategoryWalletID]) REFERENCES CategoryWallet([ID]),
   );
 END;
 GO
@@ -104,8 +88,14 @@ BEGIN
     [AddedDate] DateTime,
     [Comments] nvarchar(max),
     [Image] varchar(max),
+    [TransactionID] int,
+    --FK--
+    [ContractID] int,
+    --FK-
 
     PRIMARY KEY ([ID]),
+    --FOREIGN KEY ([TransactionID]) REFERENCES Transaction([ID]),
+    --FOREIGN KEY ([ContractID]) REFERENCES Contract([ID]),
   );
 END;
 GO
@@ -130,7 +120,6 @@ BEGIN
     [AccountID] varchar(128),
     [ScheduleTypeID] int,
     --FK--
-    [CategoryID] int,
     [NoteID] int,
     --FK--
     [StartDate] DateTime,
@@ -164,7 +153,7 @@ BEGIN
     PRIMARY KEY ([ID]),
 
     FOREIGN KEY ([CategoryID]) REFERENCES Category([ID]),
-    FOREIGN KEY ([ContractID]) REFERENCES Contract([ID]),
+    FOREIGN KEY ([ContractID]) REFERENCES [Contract]([ID]),
   );
 END;
 IF OBJECT_ID('Transaction', 'U') IS NULL
@@ -203,4 +192,18 @@ BEGIN
 
     FOREIGN KEY ([BillID]) REFERENCES Bill([ID]),
   );
+END;
+
+IF OBJECT_ID('Note', 'U') IS NOT NULL
+BEGIN
+ALTER TABLE [Note]
+   ADD CONSTRAINT FK_TransactionID_ID_Transaction FOREIGN KEY ([TransactionID])
+      REFERENCES [Transaction](ID)
+END;
+
+IF OBJECT_ID('Note', 'U') IS NOT NULL
+BEGIN
+ALTER TABLE [Note]
+  ADD CONSTRAINT FK_ContractID_ID_Contract FOREIGN KEY ([ContractID])
+      REFERENCES [Contract](ID)
 END;

@@ -8,7 +8,6 @@ namespace JARS_DAL.Models
     {
         public Wallet()
         {
-            CategoryWallets = new HashSet<CategoryWallet>();
             Transactions = new HashSet<Transaction>();
         }
 
@@ -19,9 +18,10 @@ namespace JARS_DAL.Models
         public decimal? WalletAmount { get; set; }
         public decimal? Percentage { get; set; }
         public string? AccountId { get; set; }
+        public int? CategoryWalletId { get; set; }
 
         public virtual Account? Account { get; set; }
-        public virtual ICollection<CategoryWallet> CategoryWallets { get; set; }
+        public virtual CategoryWallet? CategoryWallet { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }
