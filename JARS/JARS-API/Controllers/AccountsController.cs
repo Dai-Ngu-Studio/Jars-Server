@@ -39,7 +39,7 @@ namespace JARS_API.Controllers
         {
             ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (uid != null)
+            if (uid != null && email != null && displayName != null)
             {
                 // to-do check if admin
                 var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
@@ -240,7 +240,7 @@ namespace JARS_API.Controllers
         /// </summary>
         /// <param name="json">The body of the request should have Content-Type 'application/json', the key "token" with the token as the value.</param>
         /// <returns>
-        /// <para>201 ACCEPTED if token is valid</para>
+        /// <para>200 OK if token is valid</para>
         /// <para>401 BAD REQUEST if token is invalid</para>
         /// </returns>
         [HttpPost("verify-token")]
@@ -254,7 +254,7 @@ namespace JARS_API.Controllers
                 if (response != null)
                 {
                     string uid = ((FirebaseToken)response).Uid;
-                    return Accepted();
+                    return Ok();
                 }
             }
             catch (FirebaseAuthException)
