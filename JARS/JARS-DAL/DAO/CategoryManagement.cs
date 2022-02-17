@@ -32,6 +32,7 @@ namespace JARS_DAL.DAO
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Categories
+                .Include(cateParent => cateParent.ParentCategory)
                 .ToListAsync();
         }
         public async Task<Category> GetCategoryByCatergoryIdAsync(int? id)

@@ -8,7 +8,7 @@ namespace JARS_API.Controllers
 {
     [ApiController]
     //[Authorize]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/Categories")]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _repository;
