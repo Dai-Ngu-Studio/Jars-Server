@@ -1,9 +1,7 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
+﻿using FirebaseAdmin.Auth;
 using JARS_DAL.Models;
 using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -11,13 +9,13 @@ using System.Text.Json;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]s")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly IAccountRepository _accountRepository;
 
-        public AccountsController(IAccountRepository accountRepository)
+        public AccountController(IAccountRepository accountRepository)
         {
             _accountRepository = accountRepository;
         }
