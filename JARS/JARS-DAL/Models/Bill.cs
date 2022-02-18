@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace JARS_DAL.Models
 {
@@ -20,9 +21,13 @@ namespace JARS_DAL.Models
         public int? CategoryId { get; set; }
         public int? ContractId { get; set; }
 
+        [JsonIgnore]
         public virtual Category? Category { get; set; }
+        [JsonIgnore]
         public virtual Contract? Contract { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public virtual ICollection<BillDetail> BillDetails { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

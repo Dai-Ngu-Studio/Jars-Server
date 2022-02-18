@@ -9,16 +9,21 @@ namespace JARS_API.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/contracts")]
     public class ContractController : ControllerBase
     {
         private readonly IContractRepository _repository;
+        private readonly IBillRepository _billRepository;
         private readonly INoteRepository _noteRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public ContractController(IContractRepository repository, INoteRepository noteRepository)
+        public ContractController(IContractRepository repository, IBillRepository billRepository,
+            INoteRepository noteRepository, ICategoryRepository categoryRepository)
         {
             _repository = repository;
+            _billRepository = billRepository;
             _noteRepository = noteRepository;
+            _categoryRepository = categoryRepository;
         }
 
         [HttpGet]
@@ -45,36 +50,60 @@ namespace JARS_API.Controllers
         {
             try
             {
-                if (contract.Note == null)
+                Note note = new Note();
+                Bill bill = new Bill();
+
+                if (contract.Note != null)
                 {
-                    Contract _contract = new Contract
-                    {
-                        AccountId = GetCurrentUID(),
-                        StartDate = contract.StartDate,
-                        EndDate = contract.EndDate,
-                        Amount = contract.Amount,
-                    };
-                    await _repository.CreateContractAsync(_contract);
-                } else
-                {
-                    Note note = new Note
+                    note = new Note
                     {
                         AddedDate = contract.Note.AddedDate,
                         Comments = contract.Note.Comments,
                         Image = contract.Note.Image,
                     };
                     await _noteRepository.Add(note);
+                }
 
-                    Contract _contract = new Contract
+                Contract _contract = new Contract
+                {
+                    StartDate = contract.StartDate,
+                    EndDate = contract.EndDate,
+                    Amount = contract.Amount,
+                    NoteId = note.Id > 0 ? note.Id : null,
+                    AccountId = GetCurrentUID(),
+                };
+                await _repository.CreateContractAsync(_contract);
+
+                var createdContract = _repository.GetContractByContractIdAsync(_contract.Id, GetCurrentUID());
+                Note _note = new Note
+                {
+                    Id = note.Id,
+                    AddedDate = note.AddedDate,
+                    Comments = note.Comments,
+                    Image = note.Image,
+                    ContractId = createdContract != null ? createdContract.Id : null,
+                };
+                await _noteRepository.Update(_note);
+
+                if (contract.Bills.Count > 0)
+                {
+                    foreach (var items in contract.Bills)
                     {
-                        StartDate = contract.StartDate,
-                        EndDate = contract.EndDate,
-                        Amount = contract.Amount,
-                        NoteId = note.Id,
-                        AccountId = GetCurrentUID(),
-                    };
-                    await _repository.UpdateContractAsync(_contract);
-                }                
+                        var category = await _categoryRepository.GetCategoryByCategoryIdAsync(items.CategoryId);
+                        bill = new Bill
+                        {
+                            Date = items.Date,
+                            Name = items.Name,
+                            CategoryId = category != null ? category.Id : null,
+                            ContractId = _contract.Id,
+                            Amount = contract.Amount,
+                            LeftAmount = contract.Amount,
+                        };
+                        await _billRepository.CreateBillAsync(bill);
+                    }
+                }
+
+                
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -99,10 +128,32 @@ namespace JARS_API.Controllers
                     Id = id,
                     StartDate = contract.StartDate == null ? result.StartDate : contract.StartDate,
                     EndDate = contract.EndDate == null ? result.EndDate : contract.EndDate,
-                    Amount = contract.Amount == null ? result.Amount : contract.Amount,
+                    Amount = contract.Amount == null ? result.Amount : result.Amount + contract.Amount,
                     AccountId = result.AccountId,
                 };
                 await _repository.UpdateContractAsync(_contract);
+
+                if (contract.Amount != null)
+                {
+                    var contractBills = await _billRepository.GetAllBillByContractIdAsync(id, GetCurrentUID());
+                    foreach (var bill in contractBills)
+                    {
+                        if (bill.LeftAmount > 0)
+                        {
+                            Bill updatedBill = new Bill
+                            {
+                                Id = bill.Id,
+                                Date = bill.Date,
+                                Amount = bill.Amount + contract.Amount,
+                                LeftAmount = bill.LeftAmount + contract.Amount,
+                                Name = bill.Name,
+                                ContractId = bill.ContractId,
+                                CategoryId = bill.CategoryId,
+                            };
+                            await _billRepository.UpdateBillAsync(updatedBill);
+                        }
+                    }
+                }               
             }
             catch (DbUpdateConcurrencyException)
             {

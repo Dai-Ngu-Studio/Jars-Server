@@ -32,14 +32,14 @@ namespace JARS_DAL.DAO
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
                 .Where(c => c.AccountId == uid)
-                .Include(note => note.Note)
+                .Include(note => note.Notes)
                 .ToListAsync();
         }
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
-                .Include(note => note.Note)
+                .Include(note => note.Notes)
                 .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
         }
 

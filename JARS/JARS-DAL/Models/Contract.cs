@@ -22,11 +22,14 @@ namespace JARS_DAL.Models
         public DateTime? EndDate { get; set; }
         public decimal? Amount { get; set; }
 
+        [JsonIgnore]
         public virtual Account? Account { get; set; }
+        
         public virtual Note? Note { get; set; }
         public virtual ScheduleType? ScheduleType { get; set; }
-        [JsonIgnore]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public virtual ICollection<Bill> Bills { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Note> Notes { get; set; }
     }
 }
