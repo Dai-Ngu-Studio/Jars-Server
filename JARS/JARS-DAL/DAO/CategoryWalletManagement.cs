@@ -63,8 +63,20 @@ namespace JARS_DAL.DAO
             try
             {
                 var jarDB = new JarsDatabaseContext();
-                jarDB.CategoryWallets.Add(CategoryWallet);
+                
+                
+                jarDB.CategoryWallets.Add(CategoryWallet);             
                 await jarDB.SaveChangesAsync();
+                int cateNum = await jarDB.CategoryWallets.CountAsync();
+                CategoryWallet categoryWallet = new CategoryWallet
+                {
+                    Id = CategoryWallet.Id,
+                    Name = CategoryWallet.Name,
+                    ParentCategoryId = cateNum == 1?CategoryWallet.Id:CategoryWallet.ParentCategoryId is null?CategoryWallet.Id:CategoryWallet.ParentCategoryId,
+                    CurrentCategoryLevel = CategoryWallet.CurrentCategoryLevel
+
+                };
+               await UpdateCategoryWallet(categoryWallet);
             }
             catch (Exception ex)
             {

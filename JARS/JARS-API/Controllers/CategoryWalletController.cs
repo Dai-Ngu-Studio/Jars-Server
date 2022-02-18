@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/CategoryWallets")]
+    [Route("api/v1/category_wallets")]
     [ApiController]
     public class CategoryWalletController : ControllerBase
     {
@@ -35,9 +35,8 @@ namespace JARS_API.Controllers
                 Name = categoryWallet.Name,
                 CurrentCategoryLevel = categoryWallet.CurrentCategoryLevel,
                 ParentCategoryId = categoryWallet.ParentCategoryId,
-                WalletId = categoryWallet.WalletId,
             };
-            await repository.AddCategoryWallet(categoryWallet);
+            await repository.AddCategoryWallet(_categoryWallet);
         }
 
         //PUT /wallets/{id}

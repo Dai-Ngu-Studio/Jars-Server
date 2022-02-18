@@ -10,13 +10,13 @@ namespace JARS_DAL.Models
         public Contract()
         {
             Bills = new HashSet<Bill>();
+            Notes = new HashSet<Note>();
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string? AccountId { get; set; }
         public int? ScheduleTypeId { get; set; }
-        public int? CategoryId { get; set; }
         public int? NoteId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -27,5 +27,6 @@ namespace JARS_DAL.Models
         public virtual ScheduleType? ScheduleType { get; set; }
         [JsonIgnore]
         public virtual ICollection<Bill> Bills { get; set; }
+        public virtual ICollection<Note> Notes { get; set; }
     }
 }
