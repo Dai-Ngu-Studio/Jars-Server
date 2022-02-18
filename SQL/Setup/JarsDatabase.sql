@@ -92,6 +92,8 @@ BEGIN
     --FK--
     [ContractID] int,
     --FK-
+	[Latitude] float,
+	[Longitude] float,
 
     PRIMARY KEY ([ID]),
     --FOREIGN KEY ([TransactionID]) REFERENCES Transaction([ID]),
@@ -125,6 +127,7 @@ BEGIN
     [StartDate] DateTime,
     [EndDate] DateTime,
     [Amount] Money,
+	[Name] nvarchar(max),
 
     PRIMARY KEY ([ID]),
 
@@ -196,6 +199,7 @@ END;
 
 IF OBJECT_ID('Note', 'U') IS NOT NULL
 BEGIN
+IF(OBJECT_ID('FK_TransactionID_ID_Transaction', 'F') IS NULL)
 ALTER TABLE [Note]
    ADD CONSTRAINT FK_TransactionID_ID_Transaction FOREIGN KEY ([TransactionID])
       REFERENCES [Transaction](ID)
@@ -203,6 +207,7 @@ END;
 
 IF OBJECT_ID('Note', 'U') IS NOT NULL
 BEGIN
+IF(OBJECT_ID('FK_ContractID_ID_Contract', 'F') IS NULL)
 ALTER TABLE [Note]
   ADD CONSTRAINT FK_ContractID_ID_Contract FOREIGN KEY ([ContractID])
       REFERENCES [Contract](ID)

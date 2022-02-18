@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -14,6 +15,7 @@ namespace JARS_DAL.Models
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
         public string? AccountId { get; set; }
         public int? ScheduleTypeId { get; set; }
@@ -21,11 +23,13 @@ namespace JARS_DAL.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public decimal? Amount { get; set; }
+        public string? Name { get; set; }
 
         [JsonIgnore]
         public virtual Account? Account { get; set; }
-        
+        [JsonIgnore]
         public virtual Note? Note { get; set; }
+        [JsonIgnore]
         public virtual ScheduleType? ScheduleType { get; set; }
         [JsonIgnore]
         public virtual ICollection<Bill> Bills { get; set; }

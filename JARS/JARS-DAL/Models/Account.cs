@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -12,6 +13,7 @@ namespace JARS_DAL.Models
             Wallets = new HashSet<Wallet>();
         }
 
+        [SwaggerSchema(ReadOnly = true)]
         public string Id { get; set; } = null!;
         public bool IsAdmin { get; set; }
         public string? Email { get; set; }
