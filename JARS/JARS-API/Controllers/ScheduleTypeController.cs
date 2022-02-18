@@ -155,27 +155,28 @@ namespace JARS_API.Controllers
                 if (user != null && user.IsAdmin)
                 {
                     ScheduleType? scheduleType = await _scheduleTypeRepository.GetAsync(id);
-                    if (scheduleType != null)
+                    if (scheduleType == null)
                     {
-                        try
-                        {
-                            await _scheduleTypeRepository.DeleteAsync(scheduleType);
-                            return Ok();
-                        }
-                        catch (DbUpdateConcurrencyException)
-                        {
-                            // to-do logging
-                            return StatusCode(500);
-                        }
-                        catch (DbUpdateException)
-                        {
-                            // to-do logging
-                            return StatusCode(500);
-                        }
-                        catch (Exception ex)
-                        {
-                            return BadRequest(ex);
-                        }
+                        return BadRequest();
+                    }
+                    try
+                    {
+                        await _scheduleTypeRepository.DeleteAsync(scheduleType);
+                        return Ok();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex);
                     }
                 }
             }
