@@ -27,7 +27,7 @@ namespace JARS_DAL.Models
         
         public virtual Note? Note { get; set; }
         public virtual ScheduleType? ScheduleType { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore]
         public virtual ICollection<Bill> Bills { get; set; }
         [JsonIgnore]
         public virtual ICollection<Note> Notes { get; set; }

@@ -84,26 +84,6 @@ namespace JARS_API.Controllers
                     ContractId = createdContract != null ? createdContract.Id : null,
                 };
                 await _noteRepository.Update(_note);
-
-                if (contract.Bills.Count > 0)
-                {
-                    foreach (var items in contract.Bills)
-                    {
-                        var category = await _categoryRepository.GetCategoryByCategoryIdAsync(items.CategoryId);
-                        bill = new Bill
-                        {
-                            Date = items.Date,
-                            Name = items.Name,
-                            CategoryId = category != null ? category.Id : null,
-                            ContractId = _contract.Id,
-                            Amount = contract.Amount,
-                            LeftAmount = contract.Amount,
-                        };
-                        await _billRepository.CreateBillAsync(bill);
-                    }
-                }
-
-                
             }
             catch (DbUpdateConcurrencyException)
             {
