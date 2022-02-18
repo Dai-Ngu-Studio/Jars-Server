@@ -90,11 +90,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -126,11 +134,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return Conflict();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return Conflict();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -167,11 +183,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -181,6 +205,11 @@ namespace JARS_API.Controllers
                 }
             }
             return Unauthorized();
+        }
+
+        private bool ScheduleTypeExists(int id)
+        {
+            return _scheduleTypeRepository.GetAsync(id) != null;
         }
     }
 }
