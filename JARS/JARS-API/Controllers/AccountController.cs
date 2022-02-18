@@ -34,7 +34,6 @@ namespace JARS_API.Controllers
         public async Task<ActionResult<List<Account>>> GetList([FromHeader(Name = "Authorization")] string authorization,
             [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null && email != null && displayName != null)
             {
@@ -64,7 +63,6 @@ namespace JARS_API.Controllers
             [FromHeader(Name = "Authorization")] string authorization,
             string id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -83,7 +81,8 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Update account with UID. Only the owner of the account is authorized to use this method.
+        /// Update account with UID. Only the owner of the account/admin is authorized to use this method.
+        /// Only admin is allowed to change the role of an account. Admin can't change their own role.
         /// </summary>
         /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
@@ -93,14 +92,37 @@ namespace JARS_API.Controllers
         [Authorize]
         public async Task<IActionResult> PutAccount([FromHeader(Name = "Authorization")] string authorization, string id, Account account)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                if (id.Equals(account.Id))
+                var user = await _accountRepository.GetAsync(uid);
+                var existedAccount = await _accountRepository.GetAsync(id);
+                if (uid.Equals(id) || (user != null && user.IsAdmin))
                 {
                     try
                     {
+                        if (existedAccount == null)
+                        {
+                            return BadRequest();
+                        }
+                        // check if role was changed
+                        if (account.IsAdmin != existedAccount.IsAdmin)
+                        {
+                            if (user == null)
+                            {
+                                return Unauthorized();
+                            }
+                            // check if user is not admin
+                            if (!user.IsAdmin)
+                            {
+                                return Unauthorized();
+                            }
+                            // check if user is changing role of self
+                            if (account.Id.Equals(user.Id))
+                            {
+                                return BadRequest("User not permitted to change role of self.");
+                            }
+                        }
                         await _accountRepository.UpdateAsync(account);
                         return Ok(account);
                     }
@@ -133,7 +155,6 @@ namespace JARS_API.Controllers
         [Authorize]
         public async Task<ActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -178,7 +199,6 @@ namespace JARS_API.Controllers
         [Authorize]
         public async Task<ActionResult> Login([FromHeader(Name = "Authorization")] string authorization)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -235,37 +255,37 @@ namespace JARS_API.Controllers
             return Unauthorized();
         }
 
-        /// <summary>
-        /// This method is used to verify if a token is valid. It should only be used in development.
-        /// </summary>
-        /// <param name="json">The body of the request should have Content-Type 'application/json', the key "token" with the token as the value.</param>
-        /// <returns>
-        /// <para>200 OK if token is valid</para>
-        /// <para>401 BAD REQUEST if token is invalid</para>
-        /// </returns>
-        [HttpPost("verify-token")]
-        public async Task<ActionResult> VerifyToken([FromBody] JsonElement json)
-        {
-            var auth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
-            string? token = json.GetProperty("token").GetString();
-            try
-            {
-                var response = await auth.VerifyIdTokenAsync(token);
-                if (response != null)
-                {
-                    string uid = ((FirebaseToken)response).Uid;
-                    return Ok();
-                }
-            }
-            catch (FirebaseAuthException)
-            {
-                return BadRequest("Invalid token. The token might have expired.");
-            }
-            catch (Exception)
-            {
-                return BadRequest();
-            }
-            return BadRequest();
-        }
+        ///// <summary>
+        ///// This method is used to verify if a token is valid. It should only be used in development.
+        ///// </summary>
+        ///// <param name="json">The body of the request should have Content-Type 'application/json', the key "token" with the token as the value.</param>
+        ///// <returns>
+        ///// <para>200 OK if token is valid</para>
+        ///// <para>401 BAD REQUEST if token is invalid</para>
+        ///// </returns>
+        //[HttpPost("verify-token")]
+        //public async Task<ActionResult> VerifyToken([FromBody] JsonElement json)
+        //{
+        //    var auth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
+        //    string? token = json.GetProperty("token").GetString();
+        //    try
+        //    {
+        //        var response = await auth.VerifyIdTokenAsync(token);
+        //        if (response != null)
+        //        {
+        //            string uid = ((FirebaseToken)response).Uid;
+        //            return Ok();
+        //        }
+        //    }
+        //    catch (FirebaseAuthException)
+        //    {
+        //        return BadRequest("Invalid token. The token might have expired.");
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    return BadRequest();
+        //}
     }
 }
