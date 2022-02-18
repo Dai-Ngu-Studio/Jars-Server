@@ -35,9 +35,8 @@ namespace JARS_API.Controllers
                 Name = categoryWallet.Name,
                 CurrentCategoryLevel = categoryWallet.CurrentCategoryLevel,
                 ParentCategoryId = categoryWallet.ParentCategoryId,
-                //WalletId = categoryWallet.WalletId,
             };
-            await repository.AddCategoryWallet(categoryWallet);
+            await repository.AddCategoryWallet(_categoryWallet);
         }
 
         //PUT /wallets/{id}
