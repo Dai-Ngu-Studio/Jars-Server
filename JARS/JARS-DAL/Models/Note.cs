@@ -20,8 +20,9 @@ namespace JARS_DAL.Models
         public string? Image { get; set; }
         public int? TransactionId { get; set; }
         public int? ContractId { get; set; }
-
+        [JsonIgnore]
         public virtual Contract? Contract { get; set; }
+        [JsonIgnore]
         public virtual Transaction? Transaction { get; set; }
 
         [JsonIgnore]
