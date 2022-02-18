@@ -35,6 +35,7 @@ builder.Services.AddSwaggerGen(options =>
     // Allows summary/documentation for API endpoints.
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.EnableAnnotations();
 });
 FirebaseApp.Create(new AppOptions()
 {
