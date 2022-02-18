@@ -129,11 +129,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (!AccountExists(id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (!AccountExists(id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -173,11 +181,19 @@ namespace JARS_API.Controllers
                         catch (DbUpdateConcurrencyException)
                         {
                             // to-do logging
+                            if (!AccountExists(id))
+                            {
+                                return NotFound();
+                            }
                             return StatusCode(500);
                         }
                         catch (DbUpdateException)
                         {
                             // to-do logging
+                            if (!AccountExists(id))
+                            {
+                                return NotFound();
+                            }
                             return StatusCode(500);
                         }
                         catch (Exception ex)
@@ -253,6 +269,10 @@ namespace JARS_API.Controllers
                 }
             }
             return Unauthorized();
+        }
+
+        private bool AccountExists(string id) { 
+            return _accountRepository.GetAsync(id) != null;
         }
 
         ///// <summary>
