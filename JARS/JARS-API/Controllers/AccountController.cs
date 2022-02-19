@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace JARS_API.Controllers
 {
@@ -14,10 +13,12 @@ namespace JARS_API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountRepository _accountRepository;
+        private readonly IAccountDeviceRepository _accountDeviceRepository;
 
-        public AccountController(IAccountRepository accountRepository)
+        public AccountController(IAccountRepository accountRepository, IAccountDeviceRepository accountDeviceRepository)
         {
             _accountRepository = accountRepository;
+            _accountDeviceRepository = accountDeviceRepository;
         }
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Get account with UID. Only the owner of the account/admin is authorized to use this method.
+        /// Get account with UID. Only the owner of the account or admin is authorized to use this method.
         /// </summary>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
@@ -79,6 +80,7 @@ namespace JARS_API.Controllers
         /// <summary>
         /// Update account with UID. Only the owner of the account or admin is authorized to use this method.
         /// Only admin is allowed to change the role of an account. Admin can't change their own role.
+        /// "isAdmin" should be false if no role change is desired.
         /// </summary>
         /// <param name="id">UID of account</param>
         /// <param name="account">Account in JSON format</param>
@@ -203,10 +205,11 @@ namespace JARS_API.Controllers
         /// <summary>
         /// This method is used for signing in/creating an account.
         /// </summary>
+        /// <param name="FcmToken">Device registration token</param>
         /// <returns></returns>
         [HttpPost("login")]
         [Authorize]
-        public async Task<ActionResult> Login()
+        public async Task<ActionResult> Login([FromHeader] string FcmToken)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -215,13 +218,47 @@ namespace JARS_API.Controllers
                 Account? account = await _accountRepository.GetAsync(uid);
                 if (account != null)
                 {
-                    Console.WriteLine($"Accounts: User {uid} had already created an account.");
-                    UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-                    bool isUserRecordExisted = userRecord != null;
-                    DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
-                    account.LastLoginDate = tokenCreatedTime;
-                    await _accountRepository.UpdateAsync(account);
-                    return Ok(account);
+                    try
+                    {
+                        Console.WriteLine($"Accounts: User {uid} had already created an account.");
+                        UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+                        bool isUserRecordExisted = userRecord != null;
+                        DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                        account.LastLoginDate = tokenCreatedTime;
+                        await _accountRepository.UpdateAsync(account);
+                        AccountDevice? accountDevice = await _accountDeviceRepository.GetAsync(FcmToken);
+                        if (accountDevice != null)
+                        {
+                            accountDevice.LastActiveDate = DateTime.Now;
+                            await _accountDeviceRepository.UpdateAsync(accountDevice);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                            AccountDevice newAccountDevice = new AccountDevice
+                            {
+                                FcmToken = FcmToken,
+                                AccountId = account.Id,
+                                LastActiveDate = DateTime.Now,
+                            };
+                            await _accountDeviceRepository.AddAsync(newAccountDevice);
+                        }
+                        return Ok(account);
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex);
+                    }
                 }
                 else
                 {
@@ -238,11 +275,20 @@ namespace JARS_API.Controllers
                         {
                             Id = uid,
                             DisplayName = displayName,
+                            IsAdmin = false,
                             Email = email,
                             PhotoUrl = photoUrl,
                             LastLoginDate = tokenCreatedTime,
                         };
                         await _accountRepository.AddAsync(newAccount);
+                        Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                        AccountDevice newAccountDevice = new AccountDevice
+                        {
+                            FcmToken = FcmToken,
+                            AccountId = newAccount.Id,
+                            LastActiveDate = DateTime.Now,
+                        };
+                        await _accountDeviceRepository.AddAsync(newAccountDevice);
                         return Ok(newAccount);
                     }
                     catch (DbUpdateConcurrencyException)
@@ -264,7 +310,8 @@ namespace JARS_API.Controllers
             return Unauthorized();
         }
 
-        private bool AccountExists(string id) { 
+        private bool AccountExists(string id)
+        {
             return _accountRepository.GetAsync(id) != null;
         }
 

@@ -68,6 +68,7 @@ namespace JARS_DAL.DAO
             {
                 var jarsDB = new JarsDatabaseContext();
                 var account = await jarsDB.Accounts
+                    .Include(account => account.AccountDevices)
                     .Include(account => account.Wallets)
                     .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions).ThenInclude(transaction => transaction.Note)
                     .Include(account => account.Contracts).ThenInclude(contract => contract.Bills).ThenInclude(bill => bill.BillDetails)
