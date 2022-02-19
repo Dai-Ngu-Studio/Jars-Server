@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/Wallets")]
+    [Route("api/v1/wallets")]
     [ApiController]
     public class WalletController : ControllerBase
     {
@@ -23,10 +23,9 @@ namespace JARS_API.Controllers
         /// <summary>
         /// This method will return list of wallets upon accountId
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
-        public async Task<IEnumerable<Wallet>> GetWallets([FromHeader(Name = "Authorization")] string authorization)
+        public async Task<IEnumerable<Wallet>> GetWallets()
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;           
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
