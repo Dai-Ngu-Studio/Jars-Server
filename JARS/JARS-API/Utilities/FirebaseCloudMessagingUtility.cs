@@ -8,7 +8,7 @@ namespace JARS_API.Utilities
         /// Sends a message to the FCM service for it to be delivered to the client app.
         /// </summary>
         /// <param name="message">Message must include a FcmToken.</param>
-        public static async void SendMessageAsync(Message message)
+        public static async Task SendMessageAsync(Message message)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace JARS_API.Utilities
         /// This is the preferred method for sending multiple messages efficiently.
         /// </summary>
         /// <param name="messages">Each Message must include a FcmToken.</param>
-        public static async void SendMessagesAsync(List<Message> messages)
+        public static async Task SendMessagesAsync(List<Message> messages)
         {
             try
             {
