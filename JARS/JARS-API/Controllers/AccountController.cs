@@ -5,25 +5,25 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/accounts")]
     [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly IAccountRepository _accountRepository;
+        private readonly IAccountDeviceRepository _accountDeviceRepository;
 
-        public AccountController(IAccountRepository accountRepository)
+        public AccountController(IAccountRepository accountRepository, IAccountDeviceRepository accountDeviceRepository)
         {
             _accountRepository = accountRepository;
+            _accountDeviceRepository = accountDeviceRepository;
         }
 
         /// <summary>
         /// Get accounts with optional queries. Only the admin is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
         /// <param name="size">Maximum number of results to return. Default value: 20</param>
         /// <param name="email">Optional filter for account's email. Default value: ""</param>
@@ -31,7 +31,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<Account>>> GetList([FromHeader(Name = "Authorization")] string authorization,
+        public async Task<ActionResult<List<Account>>> GetList(
             [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -52,16 +52,13 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Get account with UID. Only the owner of the account/admin is authorized to use this method.
+        /// Get account with UID. Only the owner of the account or admin is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<Account>> GetAccount(
-            [FromHeader(Name = "Authorization")] string authorization,
-            string id)
+        public async Task<ActionResult<Account>> GetAccount(string id)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -81,16 +78,16 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Update account with UID. Only the owner of the account/admin is authorized to use this method.
+        /// Update account with UID. Only the owner of the account or admin is authorized to use this method.
         /// Only admin is allowed to change the role of an account. Admin can't change their own role.
+        /// "isAdmin" should be false if no role change is desired.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <param name="account">Account in JSON format</param>
         /// <returns></returns>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutAccount([FromHeader(Name = "Authorization")] string authorization, string id, Account account)
+        public async Task<IActionResult> PutAccount(string id, Account account)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -154,14 +151,13 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Erase all data of an account. Only the owner of the account is authorized to use this method.
+        /// Erase all data of account with UID. Only the owner of the account is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<ActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
+        public async Task<ActionResult> DeleteAccount(string id)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -209,32 +205,66 @@ namespace JARS_API.Controllers
         /// <summary>
         /// This method is used for signing in/creating an account.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
+        /// <param name="FcmToken">Device registration token</param>
         /// <returns></returns>
         [HttpPost("login")]
         [Authorize]
-        public async Task<ActionResult> Login([FromHeader(Name = "Authorization")] string authorization)
+        public async Task<ActionResult> Login([FromHeader] string FcmToken)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                Console.WriteLine($"api/Account/login: Authorized user with UID: {uid}");
+                Console.WriteLine($"Accounts: Authorized user with UID: {uid}");
                 Account? account = await _accountRepository.GetAsync(uid);
                 if (account != null)
                 {
-                    Console.WriteLine($"api/Account/login: User {uid} had already created an account.");
-                    UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
-                    bool isUserRecordExisted = userRecord != null;
-                    DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
-                    account.LastLoginDate = tokenCreatedTime;
-                    await _accountRepository.UpdateAsync(account);
-                    return Ok(account);
+                    try
+                    {
+                        Console.WriteLine($"Accounts: User {uid} had already created an account.");
+                        UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+                        bool isUserRecordExisted = userRecord != null;
+                        DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                        account.LastLoginDate = tokenCreatedTime;
+                        await _accountRepository.UpdateAsync(account);
+                        AccountDevice? accountDevice = await _accountDeviceRepository.GetAsync(FcmToken);
+                        if (accountDevice != null)
+                        {
+                            accountDevice.LastActiveDate = DateTime.Now;
+                            await _accountDeviceRepository.UpdateAsync(accountDevice);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                            AccountDevice newAccountDevice = new AccountDevice
+                            {
+                                FcmToken = FcmToken,
+                                AccountId = account.Id,
+                                LastActiveDate = DateTime.Now,
+                            };
+                            await _accountDeviceRepository.AddAsync(newAccountDevice);
+                        }
+                        return Ok(account);
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // to-do logging
+                        return StatusCode(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex);
+                    }
                 }
                 else
                 {
                     try
                     {
-                        Console.WriteLine($"api/Account/login: Creating account for user {uid} ...");
+                        Console.WriteLine($"Accounts: Creating account for user {uid} ...");
                         UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
                         bool isUserRecordExisted = userRecord != null;
                         string? displayName = isUserRecordExisted ? userRecord?.DisplayName : uid;
@@ -245,11 +275,20 @@ namespace JARS_API.Controllers
                         {
                             Id = uid,
                             DisplayName = displayName,
+                            IsAdmin = false,
                             Email = email,
                             PhotoUrl = photoUrl,
                             LastLoginDate = tokenCreatedTime,
                         };
                         await _accountRepository.AddAsync(newAccount);
+                        Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                        AccountDevice newAccountDevice = new AccountDevice
+                        {
+                            FcmToken = FcmToken,
+                            AccountId = newAccount.Id,
+                            LastActiveDate = DateTime.Now,
+                        };
+                        await _accountDeviceRepository.AddAsync(newAccountDevice);
                         return Ok(newAccount);
                     }
                     catch (DbUpdateConcurrencyException)
@@ -271,7 +310,8 @@ namespace JARS_API.Controllers
             return Unauthorized();
         }
 
-        private bool AccountExists(string id) { 
+        private bool AccountExists(string id)
+        {
             return _accountRepository.GetAsync(id) != null;
         }
 

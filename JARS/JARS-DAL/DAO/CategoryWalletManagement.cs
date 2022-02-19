@@ -53,18 +53,14 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.Message);
-            }
-            
+            }        
         }
         public async  Task AddCategoryWallet(CategoryWallet CategoryWallet)
         {   
             try
             {
                 var jarDB = new JarsDatabaseContext();
-                
-                
                 jarDB.CategoryWallets.Add(CategoryWallet);             
                 await jarDB.SaveChangesAsync();
                 int cateNum = await jarDB.CategoryWallets.CountAsync();
@@ -81,8 +77,6 @@ namespace JARS_DAL.DAO
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-
-
             }
         }
         public async Task UpdateCategoryWallet (CategoryWallet CategoryWallet)

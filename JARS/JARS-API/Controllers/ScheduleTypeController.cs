@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/schedule-types")]
     [ApiController]
     public class ScheduleTypeController : ControllerBase
     {
@@ -22,10 +22,8 @@ namespace JARS_API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<ScheduleType>>> GetList(
-            [FromHeader(Name = "Authorization")] string authorization)
+        public async Task<ActionResult<List<ScheduleType>>> GetList()
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -45,10 +43,8 @@ namespace JARS_API.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<ScheduleType>> GetScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id)
+        public async Task<ActionResult<ScheduleType>> GetScheduleType(int id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -68,10 +64,8 @@ namespace JARS_API.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id, ScheduleType scheduleType)
+        public async Task<IActionResult> PutScheduleType(int id, ScheduleType scheduleType)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -116,10 +110,8 @@ namespace JARS_API.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<ScheduleType>> PostScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, ScheduleType scheduleType)
+        public async Task<ActionResult<ScheduleType>> PostScheduleType(ScheduleType scheduleType)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -160,10 +152,8 @@ namespace JARS_API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<ActionResult> DeleteScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id)
+        public async Task<ActionResult> DeleteScheduleType(int id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {

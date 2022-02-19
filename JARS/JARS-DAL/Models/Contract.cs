@@ -27,7 +27,6 @@ namespace JARS_DAL.Models
 
         [JsonIgnore]
         public virtual Account? Account { get; set; }
-        [JsonIgnore]
         public virtual Note? Note { get; set; }
         [JsonIgnore]
         public virtual ScheduleType? ScheduleType { get; set; }
