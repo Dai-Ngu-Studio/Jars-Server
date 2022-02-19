@@ -9,97 +9,90 @@ namespace JARS_API.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/bills")]
     public class BillController : ControllerBase
     {
         private readonly IBillRepository _repository;
         private readonly IBillDetailRepository _billDetailRepository;
-        private readonly IContractRepository _contractRepository;
+        private readonly IWalletReposiotry _walletReposiotry;
+        private readonly ITransactionRepository _transactionRepository;
         private readonly ICategoryRepository _categoryRepository;
 
         public BillController(IBillRepository repository, IBillDetailRepository billDetailRepository, 
-            IContractRepository contractRepository, ICategoryRepository categoryRepository)
+            IWalletReposiotry walletReposiotry, ICategoryRepository categoryRepository, ITransactionRepository transactionRepository)
         {
             _repository = repository;
             _billDetailRepository = billDetailRepository;
-            _contractRepository = contractRepository;
+            _walletReposiotry = walletReposiotry;
             _categoryRepository = categoryRepository;
+            _transactionRepository = transactionRepository;
         }
 
-        //[HttpPost("?contract_id={contractId}")]
+        //[HttpPost("?category_id={categoryId}")]
         [HttpPost]
-        public async Task<ActionResult> CreateBillForContract([FromQuery]int contract_id,
-             [FromQuery] int category_id, Bill bill)
+        public async Task<ActionResult> CreateBill(Bill bill)
         {
-            var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
-            var category = await _categoryRepository.GetCategoryByCategoryIdAsync(category_id);
-
-            if (contract != null)
+            var category = await _categoryRepository.GetCategoryByCategoryIdAsync(bill.CategoryId);
+            if (bill.BillDetails.Count > 0)
             {
-                if (bill.BillDetails.Count > 0)
+                Bill _bill = new Bill
                 {
-                    Bill _bill = new Bill
+                    Date = bill.Date,
+                    Name = bill.Name,
+                    CategoryId = category != null ? category.Id : null,
+                };
+
+                await _repository.CreateBillAsync(_bill);
+                foreach (var item in bill.BillDetails)
+                {
+                    BillDetail billDetail = new BillDetail
                     {
-                        Date = bill.Date,
-                        Name = bill.Name,
-                        CategoryId = category != null ? category.Id : null,
-                        ContractId = contract.Id,
+                        ItemName = item.ItemName,
+                        Price = item.Price,
+                        Quantity = item.Quantity,
+                        BillId = _bill.Id,
                     };
+                    await _billDetailRepository.CreateBillDetailAsync(billDetail);
+                }
 
-                    await _repository.CreateBillAsync(_bill);
-                    foreach (var item in bill.BillDetails)
+                var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id, GetCurrentUID());
+                var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id, GetCurrentUID());
+                decimal? amount = 0;
+
+                if (searchBillDetails != null && searchBill != null)
+                {
+                    foreach (var item in searchBillDetails)
                     {
-                        BillDetail billDetail = new BillDetail
-                        {
-                            ItemName = item.ItemName,
-                            Price = item.Price,
-                            Quantity = item.Quantity,
-                            BillId = _bill.Id,
-                        };
-                        await _billDetailRepository.CreateBillDetailAsync(billDetail);
+                        amount += item.Price * item.Quantity;
                     }
-
-                    var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id, GetCurrentUID());
-                    var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id, GetCurrentUID());
-                    decimal? amount = 0;
-
-                    if (searchBillDetails != null && searchBill != null)
+                    _bill = new Bill
                     {
-                        foreach (var item in searchBillDetails)
-                        {
-                            amount += item.Price * item.Quantity;
-                        }
-                        _bill = new Bill
-                        {
-                            Id = searchBill.Id,
-                            Date = searchBill.Date,
-                            Name = searchBill.Name,
-                            LeftAmount = amount,
-                            Amount = amount,
-                            ContractId = contract.Id,
-                        };
-                        await _repository.UpdateBillAsync(_bill);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
-
-                    return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
+                        Id = searchBill.Id,
+                        Date = searchBill.Date,
+                        Name = searchBill.Name,
+                        LeftAmount = amount,
+                        Amount = amount,
+                    };
+                    await _repository.UpdateBillAsync(_bill);
                 }
                 else
                 {
-                    await _repository.CreateBillAsync(bill);
-                    return CreatedAtAction("GetBill", new { id = bill.Id }, bill);
+                    return NotFound();
                 }
+
+                return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
             }
-            return NotFound();
+            else
+            {
+                await _repository.CreateBillAsync(bill);
+                return CreatedAtAction("GetBill", new { id = bill.Id }, bill);
+            }
         }           
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateBill(int id, Bill bill)
+        [HttpPut]
+        public async Task<ActionResult> UpdateBill([FromQuery]int bill_id, [FromQuery]int wallet_id, Bill bill)
         {
-            var result = await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
+            var result = await _repository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
             if (result == null)
             {
                 return BadRequest();
@@ -109,9 +102,9 @@ namespace JARS_API.Controllers
                 decimal? leftAmount = 0;
                 if (bill.LeftAmount != null)
                 {
-                    leftAmount = bill.LeftAmount - result.LeftAmount;
+                    leftAmount = result.LeftAmount - bill.LeftAmount;
                     if (leftAmount < 0)
-                        return BadRequest("left amount below zero");
+                        leftAmount = 0;
                 } else
                 {
                     leftAmount = result.LeftAmount;
@@ -128,9 +121,25 @@ namespace JARS_API.Controllers
                     ContractId = result.ContractId,
                 };
                 await _repository.UpdateBillAsync(_bill);
+                
+                if (result.LeftAmount != leftAmount)
+                {
+                    var walletOwner = await _walletReposiotry.GetWallet(wallet_id);
+
+                    if (walletOwner == null)
+                        return NotFound(); 
+                    Transaction transaction = new Transaction
+                    {
+                        WalletId = walletOwner.Id,
+                        TransactionDate = DateTime.Now,
+                        BillId = _bill.Id,
+                        Amount = bill.LeftAmount,
+                    };
+                    await _transactionRepository.Add(transaction);
+                }
             }
             catch (DbUpdateConcurrencyException)
-            {
+            {             
                 if (_repository.GetBillByBillIdAsync(bill.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
@@ -176,7 +185,7 @@ namespace JARS_API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Bill>>> GetAllBillsForContract([FromQuery] int contract_id)
         {
-            var result = await _repository.GetBillByContractIdAsync(contract_id, GetCurrentUID());
+            var result = await _repository.GetAllBillByContractIdAsync(contract_id, GetCurrentUID());
             return Ok(result);
         }
 

@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace JARS_API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/billdetails")]
     [Authorize]
     public class BillDetailController : ControllerBase
     {

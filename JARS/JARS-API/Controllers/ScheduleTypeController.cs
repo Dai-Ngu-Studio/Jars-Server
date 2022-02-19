@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/schedule-types")]
     [ApiController]
     public class ScheduleTypeController : ControllerBase
     {
@@ -22,10 +22,8 @@ namespace JARS_API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<ScheduleType>>> GetList(
-            [FromHeader(Name = "Authorization")] string authorization)
+        public async Task<ActionResult<List<ScheduleType>>> GetList()
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -45,10 +43,8 @@ namespace JARS_API.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<ScheduleType>> GetScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id)
+        public async Task<ActionResult<ScheduleType>> GetScheduleType(int id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -68,10 +64,8 @@ namespace JARS_API.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id, ScheduleType scheduleType)
+        public async Task<IActionResult> PutScheduleType(int id, ScheduleType scheduleType)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -90,11 +84,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return NotFound();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -108,10 +110,8 @@ namespace JARS_API.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<ScheduleType>> PostScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, ScheduleType scheduleType)
+        public async Task<ActionResult<ScheduleType>> PostScheduleType(ScheduleType scheduleType)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -126,11 +126,19 @@ namespace JARS_API.Controllers
                     catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
+                        if (ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return Conflict();
+                        }
                         return StatusCode(500);
                     }
                     catch (DbUpdateException)
                     {
                         // to-do logging
+                        if (ScheduleTypeExists(scheduleType.Id))
+                        {
+                            return Conflict();
+                        }
                         return StatusCode(500);
                     }
                     catch (Exception ex)
@@ -144,10 +152,8 @@ namespace JARS_API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<ActionResult> DeleteScheduleType(
-            [FromHeader(Name = "Authorization")] string authorization, int id)
+        public async Task<ActionResult> DeleteScheduleType(int id)
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
@@ -155,31 +161,45 @@ namespace JARS_API.Controllers
                 if (user != null && user.IsAdmin)
                 {
                     ScheduleType? scheduleType = await _scheduleTypeRepository.GetAsync(id);
-                    if (scheduleType != null)
+                    if (scheduleType == null)
                     {
-                        try
+                        return BadRequest();
+                    }
+                    try
+                    {
+                        await _scheduleTypeRepository.DeleteAsync(scheduleType);
+                        return Ok();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
                         {
-                            await _scheduleTypeRepository.DeleteAsync(scheduleType);
-                            return Ok();
+                            return NotFound();
                         }
-                        catch (DbUpdateConcurrencyException)
+                        return StatusCode(500);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // to-do logging
+                        if (!ScheduleTypeExists(scheduleType.Id))
                         {
-                            // to-do logging
-                            return StatusCode(500);
+                            return NotFound();
                         }
-                        catch (DbUpdateException)
-                        {
-                            // to-do logging
-                            return StatusCode(500);
-                        }
-                        catch (Exception ex)
-                        {
-                            return BadRequest(ex);
-                        }
+                        return StatusCode(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex);
                     }
                 }
             }
             return Unauthorized();
+        }
+
+        private bool ScheduleTypeExists(int id)
+        {
+            return _scheduleTypeRepository.GetAsync(id) != null;
         }
     }
 }

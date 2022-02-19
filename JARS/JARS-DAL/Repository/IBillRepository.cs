@@ -9,7 +9,7 @@ namespace JARS_DAL.Repository
 {
     public interface IBillRepository
     {
-        Task<IReadOnlyList<Bill>> GetBillByContractIdAsync(int? contractId, string uid);
+        Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int? contractId, string uid);
         Task<Bill> GetBillByBillIdAsync(int? billId, string uid);
         Task UpdateBillAsync(Bill bill);
         Task CreateBillAsync(Bill bill);
