@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/accounts")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -23,7 +23,6 @@ namespace JARS_API.Controllers
         /// <summary>
         /// Get accounts with optional queries. Only the admin is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
         /// <param name="size">Maximum number of results to return. Default value: 20</param>
         /// <param name="email">Optional filter for account's email. Default value: ""</param>
@@ -31,7 +30,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<Account>>> GetList([FromHeader(Name = "Authorization")] string authorization,
+        public async Task<ActionResult<List<Account>>> GetList(
             [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -54,14 +53,11 @@ namespace JARS_API.Controllers
         /// <summary>
         /// Get account with UID. Only the owner of the account/admin is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<Account>> GetAccount(
-            [FromHeader(Name = "Authorization")] string authorization,
-            string id)
+        public async Task<ActionResult<Account>> GetAccount(string id)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -84,13 +80,12 @@ namespace JARS_API.Controllers
         /// Update account with UID. Only the owner of the account/admin is authorized to use this method.
         /// Only admin is allowed to change the role of an account. Admin can't change their own role.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <param name="account">Account in JSON format</param>
         /// <returns></returns>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutAccount([FromHeader(Name = "Authorization")] string authorization, string id, Account account)
+        public async Task<IActionResult> PutAccount(string id, Account account)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -156,12 +151,11 @@ namespace JARS_API.Controllers
         /// <summary>
         /// Erase all data of an account. Only the owner of the account is authorized to use this method.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<ActionResult> DeleteAccount([FromHeader(Name = "Authorization")] string authorization, string id)
+        public async Task<ActionResult> DeleteAccount(string id)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -209,20 +203,19 @@ namespace JARS_API.Controllers
         /// <summary>
         /// This method is used for signing in/creating an account.
         /// </summary>
-        /// <param name="authorization">Format: Bearer (token)</param>
         /// <returns></returns>
         [HttpPost("login")]
         [Authorize]
-        public async Task<ActionResult> Login([FromHeader(Name = "Authorization")] string authorization)
+        public async Task<ActionResult> Login()
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                Console.WriteLine($"api/Account/login: Authorized user with UID: {uid}");
+                Console.WriteLine($"Accounts: Authorized user with UID: {uid}");
                 Account? account = await _accountRepository.GetAsync(uid);
                 if (account != null)
                 {
-                    Console.WriteLine($"api/Account/login: User {uid} had already created an account.");
+                    Console.WriteLine($"Accounts: User {uid} had already created an account.");
                     UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
                     bool isUserRecordExisted = userRecord != null;
                     DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
@@ -234,7 +227,7 @@ namespace JARS_API.Controllers
                 {
                     try
                     {
-                        Console.WriteLine($"api/Account/login: Creating account for user {uid} ...");
+                        Console.WriteLine($"Accounts: Creating account for user {uid} ...");
                         UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
                         bool isUserRecordExisted = userRecord != null;
                         string? displayName = isUserRecordExisted ? userRecord?.DisplayName : uid;
