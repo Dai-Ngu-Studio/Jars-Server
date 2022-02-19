@@ -20,6 +20,8 @@ namespace JARS_DAL.Models
         public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public string? PhotoUrl { get; set; }
+
+        [SwaggerSchema(ReadOnly = true)]
         public DateTime? LastLoginDate { get; set; }
 
         [JsonIgnore]
