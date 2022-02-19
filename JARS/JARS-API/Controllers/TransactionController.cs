@@ -9,7 +9,7 @@ using System.Text;
 
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/transactions")]
     [Authorize]
     [ApiController]
     public class TransactionController : ControllerBase
@@ -19,22 +19,6 @@ namespace JARS_API.Controllers
         {
             _transactionRep = repository;
         }
-        // GET: api/Transaction
-        [HttpGet("files")]
-        public async Task<FileResult> GetFileTransactions()
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine("Amount,Wallet name,Date");
-
-            var list = await _transactionRep.GetTransactions(GetCurrentUID());
-            foreach (var transaction in list)
-            {
-                builder.AppendLine($"{transaction.Amount},{transaction.Wallet.Name},{transaction.TransactionDate}");
-            }
-            return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "Transaction_log.csv");
-
-        }
-
         // GET: api/Transaction
         [HttpGet]
         public async Task<IEnumerable<Transaction>> GetTransactions()
@@ -119,7 +103,6 @@ namespace JARS_API.Controllers
 
         private string GetCurrentUID()
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }

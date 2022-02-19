@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace JARS_DAL.Models
 {
@@ -11,7 +12,7 @@ namespace JARS_DAL.Models
         {
             Notes = new HashSet<Note>();
         }
-
+        [SwaggerSchema(ReadOnly = true)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int? WalletId { get; set; }
