@@ -15,15 +15,13 @@ namespace JARS_API.Controllers
         private readonly IContractRepository _repository;
         private readonly IBillRepository _billRepository;
         private readonly INoteRepository _noteRepository;
-        private readonly ICategoryRepository _categoryRepository;
 
         public ContractController(IContractRepository repository, IBillRepository billRepository,
-            INoteRepository noteRepository, ICategoryRepository categoryRepository)
+            INoteRepository noteRepository)
         {
             _repository = repository;
             _billRepository = billRepository;
             _noteRepository = noteRepository;
-            _categoryRepository = categoryRepository;
         }
 
         [HttpGet]
@@ -60,6 +58,8 @@ namespace JARS_API.Controllers
                         AddedDate = contract.Note.AddedDate,
                         Comments = contract.Note.Comments,
                         Image = contract.Note.Image,
+                        Latitude = contract.Note.Latitude,
+                        Longitude = contract.Note.Longitude,
                     };
                     await _noteRepository.Add(note);
                 }
@@ -69,21 +69,47 @@ namespace JARS_API.Controllers
                     StartDate = contract.StartDate,
                     EndDate = contract.EndDate,
                     Amount = contract.Amount,
+                    Name = contract.Name,
+                    ScheduleTypeId = contract.ScheduleTypeId,
                     NoteId = note.Id > 0 ? note.Id : null,
                     AccountId = GetCurrentUID(),
                 };
                 await _repository.CreateContractAsync(_contract);
 
-                var createdContract = _repository.GetContractByContractIdAsync(_contract.Id, GetCurrentUID());
-                Note _note = new Note
+                var createdContract = await _repository.GetContractByContractIdAsync(_contract.Id, GetCurrentUID());
+                var createdNote = await _noteRepository.GetNote(note.Id);
+                if (createdContract != null && createdNote != null)
                 {
-                    Id = note.Id,
-                    AddedDate = note.AddedDate,
-                    Comments = note.Comments,
-                    Image = note.Image,
-                    ContractId = createdContract != null ? createdContract.Id : null,
-                };
-                await _noteRepository.Update(_note);
+                    Note _note = new Note
+                    {
+                        Id = note.Id,
+                        AddedDate = note.AddedDate,
+                        Comments = note.Comments,
+                        Image = note.Image,
+                        ContractId = createdContract != null ? createdContract.Id : null,
+                        Latitude = note.Latitude,
+                        Longitude = note.Longitude,
+                    };
+                    await _noteRepository.Update(_note);
+                }
+
+                if (contract.StartDate == null)
+                    return BadRequest();
+                else
+                {
+                    if (DateTime.Compare(DateTime.Today, contract.StartDate.Value.Date) == 0)
+                    {
+                        bill = new Bill
+                        {
+                            Date = _contract.StartDate,
+                            Name = _contract.Name,
+                            ContractId = _contract.Id,
+                            Amount = _contract.Amount,
+                            LeftAmount = _contract.Amount,
+                        };
+                        await _billRepository.CreateBillAsync(bill);
+                    }
+                }              
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -115,7 +141,7 @@ namespace JARS_API.Controllers
 
                 if (contract.Amount != null)
                 {
-                    var contractBills = await _billRepository.GetAllBillByContractIdAsync(id, GetCurrentUID());
+                    var contractBills = await _billRepository.GetAllBillByContractIdAsync(id);
                     foreach (var bill in contractBills)
                     {
                         if (bill.LeftAmount > 0)
@@ -148,7 +174,6 @@ namespace JARS_API.Controllers
 
         private string GetCurrentUID()
         {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
             return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }

@@ -69,18 +69,18 @@ namespace JARS_DAL.DAO
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<IReadOnlyList<BillDetail>> GetAllBillDetailWithBillIdAsync(int? billId, string uid)
+        public async Task<IReadOnlyList<BillDetail>> GetAllBillDetailWithBillIdAsync(int? billId)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.BillDetails
-                .Where(bd => bd.BillId == billId && bd.Bill.Contract.AccountId == uid)
+                .Where(bd => bd.BillId == billId)
                 .ToListAsync();
         }
-        public async Task<BillDetail> GetBillDetailAsync(int? id, string uid)
+        public async Task<BillDetail> GetBillDetailAsync(int? id)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.BillDetails
-                .SingleOrDefaultAsync(bd => bd.Id == id && bd.Bill.Contract.AccountId == uid);
+                .SingleOrDefaultAsync(bd => bd.Id == id);
         }
     }
 }

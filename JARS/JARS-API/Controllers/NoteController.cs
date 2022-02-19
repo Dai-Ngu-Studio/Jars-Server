@@ -3,16 +3,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JARS_DAL.Models;
 using JARS_DAL.Repository;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 namespace JARS_API.Controllers
 {
-    [Route("api/v1/[controller]s")]
+    [Route("api/v1/notes")]
+    [Authorize]
     [ApiController]
     public class NoteController : ControllerBase
     {
-        INoteRepository noteRepository;
-        public NoteController(INoteRepository noteRepository)
+        private readonly INoteRepository _noteRepository;
+        private readonly IContractRepository _contractRepository;
+        private readonly ITransactionRepository _transactionRepository;
+
+        public NoteController(INoteRepository noteRepository, IContractRepository contractRepository, 
+            ITransactionRepository transactionRepository)
         {
-            this.noteRepository = noteRepository;
+            _noteRepository = noteRepository;
+            _contractRepository = contractRepository;
+            _transactionRepository = transactionRepository;
         }
         // GET: api/Note
         // [HttpGet]
@@ -25,7 +35,7 @@ namespace JARS_API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Note>> GetNote(int id)
         {
-            var note = await noteRepository.GetNote(id);
+            var note = await _noteRepository.GetNote(id);
             if (note == null)
             {
                 return NotFound();
@@ -39,17 +49,27 @@ namespace JARS_API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutNote(int id, Note note)
         {
-            if (id != note.Id)
+            var result = await _noteRepository.GetNote(id);
+            if (result == null)
             {
                 return BadRequest();
             }
             try
             {
-                await noteRepository.Update(note);
+                Note _note = new Note
+                {
+                    Id = result.Id,
+                    AddedDate = note.AddedDate == null ? result.AddedDate : note.AddedDate,
+                    Comments = note.Comments == null ? result.Comments : note.Comments,
+                    Image = note.Image == null ? result.Image : note.Image,
+                    Latitude = note.Latitude == null ? result.Latitude : note.Latitude,
+                    Longitude = note.Longitude == null ? result.Longitude : note.Longitude,
+                };
+                await _noteRepository.Update(_note);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (noteRepository.GetNote(note.Id) == null)
+                if (_noteRepository.GetNote(note.Id) == null)
                 {
                     return NotFound();
                 }
@@ -60,12 +80,95 @@ namespace JARS_API.Controllers
 
         // POST: api/Note
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Note>> PostNote(Note note)
+        [HttpPost("contract-note")]
+        public async Task<ActionResult<Note>> PostNoteForContract([FromQuery]int contract_id, Note note)
         {
             try
             {
-                await noteRepository.Add(note);
+                Console.WriteLine(contract_id);
+                var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
+                var result = await _noteRepository.GetNoteByContractId(contract_id);
+                if (result == null && contract != null)
+                {
+                    Note _note = new Note
+                    {
+                        AddedDate = note.AddedDate,
+                        Comments = note.Comments,
+                        Image = note.Image,
+                        Latitude = note.Latitude,
+                        Longitude = note.Longitude,
+                        ContractId = contract_id
+                    };
+                    await _noteRepository.Add(_note);
+
+                    var createdNote = await _noteRepository.GetNote(_note.Id);
+                    if (createdNote != null)
+                    {
+                        Contract _contract = new Contract
+                        {
+                            Id = contract.Id,
+                            AccountId = contract.AccountId,
+                            ScheduleTypeId = contract.ScheduleTypeId,
+                            NoteId = contract.NoteId == null ? createdNote.Id : contract.NoteId,
+                            StartDate = contract.StartDate,
+                            EndDate = contract.EndDate,
+                            Amount = contract.Amount,
+                            Name = contract.Name,
+                        };
+                        await _contractRepository.UpdateContractAsync(_contract);
+                    }
+                } else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return CreatedAtAction("GetNote", new { id = note.Id }, note);
+        }
+
+        // POST: api/Note
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("transaction-note")]
+        public async Task<ActionResult<Note>> PostNoteForTransaction([FromQuery] int transaction_id, Note note)
+        {
+            try
+            {
+                var transaction = await _transactionRepository.GetTransaction(transaction_id, GetCurrentUID());
+                var result = await _noteRepository.GetNoteByTransactionId(transaction_id);
+
+                if (result == null && transaction != null)
+                {
+                    Note _note = new Note
+                    {
+                        AddedDate = note.AddedDate,
+                        Comments = note.Comments,
+                        Image = note.Image,
+                        TransactionId = transaction_id
+                    };
+                    await _noteRepository.Add(_note);
+
+                    var createdNote = await _noteRepository.GetNote(_note.Id);
+                    if (createdNote != null)
+                    {
+                        Transaction _transaction = new Transaction
+                        {
+                            Id = transaction.Id,
+                            WalletId = transaction.Id,
+                            TransactionDate = transaction.TransactionDate,
+                            BillId = transaction.BillId,
+                            Amount = transaction.Amount,
+                            NoteId = transaction.NoteId == null ? createdNote.Id : transaction.NoteId,
+                        };
+                        await _transactionRepository.Update(_transaction);
+                    }
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -84,7 +187,7 @@ namespace JARS_API.Controllers
             };
             try
             {
-                await noteRepository.Delete(note);
+                await _noteRepository.Delete(note);
             }
             catch (Exception)
             {
@@ -92,6 +195,11 @@ namespace JARS_API.Controllers
             }
 
             return Ok(note);
+        }
+
+        private string GetCurrentUID()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

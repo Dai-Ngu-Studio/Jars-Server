@@ -14,15 +14,17 @@ namespace JARS_API.Controllers
     {
         private readonly IBillRepository _repository;
         private readonly IBillDetailRepository _billDetailRepository;
+        private readonly IContractRepository _contractRepository;
         private readonly IWalletReposiotry _walletReposiotry;
         private readonly ITransactionRepository _transactionRepository;
         private readonly ICategoryRepository _categoryRepository;
 
-        public BillController(IBillRepository repository, IBillDetailRepository billDetailRepository, 
+        public BillController(IBillRepository repository, IBillDetailRepository billDetailRepository, IContractRepository contractRepository,
             IWalletReposiotry walletReposiotry, ICategoryRepository categoryRepository, ITransactionRepository transactionRepository)
         {
             _repository = repository;
             _billDetailRepository = billDetailRepository;
+            _contractRepository = contractRepository;
             _walletReposiotry = walletReposiotry;
             _categoryRepository = categoryRepository;
             _transactionRepository = transactionRepository;
@@ -55,8 +57,8 @@ namespace JARS_API.Controllers
                     await _billDetailRepository.CreateBillDetailAsync(billDetail);
                 }
 
-                var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id, GetCurrentUID());
-                var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id, GetCurrentUID());
+                var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id);
+                var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id);
                 decimal? amount = 0;
 
                 if (searchBillDetails != null && searchBill != null)
@@ -92,11 +94,12 @@ namespace JARS_API.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateBill([FromQuery]int bill_id, [FromQuery]int wallet_id, Bill bill)
         {
-            var result = await _repository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
+            var result = await _repository.GetBillByBillIdAsync(bill_id);
             if (result == null)
             {
                 return BadRequest();
             }
+
             try
             {
                 decimal? leftAmount = 0;
@@ -140,7 +143,7 @@ namespace JARS_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {             
-                if (_repository.GetBillByBillIdAsync(bill.Id, GetCurrentUID()) == null)
+                if (_repository.GetBillByBillIdAsync(bill.Id) == null)
                 {
                     return NotFound();
                 }
@@ -158,7 +161,7 @@ namespace JARS_API.Controllers
             };
             try
             {
-                var billDetail = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(bill.Id, GetCurrentUID());
+                var billDetail = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(bill.Id);
                 if (billDetail.Count == 0)
                 {
                     await _repository.DeleteBillAsync(bill);
@@ -179,20 +182,19 @@ namespace JARS_API.Controllers
         [HttpGet("{id}")] 
         public async Task<ActionResult<Bill>> GetBill(int id)
         {
-            return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
+            return await _repository.GetBillByBillIdAsync(id);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Bill>>> GetAllBillsForContract([FromQuery] int contract_id)
-        {
-            var result = await _repository.GetAllBillByContractIdAsync(contract_id, GetCurrentUID());
-            return Ok(result);
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<List<Bill>>> GetAllBillsForContract([FromQuery] int contract_id)
+        //{
+        //    var result = await _repository.GetAllBillByContractIdAsync(contract_id);
+        //    return Ok(result);
+        //}
 
-        private string GetCurrentUID()
-        {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
-            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        }
+        //private string GetCurrentUID()
+        //{
+        //    return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //}
     }
 }

@@ -23,25 +23,20 @@ namespace JARS_DAL.DAO
                 }
             } 
         }
-        public async Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int? contractId, string uid)
+        public async Task<IReadOnlyList<Bill>> GetAllBillByContractIdAsync(int? contractId)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
-                .Where(b => b.ContractId == contractId && b.Contract.AccountId == uid)
-                .Include(bdt => bdt.BillDetails)
-                .Include(cate => cate.Category)
-                .Include(contract => contract.Contract)
+                .Where(b => b.ContractId == contractId)
                 .ToListAsync(); 
         }
 
-        public async Task<Bill> GetBillByBillIdAsync (int? id, string uid)
+        public async Task<Bill> GetBillByBillIdAsync (int? id)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
                 .Include(bdt => bdt.BillDetails)
-                .Include(bdt => bdt.Category)
-                .Include(contract => contract.Contract)
-                .FirstOrDefaultAsync(b => b.Id == id && b.Contract.AccountId == uid);
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task UpdateBillAsync(Bill bill)

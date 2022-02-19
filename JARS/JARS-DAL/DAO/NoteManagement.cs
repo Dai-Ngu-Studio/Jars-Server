@@ -45,6 +45,34 @@ public class NoteManagement
             throw;
         }
     }
+
+    public async Task<Note?> GetNoteByContractId(int? contractId)
+    {
+        try
+        {
+            var context = new JarsDatabaseContext();
+            return await context.Notes
+                .SingleOrDefaultAsync(n => n.ContractId == contractId);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<Note?> GetNoteByTransactionId(int? transactionId)
+    {
+        try
+        {
+            var context = new JarsDatabaseContext();
+            return await context.Notes
+                .SingleOrDefaultAsync(n => n.TransactionId == transactionId);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
     public async Task Add(Note note)
     {
         try
