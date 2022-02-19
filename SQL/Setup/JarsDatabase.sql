@@ -212,3 +212,19 @@ ALTER TABLE [Note]
   ADD CONSTRAINT FK_ContractID_ID_Contract FOREIGN KEY ([ContractID])
       REFERENCES [Contract](ID)
 END;
+
+IF OBJECT_ID('AccountDevice', 'U') IS NULL
+BEGIN
+  CREATE TABLE [AccountDevice]
+  (
+    [FcmToken] varchar(1000),
+    --PK--
+    [AccountID] varchar(128),
+    --FK--
+	[LastActiveDate] DateTime,
+
+    PRIMARY KEY ([FcmToken]),
+
+    FOREIGN KEY ([AccountId]) REFERENCES Account([ID]),
+  );
+END;

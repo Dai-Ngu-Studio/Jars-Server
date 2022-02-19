@@ -17,6 +17,7 @@ namespace JARS_DAL.Models
         }
 
         public virtual DbSet<Account> Accounts { get; set; } = null!;
+        public virtual DbSet<AccountDevice> AccountDevices { get; set; } = null!;
         public virtual DbSet<Bill> Bills { get; set; } = null!;
         public virtual DbSet<BillDetail> BillDetails { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
@@ -29,7 +30,7 @@ namespace JARS_DAL.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
+            string? DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer("server=db,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
@@ -52,6 +53,30 @@ namespace JARS_DAL.Models
                 entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
 
                 entity.Property(e => e.PhotoUrl).IsUnicode(false);
+            });
+
+            modelBuilder.Entity<AccountDevice>(entity =>
+            {
+                entity.HasKey(e => e.FcmToken)
+                    .HasName("PK__AccountD__F325AEE3CA6906DF");
+
+                entity.ToTable("AccountDevice");
+
+                entity.Property(e => e.FcmToken)
+                    .HasMaxLength(1000)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AccountId)
+                    .HasMaxLength(128)
+                    .IsUnicode(false)
+                    .HasColumnName("AccountID");
+
+                entity.Property(e => e.LastActiveDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountDevices)
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK__AccountDe__Accou__45F365D3");
             });
 
             modelBuilder.Entity<Bill>(entity =>
