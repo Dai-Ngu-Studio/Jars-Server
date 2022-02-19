@@ -77,7 +77,7 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Update account with UID. Only the owner of the account/admin is authorized to use this method.
+        /// Update account with UID. Only the owner of the account or admin is authorized to use this method.
         /// Only admin is allowed to change the role of an account. Admin can't change their own role.
         /// </summary>
         /// <param name="id">UID of account</param>
@@ -149,7 +149,7 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Erase all data of an account. Only the owner of the account is authorized to use this method.
+        /// Erase all data of account with UID. Only the owner of the account is authorized to use this method.
         /// </summary>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
