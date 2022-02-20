@@ -81,7 +81,6 @@ namespace JARS_API.Controllers
                 {
                     return NotFound();
                 }
-
                 return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
             }
             else
@@ -140,6 +139,7 @@ namespace JARS_API.Controllers
                     };
                     await _transactionRepository.Add(transaction);
                 }
+                return Ok(_bill);
             }
             catch (DbUpdateConcurrencyException)
             {             
@@ -148,8 +148,7 @@ namespace JARS_API.Controllers
                     return NotFound();
                 }
                 else { throw; }
-            }
-            return Ok(bill);
+            }         
         }
 
         [HttpDelete("{id}")]

@@ -87,12 +87,12 @@ namespace JARS_API.Controllers
                     ParentCategoryId = categoryFound != null ? category.ParentCategoryId : _category.Id,
                 };
                 await _repository.UpdateCategoryAsync(addParentCategoryId);
+                return CreatedAtAction("GetCategory", new { id = category.Id }, addParentCategoryId);
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
-            }
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            }           
         }
 
         [HttpDelete("{id}")]

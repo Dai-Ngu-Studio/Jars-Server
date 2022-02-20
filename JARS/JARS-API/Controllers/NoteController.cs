@@ -85,7 +85,6 @@ namespace JARS_API.Controllers
         {
             try
             {
-                Console.WriteLine(contract_id);
                 var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
                 var result = await _noteRepository.GetNoteByContractId(contract_id);
                 if (result == null && contract != null)
@@ -117,6 +116,7 @@ namespace JARS_API.Controllers
                         };
                         await _contractRepository.UpdateContractAsync(_contract);
                     }
+                    return CreatedAtAction("GetNote", new { id = note.Id }, _note);
                 } else
                 {
                     return BadRequest();
@@ -125,8 +125,7 @@ namespace JARS_API.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 throw;
-            }
-            return CreatedAtAction("GetNote", new { id = note.Id }, note);
+            }         
         }
 
         // POST: api/Note

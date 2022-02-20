@@ -81,7 +81,7 @@ namespace JARS_API.Controllers
                             Amount = amount,
                         };
                         await _billRepository.UpdateBillAsync(_bill);
-                        return CreatedAtAction("GetBillDetail", new { id = billDetail.Id }, billDetail);
+                        return CreatedAtAction("GetBillDetail", new { id = billDetail.Id }, _billDetail);
                     }
                 }
                 else
