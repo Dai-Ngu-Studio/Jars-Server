@@ -209,7 +209,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpPost("login")]
         [Authorize]
-        public async Task<ActionResult> Login([FromHeader] string FcmToken)
+        public async Task<ActionResult> Login([FromHeader] string? FcmToken)
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
@@ -226,22 +226,25 @@ namespace JARS_API.Controllers
                         DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
                         account.LastLoginDate = tokenCreatedTime;
                         await _accountRepository.UpdateAsync(account);
-                        AccountDevice? accountDevice = await _accountDeviceRepository.GetAsync(FcmToken);
-                        if (accountDevice != null)
+                        if (FcmToken != null)
                         {
-                            accountDevice.LastActiveDate = DateTime.Now;
-                            await _accountDeviceRepository.UpdateAsync(accountDevice);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Accounts: Registering new device of user {uid}");
-                            AccountDevice newAccountDevice = new AccountDevice
+                            AccountDevice? accountDevice = await _accountDeviceRepository.GetAsync(FcmToken);
+                            if (accountDevice != null)
                             {
-                                FcmToken = FcmToken,
-                                AccountId = account.Id,
-                                LastActiveDate = DateTime.Now,
-                            };
-                            await _accountDeviceRepository.AddAsync(newAccountDevice);
+                                accountDevice.LastActiveDate = DateTime.Now;
+                                await _accountDeviceRepository.UpdateAsync(accountDevice);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                                AccountDevice newAccountDevice = new AccountDevice
+                                {
+                                    FcmToken = FcmToken,
+                                    AccountId = account.Id,
+                                    LastActiveDate = DateTime.Now,
+                                };
+                                await _accountDeviceRepository.AddAsync(newAccountDevice);
+                            }
                         }
                         return Ok(account);
                     }
@@ -281,14 +284,17 @@ namespace JARS_API.Controllers
                             LastLoginDate = tokenCreatedTime,
                         };
                         await _accountRepository.AddAsync(newAccount);
-                        Console.WriteLine($"Accounts: Registering new device of user {uid}");
-                        AccountDevice newAccountDevice = new AccountDevice
+                        if (FcmToken != null)
                         {
-                            FcmToken = FcmToken,
-                            AccountId = newAccount.Id,
-                            LastActiveDate = DateTime.Now,
-                        };
-                        await _accountDeviceRepository.AddAsync(newAccountDevice);
+                            Console.WriteLine($"Accounts: Registering new device of user {uid}");
+                            AccountDevice newAccountDevice = new AccountDevice
+                            {
+                                FcmToken = FcmToken,
+                                AccountId = newAccount.Id,
+                                LastActiveDate = DateTime.Now,
+                            };
+                            await _accountDeviceRepository.AddAsync(newAccountDevice);
+                        }
                         return Ok(newAccount);
                     }
                     catch (DbUpdateConcurrencyException)
