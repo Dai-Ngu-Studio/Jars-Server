@@ -80,101 +80,90 @@ namespace JARS_API.Controllers
 
         // POST: api/Note
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("contract-note")]
-        public async Task<ActionResult<Note>> PostNoteForContract([FromQuery]int contract_id, Note note)
+        [HttpPost]
+        public async Task<ActionResult<Note>> PostNoteForContract([FromQuery]int contract_id,
+            [FromQuery] int transaction_id, Note note)
         {
             try
             {
-                Console.WriteLine(contract_id);
-                var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
-                var result = await _noteRepository.GetNoteByContractId(contract_id);
-                if (result == null && contract != null)
+                if (contract_id > 0)
                 {
-                    Note _note = new Note
+                    var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
+                    var result = await _noteRepository.GetNoteByContractId(contract_id);
+                    if (result == null && contract != null)
                     {
-                        AddedDate = note.AddedDate,
-                        Comments = note.Comments,
-                        Image = note.Image,
-                        Latitude = note.Latitude,
-                        Longitude = note.Longitude,
-                        ContractId = contract_id
-                    };
-                    await _noteRepository.Add(_note);
-
-                    var createdNote = await _noteRepository.GetNote(_note.Id);
-                    if (createdNote != null)
-                    {
-                        Contract _contract = new Contract
+                        Note _note = new Note
                         {
-                            Id = contract.Id,
-                            AccountId = contract.AccountId,
-                            ScheduleTypeId = contract.ScheduleTypeId,
-                            NoteId = contract.NoteId == null ? createdNote.Id : contract.NoteId,
-                            StartDate = contract.StartDate,
-                            EndDate = contract.EndDate,
-                            Amount = contract.Amount,
-                            Name = contract.Name,
+                            AddedDate = note.AddedDate,
+                            Comments = note.Comments,
+                            Image = note.Image,
+                            Latitude = note.Latitude,
+                            Longitude = note.Longitude,
+                            ContractId = contract_id
                         };
-                        await _contractRepository.UpdateContractAsync(_contract);
+                        await _noteRepository.Add(_note);
+
+                        var createdNote = await _noteRepository.GetNote(_note.Id);
+                        if (createdNote != null)
+                        {
+                            Contract _contract = new Contract
+                            {
+                                Id = contract.Id,
+                                AccountId = contract.AccountId,
+                                ScheduleTypeId = contract.ScheduleTypeId,
+                                NoteId = contract.NoteId == null ? createdNote.Id : contract.NoteId,
+                                StartDate = contract.StartDate,
+                                EndDate = contract.EndDate,
+                                Amount = contract.Amount,
+                                Name = contract.Name,
+                            };
+                            await _contractRepository.UpdateContractAsync(_contract);
+                        }
+                        return CreatedAtAction("GetNote", new { id = note.Id }, _note);
                     }
-                } else
-                {
-                    return BadRequest();
                 }
+
+                if (transaction_id > 0)
+                {
+                    var transaction = await _transactionRepository.GetTransaction(transaction_id, GetCurrentUID());
+                    var result = await _noteRepository.GetNoteByTransactionId(transaction_id);
+
+                    if (result == null && transaction != null)
+                    {
+                        Note _note = new Note
+                        {
+                            AddedDate = note.AddedDate,
+                            Comments = note.Comments,
+                            Image = note.Image,
+                            Latitude = note.Latitude,
+                            Longitude = note.Longitude,
+                            TransactionId = transaction_id
+                        };
+                        await _noteRepository.Add(_note);
+
+                        var createdNote = await _noteRepository.GetNote(_note.Id);
+                        if (createdNote != null)
+                        {
+                            Transaction _transaction = new Transaction
+                            {
+                                Id = transaction.Id,
+                                WalletId = transaction.Id,
+                                TransactionDate = transaction.TransactionDate,
+                                BillId = transaction.BillId,
+                                Amount = transaction.Amount,
+                                NoteId = transaction.NoteId == null ? createdNote.Id : transaction.NoteId,
+                            };
+                            await _transactionRepository.Update(_transaction);
+                        }
+                        return CreatedAtAction("GetNote", new { id = note.Id }, _note);
+                    }
+                }
+                return BadRequest();
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
-            }
-            return CreatedAtAction("GetNote", new { id = note.Id }, note);
-        }
-
-        // POST: api/Note
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("transaction-note")]
-        public async Task<ActionResult<Note>> PostNoteForTransaction([FromQuery] int transaction_id, Note note)
-        {
-            try
-            {
-                var transaction = await _transactionRepository.GetTransaction(transaction_id, GetCurrentUID());
-                var result = await _noteRepository.GetNoteByTransactionId(transaction_id);
-
-                if (result == null && transaction != null)
-                {
-                    Note _note = new Note
-                    {
-                        AddedDate = note.AddedDate,
-                        Comments = note.Comments,
-                        Image = note.Image,
-                        TransactionId = transaction_id
-                    };
-                    await _noteRepository.Add(_note);
-
-                    var createdNote = await _noteRepository.GetNote(_note.Id);
-                    if (createdNote != null)
-                    {
-                        Transaction _transaction = new Transaction
-                        {
-                            Id = transaction.Id,
-                            WalletId = transaction.Id,
-                            TransactionDate = transaction.TransactionDate,
-                            BillId = transaction.BillId,
-                            Amount = transaction.Amount,
-                            NoteId = transaction.NoteId == null ? createdNote.Id : transaction.NoteId,
-                        };
-                        await _transactionRepository.Update(_transaction);
-                    }
-                }
-                else
-                {
-                    return BadRequest();
-                }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
-            return CreatedAtAction("GetNote", new { id = note.Id }, note);
+            }         
         }
 
         // DELETE: api/Note/5

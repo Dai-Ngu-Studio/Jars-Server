@@ -109,13 +109,13 @@ namespace JARS_API.Controllers
                         };
                         await _billRepository.CreateBillAsync(bill);
                     }
-                }              
+                }
+                return CreatedAtAction("GetContract", new { id = contract.Id }, _contract);
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
-            }
-            return CreatedAtAction("GetContract", new { id = contract.Id }, contract);
+            }          
         }
 
         [HttpPut("{id}")]
