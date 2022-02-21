@@ -152,6 +152,7 @@ BEGIN
     --FK--
     [ContractID] int,
     --FK--
+	[StatusCode] int,
 
     PRIMARY KEY ([ID]),
 

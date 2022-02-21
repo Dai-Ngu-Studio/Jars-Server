@@ -20,6 +20,7 @@ namespace JARS_DAL.Models
         public decimal? LeftAmount { get; set; }
         public int? CategoryId { get; set; }
         public int? ContractId { get; set; }
+        public int? StatusCode { get; set; }
 
         [JsonIgnore]
         public virtual Category? Category { get; set; }
