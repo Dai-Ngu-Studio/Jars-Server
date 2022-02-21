@@ -13,5 +13,6 @@ namespace JARS_DAL.Repository
         Task<Contract> GetContractByContractIdAsync(int? id, string uid);
         Task CreateContractAsync(Contract contract);
         Task UpdateContractAsync(Contract contract);
+        Task<IEnumerable<Contract>> GetActiveContractsAsync(string uid);
     }
 }
