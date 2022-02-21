@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace JARS_API.Controllers
 {
     [ApiController]
-    //[Authorize]
-    [Route("api/v1/Categories")]
+    [Authorize]
+    [Route("api/v1/categories")]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _repository;
@@ -87,12 +87,12 @@ namespace JARS_API.Controllers
                     ParentCategoryId = categoryFound != null ? category.ParentCategoryId : _category.Id,
                 };
                 await _repository.UpdateCategoryAsync(addParentCategoryId);
+                return CreatedAtAction("GetCategory", new { id = category.Id }, addParentCategoryId);
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
-            }
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            }           
         }
 
         [HttpDelete("{id}")]

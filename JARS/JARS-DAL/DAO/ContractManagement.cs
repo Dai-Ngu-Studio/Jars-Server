@@ -9,10 +9,17 @@ namespace JARS_DAL.DAO
 {
     public class ContractManagement
     {
+        public const int DAILY = 1;
+        public const int WEEKLY = 2;
+        public const int MONTHLY = 3;
+
         private static ContractManagement instance = null;
         private static readonly object instanceLock = new object();
 
-        private ContractManagement() { }
+        private ContractManagement()
+        {
+        }
+
         public static ContractManagement Instance
         {
             get
@@ -23,23 +30,24 @@ namespace JARS_DAL.DAO
                     {
                         instance = new ContractManagement();
                     }
+
                     return instance;
                 }
             }
         }
+
         public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
                 .Where(c => c.AccountId == uid)
-                .Include(note => note.Note)
                 .ToListAsync();
         }
+
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Contracts
-                .Include(note => note.Note)
                 .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
         }
 
@@ -69,6 +77,61 @@ namespace JARS_DAL.DAO
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<IEnumerable<Contract>> GetActiveContractsAsync(string uid)
+        {
+            List<Contract> activeContracts;
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                activeContracts = jarsDB.Contracts
+                    .Where(c => (c.EndDate >= DateTime.Now) && (c.StartDate <= DateTime.Now))
+                    .ToList();
+                foreach (var contract in activeContracts)
+                {
+                    DateTime startDate = contract.StartDate??DateTime.Now;
+                    switch (contract.ScheduleTypeId)
+                    {
+
+                        case DAILY:
+                            await AddBillWithContract(contract);
+                            break;
+                        case WEEKLY:
+                            if (startDate.DayOfWeek == DateTime.Now.DayOfWeek)
+                            {
+                                await AddBillWithContract(contract);
+                            }
+                            break;
+                        case MONTHLY:
+                            if (startDate.Day == DateTime.Now.Day)
+                            {
+                                await AddBillWithContract(contract);
+                            }
+                            break;
+                    }
+                }
+                // return await jarsDB.Contracts.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            return activeContracts;
+        }
+
+        private async Task AddBillWithContract(Contract contract)
+        {
+            Bill bill = new Bill
+            {
+                Amount = contract.Amount,
+                Date = DateTime.Now,
+                Name = contract.Name,
+                LeftAmount = contract.Amount,
+                ContractId = contract.Id
+            };
+            await BillManagement.Instance.CreateBillAsync(bill);
         }
     }
 }

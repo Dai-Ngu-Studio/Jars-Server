@@ -8,5 +8,6 @@ public interface INoteRepository
     Task Delete(Note note);
     Task Add(Note note);
     Task Update(Note note);
-
+    Task<Note?> GetNoteByTransactionId(int? transactionId);
+    Task<Note?> GetNoteByContractId(int? contractId);
 }

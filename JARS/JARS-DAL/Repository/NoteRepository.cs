@@ -9,4 +9,6 @@ public class NoteRepository : INoteRepository
     public Task Delete(Note note) => NoteManagement.Instance.Delete(note);
     public Task Add(Note note) => NoteManagement.Instance.Add(note);
     public Task Update(Note note) => NoteManagement.Instance.Update(note);
+    public Task<Note?> GetNoteByContractId(int? contractId) => NoteManagement.Instance.GetNoteByContractId(contractId);
+    public Task<Note?> GetNoteByTransactionId(int? transactionId) => NoteManagement.Instance.GetNoteByTransactionId(transactionId);
 }
