@@ -86,7 +86,7 @@ namespace JARS_API.Controllers
         {
             try
             {
-                if (contract_id > 0)
+                if (contract_id > 0 && transaction_id == 0)
                 {
                     var contract = await _contractRepository.GetContractByContractIdAsync(contract_id, GetCurrentUID());
                     var result = await _noteRepository.GetNoteByContractId(contract_id);
@@ -123,7 +123,7 @@ namespace JARS_API.Controllers
                     }
                 }
 
-                if (transaction_id > 0)
+                if (transaction_id > 0 && contract_id == 0)
                 {
                     var transaction = await _transactionRepository.GetTransaction(transaction_id, GetCurrentUID());
                     var result = await _noteRepository.GetNoteByTransactionId(transaction_id);

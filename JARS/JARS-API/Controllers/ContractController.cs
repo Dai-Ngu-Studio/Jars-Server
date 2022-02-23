@@ -123,18 +123,30 @@ namespace JARS_API.Controllers
         {
             var result = await _repository.GetContractByContractIdAsync(id, GetCurrentUID());
             
-            if (result.Id < 0)
+            if (result == null)
             {
                 return BadRequest();
             }
             try
             {
+                decimal? amount = 0;
+                if (contract.Amount > 0)
+                {
+                    amount = result.Amount + contract.Amount;
+                } else
+                {
+                    amount = result.Amount + contract.Amount;
+                    if (amount < 0)
+                        amount = 0;
+                }
+
                 Contract _contract = new Contract
                 {
                     Id = id,
                     StartDate = contract.StartDate == null ? result.StartDate : contract.StartDate,
                     EndDate = contract.EndDate == null ? result.EndDate : contract.EndDate,
-                    Amount = contract.Amount == null ? result.Amount : result.Amount + contract.Amount,
+                    Amount = contract.Amount == null ? result.Amount : amount,
+                    Name = contract.Name == null ? result.Name : contract.Name,
                     AccountId = result.AccountId,
                 };
                 await _repository.UpdateContractAsync(_contract);
@@ -142,24 +154,45 @@ namespace JARS_API.Controllers
                 if (contract.Amount != null)
                 {
                     var contractBills = await _billRepository.GetAllBillByContractIdAsync(id);
-                    foreach (var bill in contractBills)
+                    if (contractBills != null)
                     {
-                        if (bill.LeftAmount > 0)
+                        foreach (var bill in contractBills)
                         {
-                            Bill updatedBill = new Bill
+                            if (bill.LeftAmount > 0)
                             {
-                                Id = bill.Id,
-                                Date = bill.Date,
-                                Amount = bill.Amount + contract.Amount,
-                                LeftAmount = bill.LeftAmount + contract.Amount,
-                                Name = bill.Name,
-                                ContractId = bill.ContractId,
-                                CategoryId = bill.CategoryId,
-                            };
-                            await _billRepository.UpdateBillAsync(updatedBill);
+                                decimal? leftAmount = 0;
+                                decimal? billAmount = 0;
+                                if (contract.Amount > 0)
+                                {
+                                    billAmount = bill.Amount + contract.Amount;
+                                    leftAmount = bill.LeftAmount + contract.Amount;
+                                }
+                                else
+                                {
+                                    billAmount = bill.Amount + contract.Amount;
+                                    leftAmount = bill.LeftAmount + contract.Amount;
+                                    if (leftAmount < 0)
+                                        leftAmount = 0;
+                                    if (billAmount < 0)
+                                        billAmount = 0;
+                                }
+
+                                Bill updatedBill = new Bill
+                                {
+                                    Id = bill.Id,
+                                    Date = bill.Date,
+                                    Amount = billAmount,
+                                    LeftAmount = leftAmount,
+                                    Name = bill.Name,
+                                    ContractId = bill.ContractId,
+                                    CategoryId = bill.CategoryId,
+                                };
+                                await _billRepository.UpdateBillAsync(updatedBill);
+                            }
                         }
-                    }
-                }               
+                    }                 
+                }
+                return CreatedAtAction("GetContract", new { id = contract.Id }, _contract);
             }
             catch (DbUpdateConcurrencyException)
             {
