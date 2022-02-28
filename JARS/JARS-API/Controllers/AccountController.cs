@@ -223,7 +223,7 @@ namespace JARS_API.Controllers
                         Console.WriteLine($"Accounts: User {uid} had already created an account.");
                         UserRecord? userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
                         bool isUserRecordExisted = userRecord != null;
-                        DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                        DateTime? tokenCreatedTime = DateTime.Now;
                         account.LastLoginDate = tokenCreatedTime;
                         await _accountRepository.UpdateAsync(account);
                         if (FcmToken != null)
@@ -248,19 +248,21 @@ namespace JARS_API.Controllers
                         }
                         return Ok(account);
                     }
-                    catch (DbUpdateConcurrencyException)
+                    catch (DbUpdateConcurrencyException ex)
                     {
                         // to-do logging
-                        return StatusCode(500);
+                        // return StatusCode(500);
+                        return BadRequest(ex.StackTrace);
                     }
-                    catch (DbUpdateException)
+                    catch (DbUpdateException ex)
                     {
                         // to-do logging
-                        return StatusCode(500);
+                        // return StatusCode(500);
+                        return BadRequest(ex.StackTrace);
                     }
                     catch (Exception ex)
                     {
-                        return BadRequest(ex);
+                        return BadRequest(ex.StackTrace);
                     }
                 }
                 else
@@ -273,7 +275,7 @@ namespace JARS_API.Controllers
                         string? displayName = isUserRecordExisted ? userRecord?.DisplayName : uid;
                         string? email = userRecord?.Email;
                         string? photoUrl = userRecord?.PhotoUrl;
-                        DateTime? tokenCreatedTime = isUserRecordExisted ? userRecord?.TokensValidAfterTimestamp : DateTime.Now;
+                        DateTime? tokenCreatedTime = DateTime.Now;
                         Account newAccount = new Account
                         {
                             Id = uid,
@@ -297,19 +299,21 @@ namespace JARS_API.Controllers
                         }
                         return Ok(newAccount);
                     }
-                    catch (DbUpdateConcurrencyException)
+                    catch (DbUpdateConcurrencyException ex)
                     {
                         // to-do logging
-                        return StatusCode(500);
+                        // return StatusCode(500);
+                        return BadRequest(ex.StackTrace);
                     }
-                    catch (DbUpdateException)
+                    catch (DbUpdateException ex)
                     {
                         // to-do logging
-                        return StatusCode(500);
+                        // return StatusCode(500);
+                        return BadRequest(ex.StackTrace);
                     }
                     catch (Exception ex)
                     {
-                        return BadRequest(ex);
+                        return BadRequest(ex.StackTrace);
                     }
                 }
             }
