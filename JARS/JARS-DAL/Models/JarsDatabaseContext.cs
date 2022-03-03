@@ -30,10 +30,13 @@ namespace JARS_DAL.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string? DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("server=db,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
+                string? DatabasePassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
+                if (!optionsBuilder.IsConfigured)
+                {
+                    optionsBuilder.UseSqlServer("server=db,1433;database=JarsDatabase;uid=sa;pwd=" + DatabasePassword + ";");
+                }
             }
         }
 
@@ -58,7 +61,7 @@ namespace JARS_DAL.Models
             modelBuilder.Entity<AccountDevice>(entity =>
             {
                 entity.HasKey(e => e.FcmToken)
-                    .HasName("PK__AccountD__F325AEE3CA6906DF");
+                    .HasName("PK__AccountD__F325AEE357572930");
 
                 entity.ToTable("AccountDevice");
 
@@ -76,7 +79,7 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.AccountDevices)
                     .HasForeignKey(d => d.AccountId)
-                    .HasConstraintName("FK__AccountDe__Accou__45F365D3");
+                    .HasConstraintName("FK__AccountDe__Accou__46E78A0C");
             });
 
             modelBuilder.Entity<Bill>(entity =>
@@ -84,6 +87,11 @@ namespace JARS_DAL.Models
                 entity.ToTable("Bill");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.AccountId)
+                    .HasMaxLength(128)
+                    .IsUnicode(false)
+                    .HasColumnName("AccountID");
 
                 entity.Property(e => e.Amount).HasColumnType("money");
 
@@ -95,15 +103,20 @@ namespace JARS_DAL.Models
 
                 entity.Property(e => e.LeftAmount).HasColumnType("money");
 
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.Bills)
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK__Bill__AccountID__38996AB5");
+
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__Bill__CategoryID__38996AB5");
+                    .HasConstraintName("FK__Bill__CategoryID__398D8EEE");
 
                 entity.HasOne(d => d.Contract)
                     .WithMany(p => p.Bills)
                     .HasForeignKey(d => d.ContractId)
-                    .HasConstraintName("FK__Bill__ContractID__398D8EEE");
+                    .HasConstraintName("FK__Bill__ContractID__3A81B327");
             });
 
             modelBuilder.Entity<BillDetail>(entity =>
@@ -119,7 +132,7 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.BillDetails)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__BillDetai__BillI__412EB0B6");
+                    .HasConstraintName("FK__BillDetai__BillI__4222D4EF");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -238,17 +251,17 @@ namespace JARS_DAL.Models
                 entity.HasOne(d => d.Bill)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.BillId)
-                    .HasConstraintName("FK__Transacti__BillI__3E52440B");
+                    .HasConstraintName("FK__Transacti__BillI__3F466844");
 
                 entity.HasOne(d => d.Note)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.NoteId)
-                    .HasConstraintName("FK__Transacti__NoteI__3C69FB99");
+                    .HasConstraintName("FK__Transacti__NoteI__3D5E1FD2");
 
                 entity.HasOne(d => d.Wallet)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.WalletId)
-                    .HasConstraintName("FK__Transacti__Walle__3D5E1FD2");
+                    .HasConstraintName("FK__Transacti__Walle__3E52440B");
             });
 
             modelBuilder.Entity<Wallet>(entity =>
