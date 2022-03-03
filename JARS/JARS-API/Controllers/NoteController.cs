@@ -80,6 +80,13 @@ namespace JARS_API.Controllers
 
         // POST: api/Note
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create note for transaction or contract with current UID. Only the user is authorized to use this method.
+        /// </summary>
+        /// <param name="contract_id">enter contract_id if user want to create note contract</param>
+        /// <param name="transaction_id">enter transaction_id if user want to create note transaction</param>
+        /// <param name="note">Note in JSON format</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<Note>> PostNoteForContract([FromQuery]int contract_id,
             [FromQuery] int transaction_id, Note note)
