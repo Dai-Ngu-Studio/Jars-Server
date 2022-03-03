@@ -21,7 +21,11 @@ namespace JARS_API.Controllers
             _billRepository = billRepository;
         }
 
-        //[HttpGet("?bill_id={billId")]
+        /// <summary>
+        /// Get all bill detail for a bill with bill_id. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill_id">bill_id of bill</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<List<BillDetail>>> GetBillDetailsWithBillId([FromQuery]int bill_id)
         {
@@ -41,6 +45,12 @@ namespace JARS_API.Controllers
             return Ok(billDetail);
         }
 
+        /// <summary>
+        /// Update bill detail with id. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="id">id of bill detail</param>
+        /// <param name="billDetail">BillDetail in JSON format</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBillDetail(int id, BillDetail billDetail)
         {
@@ -99,6 +109,13 @@ namespace JARS_API.Controllers
             }
             return Ok(billDetail);
         }
+
+        /// <summary>
+        /// Create bill detail for a bill with bill_id. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill_id">bill_id of bill</param>
+        /// <param name="billDetail">BillDetail in JSON format</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> CreateBillDetail([FromQuery]int bill_id, BillDetail billDetail)
         {

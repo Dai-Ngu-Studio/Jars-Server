@@ -30,7 +30,11 @@ namespace JARS_API.Controllers
             _transactionRepository = transactionRepository;
         }
 
-        //[HttpPost("?category_id={categoryId}")]
+        /// <summary>
+        /// Create bill and create bill details for current UID. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill">Bill in JSON format</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> CreateBill(Bill bill)
         {
@@ -98,8 +102,15 @@ namespace JARS_API.Controllers
                 await _repository.CreateBillAsync(_bill);
                 return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
             }
-        }           
+        }
 
+        /// <summary>
+        /// Update bill and create transaction with bill_id, wallet_id and UID. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill_id">bill_id of bill</param>
+        /// <param name="wallet_id">wallet_id of the account</param>
+        /// <param name="bill">Bill in JSON format</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<ActionResult> UpdateBill([FromQuery]int bill_id, [FromQuery]int wallet_id, Bill bill)
         {
@@ -195,6 +206,16 @@ namespace JARS_API.Controllers
             return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
         }
 
+        /// <summary>
+        /// Get bills for current UID with optional queries. Only the user is authorized to use this method.
+        /// </summary>
+        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
+        /// <param name="size">Maximum number of results to return. Default value: 20</param>
+        /// <param name="name">Optional filter for bill's name. Default value: ""</param>
+        /// <param name="sortOrder">Optional filter for bill's to sort ascending or descending. Default value: ""</param>
+        /// <param name="dateTo">Optional filter for bill's to search from date. Default value: ""</param>
+        /// <param name="dateFrom">Optional filter for bill's to search to date. Default value: ""</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<List<Bill>>> GetAllBills(
             [FromQuery] string? name, [FromQuery] string? sortOrder,
