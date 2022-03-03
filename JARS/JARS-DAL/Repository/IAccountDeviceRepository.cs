@@ -10,8 +10,10 @@ namespace JARS_DAL.Repository
     public interface IAccountDeviceRepository
     {
         public abstract Task<AccountDevice?> GetAsync(string fcmToken);
+        public abstract Task<IEnumerable<AccountDevice?>> GetListFromTokensAsync(List<string> fcmTokens);
         public abstract Task AddAsync(AccountDevice accountDevice);
         public abstract Task UpdateAsync(AccountDevice accountDevice);
         public abstract Task DeleteAsync(AccountDevice accountDevice);
+        public abstract Task DeleteListAsync(IEnumerable<AccountDevice?> accountDevices);
     }
 }

@@ -44,6 +44,22 @@ namespace JARS_DAL.DAO
             }
         }
 
+        public async Task<IEnumerable<AccountDevice>> GetListFromTokensAsync(List<string> fcmTokens)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                var accountDevices = await jarsDB.AccountDevices
+                    .Where(accountDevice => fcmTokens.Any(fcmToken => fcmToken == accountDevice.FcmToken))
+                    .ToListAsync();
+                return accountDevices;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<AccountDevice?> GetAsync(string fcmToken)
         {
             try
@@ -133,6 +149,38 @@ namespace JARS_DAL.DAO
                 {
                     throw new Exception("Specified account device does not exist.");
                 }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteListAsync(IEnumerable<AccountDevice?> accountDevices)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                foreach (var accountDevice in accountDevices)
+                {
+                    if (accountDevice != null)
+                    {
+                        AccountDevice? _account = await GetAsync(accountDevice.FcmToken);
+                        if (_account != null)
+                        {
+                            jarsDB.AccountDevices.Remove(accountDevice);
+                        }
+                    }
+                }
+                await jarsDB.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
