@@ -31,12 +31,56 @@ namespace JARS_DAL.DAO
                 .ToListAsync(); 
         }
 
-        public async Task<Bill> GetBillByBillIdAsync (int? id)
+        public async Task<IEnumerable<Bill>> GetAllBillAsync
+            (string uid, string? searchName, string? sortOrder, int page, int size, DateTime? dateFrom, DateTime? dateTo)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                var bills = await jarsDB.Bills
+                    .Where(s => s.AccountId == uid)
+                    .Skip(page * size)
+                    .Take(size)
+                    .ToListAsync();
+                if (searchName != null)
+                {
+                    bills = bills.Where(bill => string.IsNullOrEmpty(bill.Name) || bill.Name.ToLower().Contains(searchName.ToLower())).ToList();
+                }
+                if (dateFrom.HasValue && dateTo.HasValue)
+                {
+                    bills = bills.Where(bill => DateTime.Compare(bill.Date.Value.Date, dateFrom.Value.Date) >= 0
+                            && DateTime.Compare(bill.Date.Value.Date, dateTo.Value.Date) <= 0).ToList();
+                } 
+
+                switch (sortOrder)
+                {
+                    case "asc":
+                        bills = bills.OrderBy(s => s.Date).ToList();
+                        break;
+                    case "desc":
+                        bills = bills.OrderByDescending(s => s.Date).ToList();
+                        break;
+                    case "z-a":
+                        bills = bills.OrderByDescending(s => s.Name).ToList();
+                        break;
+                    default:
+                        bills = bills.OrderBy(s => s.Name).ToList();
+                        break;
+                }
+                return bills;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.InnerException.Message);
+            }    
+        }
+
+        public async Task<Bill> GetBillByBillIdAsync (int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
             return await jarsDB.Bills
                 .Include(bdt => bdt.BillDetails)
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == id && b.AccountId == uid);
         }
 
         public async Task UpdateBillAsync(Bill bill)

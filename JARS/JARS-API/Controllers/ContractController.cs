@@ -25,9 +25,10 @@ namespace JARS_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Contract>>> GetAllContracts()
+        public async Task<ActionResult<List<Contract>>> GetAllContracts([FromQuery] string? name, [FromQuery] string? sortOrder,
+            [FromQuery] int page = 0, [FromQuery] int size = 20)
         {
-            var result = await _repository.GetAllContractAsync(GetCurrentUID());
+            var result = await _repository.GetAllContractAsync(GetCurrentUID(), name, sortOrder, page, size);
             return Ok(result);
         }
 
@@ -104,6 +105,7 @@ namespace JARS_API.Controllers
                             Date = _contract.StartDate,
                             Name = _contract.Name,
                             ContractId = _contract.Id,
+                            AccountId = GetCurrentUID(),
                             Amount = _contract.Amount,
                             LeftAmount = _contract.Amount,
                         };
@@ -184,6 +186,7 @@ namespace JARS_API.Controllers
                                     Amount = billAmount,
                                     LeftAmount = leftAmount,
                                     Name = bill.Name,
+                                    AccountId = bill.AccountId,
                                     ContractId = bill.ContractId,
                                     CategoryId = bill.CategoryId,
                                 };

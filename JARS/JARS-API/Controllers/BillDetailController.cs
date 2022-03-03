@@ -65,7 +65,7 @@ namespace JARS_API.Controllers
                 if (result != null)
                 {                   
                     var getAllCreatedBillDetails = await _repository.GetAllBillDetailWithBillIdAsync(_billDetail.BillId);
-                    Bill bill = await _billRepository.GetBillByBillIdAsync(_billDetail.BillId);
+                    Bill bill = await _billRepository.GetBillByBillIdAsync(_billDetail.BillId, GetCurrentUID());
 
                     if (getAllCreatedBillDetails != null && bill != null)
                     {
@@ -102,7 +102,7 @@ namespace JARS_API.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateBillDetail([FromQuery]int bill_id, BillDetail billDetail)
         {
-            Bill bill = await _billRepository.GetBillByBillIdAsync(bill_id);
+            Bill bill = await _billRepository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
 
             if (bill == null)
                 return NotFound();
@@ -162,9 +162,9 @@ namespace JARS_API.Controllers
             return Ok(billDetail);
         }
 
-        //private string GetCurrentUID()
-        //{
-        //    return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //}
+        private string GetCurrentUID()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
     }
 }
