@@ -25,17 +25,17 @@ namespace JARS_API.Utilities
         }
 
         /// <summary>
-        /// Sends all messages in the given list. Up to 100 messages can be batched.
+        /// Sends all messages in the given list. Up to 500 messages can be batched.
         /// Messages are not required to have the same FcmToken, Notification or Data.
         /// For example, two different messages with two different FcmTokens can be in the same list.
         /// This is the preferred method for sending multiple messages efficiently.
         /// </summary>
         /// <param name="messages">Each Message must include a FcmToken.</param>
-        public static async Task SendMessagesAsync(List<Message> messages)
+        public static async Task<BatchResponse> SendMessagesAsync(List<Message> messages)
         {
             try
             {
-                BatchResponse response = await FirebaseMessaging.DefaultInstance.SendAllAsync(messages);
+                return await FirebaseMessaging.DefaultInstance.SendAllAsync(messages);
             }
             catch (FirebaseMessagingException)
             {

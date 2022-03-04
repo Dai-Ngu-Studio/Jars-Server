@@ -12,6 +12,8 @@ namespace JARS_DAL.Models
             AccountDevices = new HashSet<AccountDevice>();
             Contracts = new HashSet<Contract>();
             Wallets = new HashSet<Wallet>();
+            Bills = new HashSet<Bill>();
+
         }
 
         [SwaggerSchema(ReadOnly = true)]
@@ -30,5 +32,8 @@ namespace JARS_DAL.Models
         public virtual ICollection<Contract> Contracts { get; set; }
         [JsonIgnore]
         public virtual ICollection<Wallet> Wallets { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Bill> Bills { get; set; }
+
     }
 }

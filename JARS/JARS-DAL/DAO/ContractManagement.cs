@@ -36,12 +36,29 @@ namespace JARS_DAL.DAO
             }
         }
 
-        public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid)
+        public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
         {
             var jarsDB = new JarsDatabaseContext();
-            return await jarsDB.Contracts
+            var contracts = await jarsDB.Contracts
                 .Where(c => c.AccountId == uid)
+                .Skip(page * size)
+                .Take(size)
                 .ToListAsync();
+
+            if (searchName != null)
+            {
+                contracts = contracts.Where(contract => string.IsNullOrEmpty(contract.Name) || contract.Name.ToLower().Contains(searchName.ToLower())).ToList();
+            }
+            switch (sortOrder)
+            {
+                case "z-a":
+                    contracts = contracts.OrderByDescending(s => s.Name).ToList();
+                    break;
+                default:
+                    contracts = contracts.OrderBy(s => s.Name).ToList();
+                    break;
+            }
+            return contracts;
         }
 
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)

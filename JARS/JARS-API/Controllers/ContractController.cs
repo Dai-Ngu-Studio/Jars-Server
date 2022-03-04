@@ -24,10 +24,19 @@ namespace JARS_API.Controllers
             _noteRepository = noteRepository;
         }
 
+        /// <summary>
+        /// Get contacts for current UID with optional queries. Only the user is authorized to use this method.
+        /// </summary>
+        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
+        /// <param name="size">Maximum number of results to return. Default value: 20</param>
+        /// <param name="name">Optional filter for bill's name. Default value: ""</param>
+        /// <param name="sortOrder">Optional filter for bill's to sort ascending or descending. Default value: ""</param>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<List<Contract>>> GetAllContracts()
+        public async Task<ActionResult<List<Contract>>> GetAllContracts([FromQuery] string? name, [FromQuery] string? sortOrder,
+            [FromQuery] int page = 0, [FromQuery] int size = 20)
         {
-            var result = await _repository.GetAllContractAsync(GetCurrentUID());
+            var result = await _repository.GetAllContractAsync(GetCurrentUID(), name, sortOrder, page, size);
             return Ok(result);
         }
 
@@ -43,6 +52,12 @@ namespace JARS_API.Controllers
             return Ok(contract);
         }
 
+        /// <summary>
+        /// Create contract, create note if user want to and automatically create bill user choose "StartDate" is today for current UID. 
+        /// Only the user is authorized to use this method.
+        /// </summary>
+        /// <param name="contract">Contract in JSON format</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> CreateContract(Contract contract)
         {
@@ -104,6 +119,7 @@ namespace JARS_API.Controllers
                             Date = _contract.StartDate,
                             Name = _contract.Name,
                             ContractId = _contract.Id,
+                            AccountId = GetCurrentUID(),
                             Amount = _contract.Amount,
                             LeftAmount = _contract.Amount,
                         };
@@ -184,6 +200,7 @@ namespace JARS_API.Controllers
                                     Amount = billAmount,
                                     LeftAmount = leftAmount,
                                     Name = bill.Name,
+                                    AccountId = bill.AccountId,
                                     ContractId = bill.ContractId,
                                     CategoryId = bill.CategoryId,
                                 };

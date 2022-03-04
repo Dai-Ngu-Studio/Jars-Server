@@ -30,7 +30,11 @@ namespace JARS_API.Controllers
             _transactionRepository = transactionRepository;
         }
 
-        //[HttpPost("?category_id={categoryId}")]
+        /// <summary>
+        /// Create bill and create bill details for current UID. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill">Bill in JSON format</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> CreateBill(Bill bill)
         {
@@ -41,6 +45,7 @@ namespace JARS_API.Controllers
                 {
                     Date = bill.Date,
                     Name = bill.Name,
+                    AccountId = GetCurrentUID(),
                     CategoryId = category != null ? category.Id : null,
                 };
 
@@ -58,7 +63,7 @@ namespace JARS_API.Controllers
                 }
 
                 var searchBillDetails = await _billDetailRepository.GetAllBillDetailWithBillIdAsync(_bill.Id);
-                var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id);
+                var searchBill = await _repository.GetBillByBillIdAsync(_bill.Id, GetCurrentUID());
                 decimal? amount = 0;
 
                 if (searchBillDetails != null && searchBill != null)
@@ -74,6 +79,8 @@ namespace JARS_API.Controllers
                         Name = searchBill.Name,
                         LeftAmount = amount,
                         Amount = amount,
+                        CategoryId = searchBill.CategoryId,
+                        AccountId = searchBill.AccountId,
                     };
                     await _repository.UpdateBillAsync(_bill);
                 }
@@ -85,15 +92,29 @@ namespace JARS_API.Controllers
             }
             else
             {
-                await _repository.CreateBillAsync(bill);
-                return CreatedAtAction("GetBill", new { id = bill.Id }, bill);
+                Bill _bill = new Bill
+                {
+                    Date = bill.Date,
+                    Name = bill.Name,
+                    AccountId = GetCurrentUID(),
+                    CategoryId = category != null ? category.Id : null,
+                };
+                await _repository.CreateBillAsync(_bill);
+                return CreatedAtAction("GetBill", new { id = bill.Id }, _bill);
             }
-        }           
+        }
 
+        /// <summary>
+        /// Update bill and create transaction with bill_id, wallet_id and UID. Only the owner of the account or admin is authorized to use this method.
+        /// </summary>
+        /// <param name="bill_id">bill_id of bill</param>
+        /// <param name="wallet_id">wallet_id of the account</param>
+        /// <param name="bill">Bill in JSON format</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<ActionResult> UpdateBill([FromQuery]int bill_id, [FromQuery]int wallet_id, Bill bill)
         {
-            var result = await _repository.GetBillByBillIdAsync(bill_id);
+            var result = await _repository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
             if (result == null)
             {
                 return BadRequest();
@@ -120,6 +141,7 @@ namespace JARS_API.Controllers
                     Name = bill.Name == null ? result.Name : bill.Name,
                     Amount = result.Amount,
                     CategoryId = result.CategoryId,
+                    AccountId = result.AccountId,
                     ContractId = result.ContractId,
                 };
                 await _repository.UpdateBillAsync(_bill);
@@ -143,7 +165,7 @@ namespace JARS_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {             
-                if (_repository.GetBillByBillIdAsync(bill.Id) == null)
+                if (_repository.GetBillByBillIdAsync(bill.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
                 }
@@ -181,19 +203,31 @@ namespace JARS_API.Controllers
         [HttpGet("{id}")] 
         public async Task<ActionResult<Bill>> GetBill(int id)
         {
-            return await _repository.GetBillByBillIdAsync(id);
+            return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<Bill>>> GetAllBillsForContract([FromQuery] int contract_id)
-        //{
-        //    var result = await _repository.GetAllBillByContractIdAsync(contract_id);
-        //    return Ok(result);
-        //}
+        /// <summary>
+        /// Get bills for current UID with optional queries. Only the user is authorized to use this method.
+        /// </summary>
+        /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
+        /// <param name="size">Maximum number of results to return. Default value: 20</param>
+        /// <param name="name">Optional filter for bill's name. Default value: ""</param>
+        /// <param name="sortOrder">Optional filter for bill's to sort ascending or descending. Default value: ""</param>
+        /// <param name="dateTo">Optional filter for bill's to search from date. Default value: ""</param>
+        /// <param name="dateFrom">Optional filter for bill's to search to date. Default value: ""</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<List<Bill>>> GetAllBills(
+            [FromQuery] string? name, [FromQuery] string? sortOrder,
+            [FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] int page = 0, [FromQuery] int size = 20)
+        {
+            var result = await _repository.GetAllBillAsync(GetCurrentUID(), name, sortOrder, page, size, dateFrom, dateTo);
+            return Ok(result);
+        }
 
-        //private string GetCurrentUID()
-        //{
-        //    return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //}
+        private string GetCurrentUID()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
     }
 }

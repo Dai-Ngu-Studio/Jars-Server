@@ -21,9 +21,13 @@ namespace JARS_DAL.Models
         public int? CategoryId { get; set; }
         public int? ContractId { get; set; }
         public int? StatusCode { get; set; }
+        public string? AccountId { get; set; }
 
         [JsonIgnore]
         public virtual Category? Category { get; set; }
+        [JsonIgnore]
+        public virtual Account? Account { get; set; }
+
         [JsonIgnore]
         public virtual Contract? Contract { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
