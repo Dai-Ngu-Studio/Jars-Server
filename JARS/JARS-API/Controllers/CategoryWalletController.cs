@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using JARS_API.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JARS_API.Controllers
 {
     [Route("api/v1/category-wallets")]
     [ApiController]
+    [Authorize]
     public class CategoryWalletController : ControllerBase
     {
         private readonly ICategoryWalletReposiotry repository;
@@ -28,15 +30,27 @@ namespace JARS_API.Controllers
         }
         //POST /wallets/
         [HttpPost]
-        public async Task AddCategoryWallet(CategoryWallet categoryWallet)
-        {
+        public async Task<ActionResult> AddCategoryWallet(CategoryWallet categoryWallet)
+        {   
+            if (categoryWallet.ParentCategoryId.Value == 0 || categoryWallet.ParentCategoryId is null)
+            {               
+            }
+            else {
+                CategoryWallet parentCate = await repository.GetCategoryWallet(categoryWallet.ParentCategoryId.Value);
+                if (parentCate == null)
+                {
+                    return BadRequest("Id of parentCategory that you have just inputed does not exist");
+                }
+            }
+
             CategoryWallet _categoryWallet = new CategoryWallet
             {
+                ParentCategoryId = categoryWallet.ParentCategoryId,
                 Name = categoryWallet.Name,
                 CurrentCategoryLevel = categoryWallet.CurrentCategoryLevel,
-                ParentCategoryId = categoryWallet.ParentCategoryId,
             };
             await repository.AddCategoryWallet(_categoryWallet);
+            return Ok(200);
         }
 
         //PUT /wallets/{id}

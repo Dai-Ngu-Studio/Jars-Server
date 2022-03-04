@@ -39,10 +39,9 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
-            
+
         }
         public async Task<CategoryWallet> GetCategoryWallet(int id)
         {
@@ -61,22 +60,37 @@ namespace JARS_DAL.DAO
             try
             {
                 var jarDB = new JarsDatabaseContext();
-                jarDB.CategoryWallets.Add(CategoryWallet);             
-                await jarDB.SaveChangesAsync();
-                int cateNum = await jarDB.CategoryWallets.CountAsync();
-                CategoryWallet categoryWallet = new CategoryWallet
+                if(CategoryWallet.ParentCategoryId == 0)
                 {
-                    Id = CategoryWallet.Id,
-                    Name = CategoryWallet.Name,
-                    ParentCategoryId = cateNum == 1?CategoryWallet.Id:CategoryWallet.ParentCategoryId is null?CategoryWallet.Id:CategoryWallet.ParentCategoryId,
-                    CurrentCategoryLevel = CategoryWallet.CurrentCategoryLevel
+                    CategoryWallet.ParentCategoryId = null;
+                }
+                
+                //CategoryWallet.ParentCategoryId = CategoryWallet.Id == 0 ?null:CategoryWallet.ParentCategoryId;
+                //Console.WriteLine("new DBcontext");
+                //Console.WriteLine("ID trươc add: " + CategoryWallet.Id + " Name: " + CategoryWallet.Name + " ParentCategoryId :" + CategoryWallet.ParentCategoryId + " CurrentCategoryId: " + CategoryWallet.CurrentCategoryLevel);
+                jarDB.CategoryWallets.Add(CategoryWallet);
+               // Console.WriteLine("addCategoryWallet");
+                await jarDB.SaveChangesAsync();
+                //Console.WriteLine("Save changes");
+                //Console.WriteLine("ID sau add : " + CategoryWallet.Id + " Name: " + CategoryWallet.Name + " ParentCategoryId :" + CategoryWallet.ParentCategoryId + " CurrentCategoryId: " + CategoryWallet.CurrentCategoryLevel);
+                if(CategoryWallet.ParentCategoryId is null)
+                {
+                    int cateNum = await jarDB.CategoryWallets.CountAsync();
+                    CategoryWallet categoryWallet = new CategoryWallet
+                    {
+                        Id = CategoryWallet.Id,
+                        Name = CategoryWallet.Name,
+                        ParentCategoryId = cateNum == 1 ? CategoryWallet.Id : CategoryWallet.ParentCategoryId is null ? CategoryWallet.Id : CategoryWallet.ParentCategoryId,
+                        CurrentCategoryLevel = CategoryWallet.CurrentCategoryLevel
 
-                };
-               await UpdateCategoryWallet(categoryWallet);
+                    };
+                    //Console.WriteLine("ID sau update: " + categoryWallet.Id + " Name: " + categoryWallet.Name + " ParentCategoryId :" + categoryWallet.ParentCategoryId + " CurrentCategoryId: " + categoryWallet.CurrentCategoryLevel);
+                    await UpdateCategoryWallet(categoryWallet);
+                }       
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task UpdateCategoryWallet (CategoryWallet CategoryWallet)
@@ -87,9 +101,9 @@ namespace JARS_DAL.DAO
                 jarDB.CategoryWallets.Update(CategoryWallet);
                 await jarDB.SaveChangesAsync();
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task RemoveCategoryWallet(int id)
@@ -111,8 +125,7 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
     }
