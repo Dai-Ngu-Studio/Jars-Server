@@ -146,14 +146,26 @@ namespace JARS_API.Controllers
             try
             {
                 decimal? amount = 0;
-                if (contract.Amount > 0)
+                if (contract.Amount != result.Amount)
                 {
-                    amount = result.Amount + contract.Amount;
-                } else
+                    if (contract.Amount > 0)
+                    {
+                        amount = result.Amount + contract.Amount;
+                    }
+                    if (contract.Amount < 0)
+                    {
+                        amount = result.Amount + contract.Amount;
+                        if (amount < 0)
+                            amount = 0;
+                    }
+                    if (contract.Amount == 0)
+                    {
+                        amount = result.Amount;
+                    }
+                }
+                else
                 {
-                    amount = result.Amount + contract.Amount;
-                    if (amount < 0)
-                        amount = 0;
+                    amount = contract.Amount;
                 }
 
                 Contract _contract = new Contract
@@ -172,41 +184,44 @@ namespace JARS_API.Controllers
                     var contractBills = await _billRepository.GetAllBillByContractIdAsync(id);
                     if (contractBills != null)
                     {
-                        foreach (var bill in contractBills)
+                        if (result.Amount != contract.Amount)
                         {
-                            if (bill.LeftAmount > 0)
+                            foreach (var bill in contractBills)
                             {
-                                decimal? leftAmount = 0;
-                                decimal? billAmount = 0;
-                                if (contract.Amount > 0)
+                                if (bill.LeftAmount > 0)
                                 {
-                                    billAmount = bill.Amount + contract.Amount;
-                                    leftAmount = bill.LeftAmount + contract.Amount;
-                                }
-                                else
-                                {
-                                    billAmount = bill.Amount + contract.Amount;
-                                    leftAmount = bill.LeftAmount + contract.Amount;
-                                    if (leftAmount < 0)
-                                        leftAmount = 0;
-                                    if (billAmount < 0)
-                                        billAmount = 0;
-                                }
+                                    decimal? leftAmount = 0;
+                                    decimal? billAmount = 0;
+                                    if (contract.Amount > 0)
+                                    {
+                                        billAmount = bill.Amount + contract.Amount;
+                                        leftAmount = bill.LeftAmount + contract.Amount;
+                                    }
+                                    else
+                                    {
+                                        billAmount = bill.Amount + contract.Amount;
+                                        leftAmount = bill.LeftAmount + contract.Amount;
+                                        if (leftAmount < 0)
+                                            leftAmount = 0;
+                                        if (billAmount < 0)
+                                            billAmount = 0;
+                                    }
 
-                                Bill updatedBill = new Bill
-                                {
-                                    Id = bill.Id,
-                                    Date = bill.Date,
-                                    Amount = billAmount,
-                                    LeftAmount = leftAmount,
-                                    Name = bill.Name,
-                                    AccountId = bill.AccountId,
-                                    ContractId = bill.ContractId,
-                                    CategoryId = bill.CategoryId,
-                                };
-                                await _billRepository.UpdateBillAsync(updatedBill);
+                                    Bill updatedBill = new Bill
+                                    {
+                                        Id = bill.Id,
+                                        Date = bill.Date,
+                                        Amount = billAmount,
+                                        LeftAmount = leftAmount,
+                                        Name = bill.Name,
+                                        AccountId = bill.AccountId,
+                                        ContractId = bill.ContractId,
+                                        CategoryId = bill.CategoryId,
+                                    };
+                                    await _billRepository.UpdateBillAsync(updatedBill);
+                                }
                             }
-                        }
+                        }                         
                     }                 
                 }
                 return CreatedAtAction("GetContract", new { id = contract.Id }, _contract);

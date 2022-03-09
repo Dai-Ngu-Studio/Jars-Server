@@ -123,12 +123,12 @@ namespace JARS_API.Controllers
             try
             {
                 decimal? leftAmount = 0;
-                if (bill.LeftAmount != null)
+                if (bill.LeftAmount > 0)
                 {
                     leftAmount = result.LeftAmount - bill.LeftAmount;
                     if (leftAmount < 0)
                         leftAmount = 0;
-                } else
+                } else if (bill.LeftAmount <= 0)
                 {
                     leftAmount = result.LeftAmount;
                 }
