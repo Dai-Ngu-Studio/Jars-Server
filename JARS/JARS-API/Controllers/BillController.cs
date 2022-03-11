@@ -119,18 +119,44 @@ namespace JARS_API.Controllers
             {
                 return BadRequest();
             }
+            var walletOwner = await _walletReposiotry.GetWallet(wallet_id);
+
+            if (walletOwner == null)
+                return NotFound();
+            if (walletOwner.WalletAmount < bill.LeftAmount)
+            {
+                return BadRequest();
+            }
 
             try
             {
                 decimal? leftAmount = 0;
-                if (bill.LeftAmount > 0)
-                {
-                    leftAmount = result.LeftAmount - bill.LeftAmount;
-                    if (leftAmount < 0)
-                        leftAmount = 0;
-                } else if (bill.LeftAmount <= 0)
+                decimal? transactionLeftAmount = 0;
+                if (result.LeftAmount == bill.LeftAmount)
                 {
                     leftAmount = result.LeftAmount;
+                }
+                else
+                {
+                    if (bill.LeftAmount > 0)
+                    {
+                        transactionLeftAmount = result.LeftAmount - bill.LeftAmount;
+
+                        if (transactionLeftAmount < 0)
+                        {
+                            leftAmount = 0;
+                            transactionLeftAmount = result.LeftAmount;
+                        }
+                        else
+                        {
+                            leftAmount = result.LeftAmount - transactionLeftAmount;
+                        }
+                    }
+                    if (bill.LeftAmount == 0)
+                    {
+                        leftAmount = 0;
+                        transactionLeftAmount = result.Amount;
+                    }
                 }
 
                 Bill _bill = new Bill
@@ -147,19 +173,25 @@ namespace JARS_API.Controllers
                 await _repository.UpdateBillAsync(_bill);
                 
                 if (result.LeftAmount != leftAmount)
-                {
-                    var walletOwner = await _walletReposiotry.GetWallet(wallet_id);
-
-                    if (walletOwner == null)
-                        return NotFound(); 
+                {                   
                     Transaction transaction = new Transaction
                     {
                         WalletId = walletOwner.Id,
                         TransactionDate = DateTime.Now,
                         BillId = _bill.Id,
-                        Amount = bill.LeftAmount,
+                        Amount = transactionLeftAmount,
                     };
                     await _transactionRepository.Add(transaction);
+
+                    Wallet wallet = new Wallet
+                    {
+                        Id = walletOwner.Id,
+                        Name = walletOwner.Name,
+                        WalletAmount = walletOwner.WalletAmount - transaction.Amount < 0 ? 0 : walletOwner.WalletAmount - transaction.Amount,
+                        Percentage = walletOwner.Percentage,
+                        AccountId = walletOwner.AccountId,
+                    };
+                    await _walletReposiotry.UpdateWallet(wallet);
                 }
                 return Ok(_bill);
             }
