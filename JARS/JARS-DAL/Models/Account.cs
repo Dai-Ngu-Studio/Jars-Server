@@ -16,7 +16,6 @@ namespace JARS_DAL.Models
 
         }
 
-        [SwaggerSchema(ReadOnly = true)]
         public string Id { get; set; } = null!;
         public bool IsAdmin { get; set; }
         public string? Email { get; set; }

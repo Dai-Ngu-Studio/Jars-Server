@@ -14,7 +14,6 @@ namespace JARS_DAL.Models
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
         public string? Name { get; set; }
         public DateTime? StartDate { get; set; }

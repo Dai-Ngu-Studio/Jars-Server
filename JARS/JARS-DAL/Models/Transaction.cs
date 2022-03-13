@@ -12,7 +12,6 @@ namespace JARS_DAL.Models
         {
             Notes = new HashSet<Note>();
         }
-        [SwaggerSchema(ReadOnly = true)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int? WalletId { get; set; }

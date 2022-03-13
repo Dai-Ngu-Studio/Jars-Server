@@ -15,7 +15,6 @@ namespace JARS_DAL.Models
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
         public string? AccountId { get; set; }
         public int? ScheduleTypeId { get; set; }
