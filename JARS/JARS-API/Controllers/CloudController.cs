@@ -1,4 +1,6 @@
-﻿using Google.Cloud.Storage.V1;
+﻿using FirebaseAdmin.Auth;
+using Google.Analytics.Data.V1Beta;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -90,6 +92,32 @@ namespace JARS_API.Controllers
             {
                 return BadRequest(FaultyBody);
             }
+        }
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics()
+        {
+            BetaAnalyticsDataClient client = new BetaAnalyticsDataClientBuilder
+            {
+                CredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"),
+            }.Build();
+
+            RunReportRequest request = new RunReportRequest
+            {
+                Property = "properties/" + 306844081,
+                Dimensions = { new Dimension { Name = "city" }, },
+                Metrics = {
+                    new Metric { Name = "activeUsers" },
+                    new Metric { Name = "active28DayUsers" },
+                    new Metric { Name = "newUsers" },
+                    new Metric { Name = "totalUsers" },
+                    new Metric { Name = "sessions" },
+                },
+                DateRanges = { new DateRange { StartDate = "2020-03-31", EndDate = "today" }, },
+            };
+
+            var response = await client.RunReportAsync(request);
+            return Ok(response);
         }
     }
 }
