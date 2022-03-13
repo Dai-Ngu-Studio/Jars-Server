@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JARS-API", "JARS-API\JARS-A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JARS-DAL", "JARS-DAL\JARS-DAL.csproj", "{66A4F66F-1341-4F63-AAAD-70FF22650A5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JARS_Services", "JARS_Services\JARS_Services.csproj", "{6E02611C-DF8C-4516-A993-BB73CEF949BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{66A4F66F-1341-4F63-AAAD-70FF22650A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66A4F66F-1341-4F63-AAAD-70FF22650A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66A4F66F-1341-4F63-AAAD-70FF22650A5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E02611C-DF8C-4516-A993-BB73CEF949BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E02611C-DF8C-4516-A993-BB73CEF949BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E02611C-DF8C-4516-A993-BB73CEF949BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E02611C-DF8C-4516-A993-BB73CEF949BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
