@@ -91,5 +91,11 @@ namespace JARS_API.Controllers
                 return BadRequest(FaultyBody);
             }
         }
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics()
+        {
+            return Ok();
+        }
     }
 }
