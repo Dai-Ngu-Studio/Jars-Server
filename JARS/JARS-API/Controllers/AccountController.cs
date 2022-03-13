@@ -120,6 +120,7 @@ namespace JARS_API.Controllers
                                 return BadRequest("User not permitted to change role of self.");
                             }
                         }
+                        account.LastLoginDate = existedAccount.LastLoginDate;
                         await _accountRepository.UpdateAsync(account);
                         return Ok(account);
                     }
@@ -151,7 +152,7 @@ namespace JARS_API.Controllers
         }
 
         /// <summary>
-        /// Erase all data of account with UID. Only the owner of the account is authorized to use this method.
+        /// Erase all data of account with UID. Only the owner of the account or admin is authorized to use this method.
         /// </summary>
         /// <param name="id">UID of account</param>
         /// <returns></returns>
@@ -162,7 +163,8 @@ namespace JARS_API.Controllers
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                if (uid.Equals(id))
+                var user = await _accountRepository.GetAsync(uid);
+                if (uid.Equals(id) || (user != null && user.IsAdmin))
                 {
                     var auth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
                     Account? account = await _accountRepository.GetIncludedAsync(id);
