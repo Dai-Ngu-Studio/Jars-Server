@@ -190,6 +190,8 @@ namespace JARS_API.Controllers
                         WalletAmount = walletOwner.WalletAmount - transaction.Amount < 0 ? 0 : walletOwner.WalletAmount - transaction.Amount,
                         Percentage = walletOwner.Percentage,
                         AccountId = walletOwner.AccountId,
+                        StartDate = walletOwner.StartDate,
+                        CategoryWallet = walletOwner.CategoryWallet,
                     };
                     await _walletReposiotry.UpdateWallet(wallet);
                 }
