@@ -1,3 +1,5 @@
+using FirebaseAdmin.Messaging;
+using JARS_API.Utilities;
 using JARS_DAL.Repository;
 
 namespace BackgroundTasksSample.Services
@@ -27,8 +29,35 @@ namespace BackgroundTasksSample.Services
 
         private void DoWork(object? state)
         {
-            DateTime dt = new DateTime(2003, 5, 1);
-            var abc = _contractRepository.GetActiveContractsAsync("abc");
+            var contracts = _contractRepository.CreateBillByContract();
+            contracts.Wait();
+            List<Message> messages = new List<Message>();
+            foreach (var contract in contracts.Result)
+            {
+                foreach (var accountDevice in contract.Account.AccountDevices)
+                {
+                    Notification noti = new NotificationBuilder().AddTitle("JARS")
+                        .AddBody("A bill was created for contract " + contract.Name).Build();
+                    Message messageForA = new MessageBuilder().AddToken(accountDevice.FcmToken).AddNotification(noti)
+                        .Build();
+                    messages.Add(messageForA);
+                }
+            }
+
+            try
+            {
+                BatchResponse batchResponse = FirebaseCloudMessagingUtility.SendMessagesAsync(messages)
+                    .GetAwaiter().GetResult();
+                FcmTokenHandler.HandleBatchResponse(batchResponse, messages).GetAwaiter();
+            }
+            catch (FirebaseMessagingException)
+            {
+//burh
+            }
+            catch (Exception)
+            {
+                // log
+            }
 
             _logger.LogInformation(
                 "Timed Hosted Service is working");
