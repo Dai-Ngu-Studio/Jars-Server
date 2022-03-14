@@ -1,4 +1,5 @@
 ﻿using FirebaseAdmin.Auth;
+using JARS_API.BusinessModels;
 using JARS_DAL.Models;
 using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +32,7 @@ namespace JARS_API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<Account>>> GetList(
+        public async Task<ActionResult<List<AccountWithTransactionCount>>> GetList(
             [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
         {
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -43,7 +44,26 @@ namespace JARS_API.Controllers
                     var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
                     if (accounts != null)
                     {
-                        return accounts.ToList();
+                        List<AccountWithTransactionCount> accountWithTransactions = new List<AccountWithTransactionCount>();
+                        foreach(var account in accounts)
+                        {
+                            int transactionCount = 0;
+                            foreach(var wallet in account.Wallets)
+                            {
+                                transactionCount += wallet.Transactions.Count();
+                            }
+                            AccountWithTransactionCount accountWithTransaction = new()
+                            {
+                                IsAdmin = account.IsAdmin,
+                                DisplayName = displayName,
+                                Email = email,
+                                Id = account.Id,
+                                PhotoUrl = account.PhotoUrl,
+                                TransactionCount = transactionCount,
+                            };
+                            accountWithTransactions.Add(accountWithTransaction);
+                        }
+                        return accountWithTransactions;
                     }
                     return NoContent();
                 }

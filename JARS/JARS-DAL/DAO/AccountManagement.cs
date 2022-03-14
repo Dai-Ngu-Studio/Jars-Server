@@ -48,6 +48,7 @@ namespace JARS_DAL.DAO
             {
                 var jarsDB = new JarsDatabaseContext();
                 var accounts = await jarsDB.Accounts
+                    .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions.Where(transaction => ((DateTime)transaction.TransactionDate!).Date == DateTime.Today))
                     .OrderBy(account => account.Email)
                     .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(email))
                     .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(displayName))
