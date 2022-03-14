@@ -96,13 +96,15 @@ namespace JARS_DAL.DAO
             }
         }
 
-        public async Task<IEnumerable<Contract>> GetActiveContractsAsync(string uid)
+        public async Task<IEnumerable<Contract>> CreateBillByContract()
         {
             List<Contract> activeContracts;
             try
             {
                 var jarsDB = new JarsDatabaseContext();
                 activeContracts = jarsDB.Contracts
+                    .Include(c => c.Account)
+                    .ThenInclude(a => a.AccountDevices)
                     .Where(c => (c.EndDate >= DateTime.Now) && (c.StartDate <= DateTime.Now))
                     .ToList();
                 foreach (var contract in activeContracts)

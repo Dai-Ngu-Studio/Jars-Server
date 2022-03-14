@@ -15,6 +15,6 @@ namespace JARS_DAL.Repository
         public Task<Contract> GetContractByContractIdAsync(int? id, string uid) => ContractManagement.Instance.GetContractByContractIdAsync(id, uid);
         public Task CreateContractAsync(Contract contract) => ContractManagement.Instance.CreateContractAsync(contract);
         public Task UpdateContractAsync(Contract contract) => ContractManagement.Instance.UpdateContractAsync(contract);
-        public Task<IEnumerable<Contract>> GetActiveContractsAsync(string uid) => ContractManagement.Instance.GetActiveContractsAsync(uid);
+        public Task<IEnumerable<Contract>> CreateBillByContract() => ContractManagement.Instance.CreateBillByContract();
     }
 }
