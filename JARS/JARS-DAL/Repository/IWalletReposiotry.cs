@@ -15,6 +15,7 @@ namespace JARS_DAL.Repository
         Task<IEnumerable<Wallet>> GetAllWallets(string id);
         Task AddWallet(Wallet wallet);
         Task Add6DefaultJars(string id, decimal totalAmount);
+        Task<int> countWallets(string uid);
 
     }
 }

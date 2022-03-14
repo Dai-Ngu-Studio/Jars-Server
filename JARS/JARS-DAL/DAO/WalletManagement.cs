@@ -29,6 +29,11 @@ namespace JARS_DAL.DAO
                 return instance; 
             }
         }
+        public async Task<int> countWalletsByUserID(String uid)
+        {
+            var jarsDB = new JarsDatabaseContext();
+            return await jarsDB.Wallets.Where(w => w.AccountId == uid).CountAsync();
+        }
         public async Task<IEnumerable<Wallet>> GetWallets(string id)
         {            
             try
@@ -72,6 +77,7 @@ namespace JARS_DAL.DAO
         {
             try
             {
+                
                 var jarDB = new JarsDatabaseContext();
                 CategoryWallet categoryWallet = new CategoryWallet()
                 {
@@ -80,12 +86,10 @@ namespace JARS_DAL.DAO
                     
                 };
                 jarDB.CategoryWallets.Add(categoryWallet);
-                jarDB.SaveChanges();
-                categoryWallet.ParentCategoryId = categoryWallet.Id;
-                jarDB.CategoryWallets.Update(categoryWallet);
-                List<Wallet> wallets =  new List<Wallet>{ 
+                await jarDB.SaveChangesAsync();
+                List<Wallet> wallets = new List<Wallet>{
                     new Wallet()
-                    { 
+                    {
 
                         AccountId = id,
                         CategoryWalletId = categoryWallet.Id,
@@ -146,6 +150,10 @@ namespace JARS_DAL.DAO
                     },
 
                 };
+                categoryWallet.ParentCategoryId = categoryWallet.Id;
+                jarDB.CategoryWallets.Update(categoryWallet);
+                await jarDB.SaveChangesAsync();
+               
                 jarDB.Wallets.AddRange(wallets);
                 await jarDB.SaveChangesAsync();
             }

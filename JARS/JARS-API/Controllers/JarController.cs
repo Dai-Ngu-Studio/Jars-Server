@@ -16,18 +16,25 @@ namespace JARS_API.Controllers
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> CreateSixJars([FromQuery] decimal totalAmount)
-        {
-            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
-            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (uid != null)
-            {
-                if (await repository.GetAllWallets(uid) != null)
+        {   
+                ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+                string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (uid != null)
                 {
-                    await repository.Add6DefaultJars(uid, totalAmount);
+                    if (await repository.countWallets(uid) == 0)
+                    {
+                        if (await repository.GetAllWallets(uid) != null)
+                        {
+                            await repository.Add6DefaultJars(uid, totalAmount);
+                        }
+                        return Ok("Add success 6 Jars");
+                    }
+                    else return BadRequest("This account already have more than 1 wallet, cannot create 6 default jars");
+                   
                 }
-                return Ok("Add success 6 Jars");
-            }
-            return BadRequest("Authorize problem or wrong input");
+                return BadRequest("Authorize problem or wrong input");
+            
+
         }
     }
 }
