@@ -1,6 +1,7 @@
 ﻿using FirebaseAdmin.Auth;
 using Google.Analytics.Data.V1Beta;
 using Google.Cloud.Storage.V1;
+using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,12 @@ namespace JARS_API.Controllers
         private const string UnreadableBody = "Request body is not readable.";
         private const string FaultyBody = "Request body is faulty.";
         private const string GoogleStorage = "https://storage.googleapis.com/";
+
+        private ITransactionRepository _transactionRepository;
+        public CloudController(ITransactionRepository repository)
+        {
+            _transactionRepository = repository;
+        }
 
         /// <summary>
         /// Uploads an image represented by a Base-64 String.
@@ -117,7 +124,11 @@ namespace JARS_API.Controllers
             };
 
             var response = await client.RunReportAsync(request);
-            return Ok(response);
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            
+            data.Add("report", response);
+            data.Add("transactions", (await _transactionRepository.GetTransactionsFromDate(DateTime.Today)).Count());
+            return Ok(data);
         }
     }
 }
