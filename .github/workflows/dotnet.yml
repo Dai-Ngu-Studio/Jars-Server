@@ -5,58 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
-      - name: Restore dependencies
-        run: dotnet restore ./JARS/JARS-API
-      - name: Build
-        run: dotnet build ./JARS/JARS-API --no-restore
-      - uses: actions/upload-artifact@main
-        with:
-          name: dotnet build artifacts
-          path: ./JARS/JARS-API/
-  deploytest:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.4.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: ./JARS/
-          push: true
-          tags: ngianguyen81/jars:test
-          build-args: |
-            SSL_PASSWORD=${{ secrets.SSL_PASSWORD }}
-      - name: SSH to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOSTNAME }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATEKEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
-            sudo docker stop jars-api-container-test
-            sudo docker container rm jars-api-container-test
-            sudo docker image rm ngianguyen81/jars:test
-            sudo docker pull ngianguyen81/jars:test
-            docker run --network jars_test_network --network-alias api_test -d -p 81:80 -p 8002:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8002 -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -e ASPNETCORE_Kestrel__Certificates__Default__Password=${{ secrets.SSL_PASSWORD }} -e ASPNETCORE_ENVIRONMENT=Development -e SA_PASSWORD=${{secrets.SA_PASSWORD}} -e FIREBASE_SECRET=${{secrets.FIREBASE_SECRET}} -e GOOGLE_APPLICATION_CREDENTIALS="./jars-c19f8-firebase-adminsdk.json" --name jars-api-container-test ngianguyen81/jars:test
   test:
-    needs: deploytest
     runs-on: ubuntu-latest
     steps:
     - name: Newman Action
@@ -65,37 +14,3 @@ jobs:
         apiKey: ${{ secrets.POSTMAN_API_KEY }}
         collection: ${{ secrets.POSTMAN_COLLECTION_UID }}
         environment: ${{ secrets.POSTMAN_ENVIRONMENT_UID }}
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.4.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: ./JARS/
-          push: true
-          tags: ngianguyen81/jars:latest
-          build-args: |
-            SSL_PASSWORD=${{ secrets.SSL_PASSWORD }}
-      - name: SSH to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOSTNAME }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATEKEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            sudo docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }}
-            sudo docker stop jars-api-container
-            sudo docker container rm jars-api-container
-            sudo docker image rm ngianguyen81/jars:latest
-            sudo docker pull ngianguyen81/jars:latest
-            docker run --network jars_network --network-alias api -d -p 80:80 -p 8001:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8001 -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx -e ASPNETCORE_Kestrel__Certificates__Default__Password=${{ secrets.SSL_PASSWORD }} -e ASPNETCORE_ENVIRONMENT=Development -e SA_PASSWORD=${{secrets.SA_PASSWORD}} -e FIREBASE_SECRET=${{secrets.FIREBASE_SECRET}} -e GOOGLE_APPLICATION_CREDENTIALS="./jars-c19f8-firebase-adminsdk.json" --name jars-api-container ngianguyen81/jars:latest
