@@ -13,6 +13,6 @@ jobs:
     - name: Newman Action
       uses: matt-ball/newman-action@v1.0.4
       with:
-        apiKey: ${{ secrets.POSTMAN_API_KEY }}
+        apiKey: PMAK-620dba0ee56bc80cdc1975e4-ed521c9e35a6b4905a049573a9415e0ed1
         collection: 19221303-96694d53-940f-4ae7-8d9f-4afc978498e1
-        environment: ${{ secrets.POSTMAN_ENVIRONMENT_UID }}
+        environment: 19221303-256e97c9-90ae-4a07-b4db-72f80bd6fc09
