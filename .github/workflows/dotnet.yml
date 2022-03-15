@@ -3,9 +3,9 @@ name: .NET
 on:
   push:
     branches: [main]
-
+    
 jobs:
-  test:
+  newman:
     runs-on: ubuntu-latest
     steps:
     - name: Newman Action
