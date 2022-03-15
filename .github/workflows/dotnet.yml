@@ -2,8 +2,10 @@ name: .NET
 
 on:
   push:
-    branches: [main]
-    
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
   newman:
     runs-on: ubuntu-latest
