@@ -10,8 +10,13 @@ namespace JARS_DAL.Repository
 {
     public class WalletRepository : IWalletReposiotry
     {
+        public Task Add6DefaultJars(string id, decimal totalAmount) =>WalletManagement.Instance.Add6DefaultJars(id, totalAmount);
+       
+
         public Task AddWallet(Wallet wallet) => WalletManagement.Instance.AddWallet(wallet);
 
+        public Task<int> countWallets(string uid) => WalletManagement.Instance.countWalletsByUserID(uid);
+  
 
         public Task DeleteWallet(int id) => WalletManagement.Instance.RemoveWallet(id);
        

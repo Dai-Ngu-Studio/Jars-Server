@@ -29,6 +29,11 @@ namespace JARS_DAL.DAO
                 return instance; 
             }
         }
+        public async Task<int> countWalletsByUserID(String uid)
+        {
+            var jarsDB = new JarsDatabaseContext();
+            return await jarsDB.Wallets.Where(w => w.AccountId == uid).CountAsync();
+        }
         public async Task<IEnumerable<Wallet>> GetWallets(string id)
         {            
             try
@@ -39,8 +44,7 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task<Wallet> GetWallet(int id)
@@ -53,8 +57,7 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task AddWallet(Wallet wallet)
@@ -67,9 +70,96 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
+            }
+        }
+        public async Task Add6DefaultJars(string id,decimal totalAmount)
+        {
+            try
+            {
+                
+                var jarDB = new JarsDatabaseContext();
+                CategoryWallet categoryWallet = new CategoryWallet()
+                {
+                    Name = "FromSalary",
+                    CurrentCategoryLevel = 0,
+                    
+                };
+                jarDB.CategoryWallets.Add(categoryWallet);
+                await jarDB.SaveChangesAsync();
+                List<Wallet> wallets = new List<Wallet>{
+                    new Wallet()
+                    {
 
+                        AccountId = id,
+                        CategoryWalletId = categoryWallet.Id,
+                        Name = "The Necessaries Account",
+                        Percentage = 55,
+                        StartDate = DateTime.Now,
+                        WalletAmount = (totalAmount*55)/100,
+                    },
+                    new Wallet()
+                    {
 
+                            AccountId = id,
+                            CategoryWalletId = categoryWallet.Id,
+                            Name = "Financial Freedom Account",
+                            Percentage = 10,
+                            StartDate = DateTime.Now,
+                            WalletAmount= (totalAmount *10)/100,
+                    },
+                    new Wallet()
+                     {
+
+                            AccountId = id,
+                            CategoryWalletId = categoryWallet.Id,
+                            Name = "Long-term Saving Account",
+                            Percentage = 10,
+                            StartDate = DateTime.Now,
+                            WalletAmount= (totalAmount * 10) / 100,
+                    },
+                    new Wallet()
+                    {
+
+                        AccountId = id,
+                        CategoryWalletId = categoryWallet.Id,
+                        Name = "Education Account",
+                        Percentage = 10,
+                        StartDate = DateTime.Now,
+                        WalletAmount= (totalAmount*10)/100,
+                    },
+                    new Wallet()
+                    {
+
+                        AccountId = id,
+                        CategoryWalletId = categoryWallet.Id,
+                        Name = "Play Account",
+                        Percentage = 10,
+                        StartDate = DateTime.Now,
+                        WalletAmount= (totalAmount*10)/100,
+                    },
+                    new Wallet()
+                    {
+
+                        AccountId = id,
+                        CategoryWalletId = categoryWallet.Id,
+                        Name = "Give Account",
+                        Percentage = 5,
+                        StartDate = DateTime.Now
+                        ,WalletAmount = (totalAmount*5)/100,
+                    },
+
+                };
+                categoryWallet.ParentCategoryId = categoryWallet.Id;
+                jarDB.CategoryWallets.Update(categoryWallet);
+                await jarDB.SaveChangesAsync();
+               
+                jarDB.Wallets.AddRange(wallets);
+                await jarDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task UpdateWallet (Wallet wallet)
@@ -81,9 +171,9 @@ namespace JARS_DAL.DAO
                 jarDB.Wallets.Update(wallet);
                 await jarDB.SaveChangesAsync();
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
         public async Task RemoveWallet(int id)
@@ -105,8 +195,7 @@ namespace JARS_DAL.DAO
             }
             catch (Exception ex)
             {
-
-                throw new Exception(ex.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
     }
