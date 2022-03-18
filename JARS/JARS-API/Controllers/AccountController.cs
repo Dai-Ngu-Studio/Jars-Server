@@ -26,49 +26,47 @@ namespace JARS_API.Controllers
         /// Get accounts with optional queries. Only the admin is authorized to use this method.
         /// </summary>
         /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
-        /// <param name="size">Maximum number of results to return. Default value: 20</param>
-        /// <param name="email">Optional filter for account's email. Default value: ""</param>
-        /// <param name="displayName">Optional filter for account's displayName. Default value: ""</param>
+        /// <param name="size">Maximum number of results to return. Default value: 10</param>
+        /// <param name="search">Optional filter. Default value: ""</param>
         /// <returns></returns>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<List<AccountWithTransactionCount>>> GetList(
-            [FromQuery] int page = 0, [FromQuery] int size = 20, [FromQuery] string? email = "", [FromQuery] string? displayName = "")
+            [FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? search = null!)
         {
-            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (uid != null && email != null && displayName != null)
+            var accounts = await _accountRepository.GetListAsync(page, size, search!);
+            if (accounts != null)
             {
-                var user = await _accountRepository.GetAsync(uid);
-                if (user != null && user.IsAdmin)
+                List<AccountWithTransactionCount> accountWithTransactions = new List<AccountWithTransactionCount>();
+                foreach (var account in accounts)
                 {
-                    var accounts = await _accountRepository.GetListAsync(page, size, email, displayName);
-                    if (accounts != null)
+                    int transactionCount = 0;
+                    foreach (var wallet in account.Wallets)
                     {
-                        List<AccountWithTransactionCount> accountWithTransactions = new List<AccountWithTransactionCount>();
-                        foreach(var account in accounts)
-                        {
-                            int transactionCount = 0;
-                            foreach(var wallet in account.Wallets)
-                            {
-                                transactionCount += wallet.Transactions.Count();
-                            }
-                            AccountWithTransactionCount accountWithTransaction = new()
-                            {
-                                IsAdmin = account.IsAdmin,
-                                DisplayName = displayName,
-                                Email = email,
-                                Id = account.Id,
-                                PhotoUrl = account.PhotoUrl,
-                                TransactionCount = transactionCount,
-                            };
-                            accountWithTransactions.Add(accountWithTransaction);
-                        }
-                        return accountWithTransactions;
+                        transactionCount += wallet.Transactions.Count();
                     }
-                    return NoContent();
+                    AccountWithTransactionCount accountWithTransaction = new()
+                    {
+                        IsAdmin = account.IsAdmin,
+                        DisplayName = account.DisplayName,
+                        Email = account.Email,
+                        Id = account.Id,
+                        LastLoginDate = account.LastLoginDate,
+                        PhotoUrl = account.PhotoUrl,
+                        TransactionCount = transactionCount,
+                    };
+                    accountWithTransactions.Add(accountWithTransaction);
                 }
+                int TotalAccounts = await _accountRepository.GetTotalAccount(search!);
+                int TotalPages = (TotalAccounts - 1) / size + 1;
+                var model = new
+                {
+                    accounts = accountWithTransactions,
+                    numOfPages = TotalPages,
+                };
+                return Ok(model);
             }
-            return Unauthorized();
+            return NoContent();
         }
 
         /// <summary>
