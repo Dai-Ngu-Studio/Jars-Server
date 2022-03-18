@@ -42,7 +42,31 @@ namespace JARS_DAL.DAO
             }
         }
 
-        public async Task<IEnumerable<Account>> GetListAsync(int page, int size, string email, string displayName)
+        public async Task<int> GetTotalAccount(string search)
+        {
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();                
+                if (search != null)
+                {
+                    int TotalAccount = await jarsDB.Accounts
+                        .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(search))
+                        .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(search))
+                        .CountAsync();
+                    return TotalAccount;
+                } else
+                {
+                    int TotalAccount = await jarsDB.Accounts.CountAsync();
+                    return TotalAccount;
+                }           
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Account>> GetListAsync(int page, int size, string search)
         {
             try
             {
@@ -50,9 +74,9 @@ namespace JARS_DAL.DAO
                 var accounts = await jarsDB.Accounts
                     .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions.Where(transaction => ((DateTime)transaction.TransactionDate!).Date == DateTime.Today))
                     .OrderBy(account => account.Email)
-                    .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(email))
-                    .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(displayName))
-                    .Skip(page * size)
+                    .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(search))
+                    .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(search))
+                    .Skip((page - 1) * size)
                     .Take(size)
                     .ToListAsync();
                 return accounts;

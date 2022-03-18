@@ -30,7 +30,7 @@ builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<IScheduleTypeRepository, ScheduleTypeRepository>();
 builder.Services.AddScoped<IAccountDeviceRepository, AccountDeviceRepository>();
 
-// builder.Services.AddSingleton<IContractRepository, ContractRepository>();
+builder.Services.AddCors();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
