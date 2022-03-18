@@ -47,10 +47,16 @@ namespace JARS_DAL.DAO
 
             if (searchName != null)
             {
-                contracts = contracts.Where(contract => string.IsNullOrEmpty(contract.Name) || contract.Name.ToLower().Contains(searchName.ToLower())).ToList();
+                contracts = contracts.Where(contract => contract.Name!.ToLower().Contains(searchName.ToLower())).ToList();
             }
             switch (sortOrder)
             {
+                case "asc":
+                    contracts = contracts.OrderBy(s => s.StartDate).ToList();
+                    break;
+                case "desc":
+                    contracts = contracts.OrderByDescending(s => s.StartDate).ToList();
+                    break;
                 case "z-a":
                     contracts = contracts.OrderByDescending(s => s.Name).ToList();
                     break;
