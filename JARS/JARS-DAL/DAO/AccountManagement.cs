@@ -46,19 +46,19 @@ namespace JARS_DAL.DAO
         {
             try
             {
-                var jarsDB = new JarsDatabaseContext();                
+                var jarsDB = new JarsDatabaseContext();
                 if (search != null)
                 {
                     int TotalAccount = await jarsDB.Accounts
-                        .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(search))
-                        .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(search))
+                        .Where(account => account.Email!.ToLower().Contains(search) || account.DisplayName!.ToLower().Contains(search))
                         .CountAsync();
                     return TotalAccount;
-                } else
+                }
+                else
                 {
                     int TotalAccount = await jarsDB.Accounts.CountAsync();
                     return TotalAccount;
-                }           
+                }
             }
             catch (Exception)
             {
@@ -71,15 +71,28 @@ namespace JARS_DAL.DAO
             try
             {
                 var jarsDB = new JarsDatabaseContext();
-                var accounts = await jarsDB.Accounts
-                    .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions.Where(transaction => ((DateTime)transaction.TransactionDate!).Date == DateTime.Today))
-                    .OrderBy(account => account.Email)
-                    .Where(account => string.IsNullOrEmpty(account.Email) || account.Email.ToLower().Contains(search))
-                    .Where(account => string.IsNullOrEmpty(account.DisplayName) || account.DisplayName.ToLower().Contains(search))
-                    .Skip((page - 1) * size)
-                    .Take(size)
-                    .ToListAsync();
-                return accounts;
+                if (search != null)
+                {
+                    var accounts = await jarsDB.Accounts
+                        .Include(account => account.Wallets)
+                        .ThenInclude(wallet => wallet.Transactions.Where(transaction => ((DateTime)transaction.TransactionDate!).Date == DateTime.Today))
+                        .OrderBy(account => account.Email)
+                        .Where(account => account.Email!.ToLower().Contains(search) || account.DisplayName!.ToLower().Contains(search))
+                        .Skip((page - 1) * size)
+                        .Take(size)
+                        .ToListAsync();
+                    return accounts;
+                } else
+                {
+                    var accounts = await jarsDB.Accounts
+                        .Include(account => account.Wallets)
+                        .ThenInclude(wallet => wallet.Transactions.Where(transaction => ((DateTime)transaction.TransactionDate!).Date == DateTime.Today))
+                        .OrderBy(account => account.Email)
+                        .Skip((page - 1) * size)
+                        .Take(size)
+                        .ToListAsync();
+                    return accounts;
+                }
             }
             catch (Exception)
             {
@@ -147,7 +160,8 @@ namespace JARS_DAL.DAO
                     var jarsDB = new JarsDatabaseContext();
                     jarsDB.Entry<Account>(account).State = EntityState.Modified;
                     await jarsDB.SaveChangesAsync();
-                } else
+                }
+                else
                 {
                     throw new Exception("Specified account does not exist.");
                 }
