@@ -109,25 +109,36 @@ namespace JARS_API.Controllers
                 CredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS"),
             }.Build();
 
+            string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+
+            List<string> dateRanges = new List<string>();
+            for (int i = -7; i < 0; i++)
+            {
+                dateRanges.Add(DateTime.Now.AddDays(i).ToString("yyyy-MM-dd"));
+            }
+
             RunReportRequest request = new RunReportRequest
             {
                 Property = "properties/" + 306844081,
                 Dimensions = { new Dimension { Name = "city" }, },
                 Metrics = {
-                    new Metric { Name = "activeUsers" },
                     new Metric { Name = "active28DayUsers" },
                     new Metric { Name = "newUsers" },
                     new Metric { Name = "totalUsers" },
-                    new Metric { Name = "sessions" },
                 },
-                DateRanges = { new DateRange { StartDate = "2020-03-31", EndDate = "today" }, },
+                DateRanges = {
+                    new DateRange { StartDate = dateRanges[0], EndDate = dateRanges[1], Name = "7 to 6 days ago" },
+                    new DateRange { StartDate = dateRanges[2], EndDate = dateRanges[3], Name = "5 to 4 days ago" },
+                    new DateRange { StartDate = dateRanges[4], EndDate = dateRanges[5], Name = "3 to 2 days ago" },
+                    new DateRange { StartDate = dateRanges[6], EndDate = currentDate, Name = "yesterday and today" },
+                },
             };
 
             var response = await client.RunReportAsync(request);
             Dictionary<string, object> data = new Dictionary<string, object>();
-            
+
             data.Add("report", response);
-            data.Add("transactions", (await _transactionRepository.GetTransactionsFromDate(DateTime.Today)).Count());
+            data.Add("todayTransactions", (await _transactionRepository.GetTransactionsFromDate(DateTime.Today)).Count());
             return Ok(data);
         }
     }

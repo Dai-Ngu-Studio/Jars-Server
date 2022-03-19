@@ -27,46 +27,55 @@ namespace JARS_API.Controllers
         /// </summary>
         /// <param name="page">Parameter "page" is multiplied by the parameter "size" to determine the number of rows to skip. Default value: 0</param>
         /// <param name="size">Maximum number of results to return. Default value: 10</param>
-        /// <param name="search">Optional filter. Default value: ""</param>
+        /// <param name="search">Optional filter. Default value: null</param>
         /// <returns></returns>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<List<AccountWithTransactionCount>>> GetList(
             [FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? search = null!)
         {
-            var accounts = await _accountRepository.GetListAsync(page, size, search!);
-            if (accounts != null)
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
             {
-                List<AccountWithTransactionCount> accountWithTransactions = new List<AccountWithTransactionCount>();
-                foreach (var account in accounts)
+                var user = await _accountRepository.GetAsync(uid);
+                if (user != null && user.IsAdmin)
                 {
-                    int transactionCount = 0;
-                    foreach (var wallet in account.Wallets)
+                    var accounts = await _accountRepository.GetListAsync(page, size, search!);
+                    if (accounts != null)
                     {
-                        transactionCount += wallet.Transactions.Count();
+                        List<AccountWithTransactionCount> accountWithTransactions = new List<AccountWithTransactionCount>();
+                        foreach (var account in accounts)
+                        {
+                            int transactionCount = 0;
+                            foreach (var wallet in account.Wallets)
+                            {
+                                transactionCount += wallet.Transactions.Count();
+                            }
+                            AccountWithTransactionCount accountWithTransaction = new()
+                            {
+                                IsAdmin = account.IsAdmin,
+                                DisplayName = account.DisplayName,
+                                Email = account.Email,
+                                Id = account.Id,
+                                LastLoginDate = account.LastLoginDate,
+                                PhotoUrl = account.PhotoUrl,
+                                TransactionCount = transactionCount,
+                            };
+                            accountWithTransactions.Add(accountWithTransaction);
+                        }
+                        int TotalAccounts = await _accountRepository.GetTotalAccount(search!);
+                        int TotalPages = (TotalAccounts - 1) / size + 1;
+                        var model = new
+                        {
+                            accounts = accountWithTransactions,
+                            numOfPages = TotalPages,
+                        };
+                        return Ok(model);
                     }
-                    AccountWithTransactionCount accountWithTransaction = new()
-                    {
-                        IsAdmin = account.IsAdmin,
-                        DisplayName = account.DisplayName,
-                        Email = account.Email,
-                        Id = account.Id,
-                        LastLoginDate = account.LastLoginDate,
-                        PhotoUrl = account.PhotoUrl,
-                        TransactionCount = transactionCount,
-                    };
-                    accountWithTransactions.Add(accountWithTransaction);
+                    return NoContent();
                 }
-                int TotalAccounts = await _accountRepository.GetTotalAccount(search!);
-                int TotalPages = (TotalAccounts - 1) / size + 1;
-                var model = new
-                {
-                    accounts = accountWithTransactions,
-                    numOfPages = TotalPages,
-                };
-                return Ok(model);
             }
-            return NoContent();
+            return Unauthorized();
         }
 
         /// <summary>
