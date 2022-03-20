@@ -93,7 +93,7 @@ namespace JARS_DAL.DAO
 
                         AccountId = id,
                         CategoryWalletId = categoryWallet.Id,
-                        Name = "The Necessaries Account",
+                        Name = "Necessities",
                         Percentage = 55,
                         StartDate = DateTime.Now,
                         WalletAmount = (totalAmount*55)/100,
@@ -103,7 +103,7 @@ namespace JARS_DAL.DAO
 
                             AccountId = id,
                             CategoryWalletId = categoryWallet.Id,
-                            Name = "Financial Freedom Account",
+                            Name = "Investment",
                             Percentage = 10,
                             StartDate = DateTime.Now,
                             WalletAmount= (totalAmount *10)/100,
@@ -113,7 +113,7 @@ namespace JARS_DAL.DAO
 
                             AccountId = id,
                             CategoryWalletId = categoryWallet.Id,
-                            Name = "Long-term Saving Account",
+                            Name = "Saving",
                             Percentage = 10,
                             StartDate = DateTime.Now,
                             WalletAmount= (totalAmount * 10) / 100,
@@ -123,7 +123,7 @@ namespace JARS_DAL.DAO
 
                         AccountId = id,
                         CategoryWalletId = categoryWallet.Id,
-                        Name = "Education Account",
+                        Name = "Education",
                         Percentage = 10,
                         StartDate = DateTime.Now,
                         WalletAmount= (totalAmount*10)/100,
@@ -133,7 +133,7 @@ namespace JARS_DAL.DAO
 
                         AccountId = id,
                         CategoryWalletId = categoryWallet.Id,
-                        Name = "Play Account",
+                        Name = "Play",
                         Percentage = 10,
                         StartDate = DateTime.Now,
                         WalletAmount= (totalAmount*10)/100,
@@ -143,7 +143,7 @@ namespace JARS_DAL.DAO
 
                         AccountId = id,
                         CategoryWalletId = categoryWallet.Id,
-                        Name = "Give Account",
+                        Name = "Give",
                         Percentage = 5,
                         StartDate = DateTime.Now
                         ,WalletAmount = (totalAmount*5)/100,
