@@ -55,6 +55,7 @@ namespace JARS_API.Controllers
             };
                   await repository.AddWallet(_wallet);
         }
+       
 
         //PUT /wallets/{id}
         [HttpPut("{id}")]
@@ -86,6 +87,29 @@ namespace JARS_API.Controllers
         {
            repository.DeleteWallet(id);
             return Ok();
+
+        }
+        [HttpPost("six-wallets")]
+        [Authorize]
+        public async Task<ActionResult> CreateSixJars([FromQuery] decimal totalAmount)
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                if (await repository.countWallets(uid) == 0)
+                {
+                    if (await repository.GetAllWallets(uid) != null)
+                    {
+                        await repository.Add6DefaultJars(uid, totalAmount);
+                    }
+                    return Ok("Add success 6 Jars");
+                }
+                else return BadRequest("This account already have more than 1 wallet, cannot create 6 default jars");
+
+            }
+            return BadRequest("Authorize problem or wrong input");
+
 
         }
 
