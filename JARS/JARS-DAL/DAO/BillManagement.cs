@@ -44,11 +44,17 @@ namespace JARS_DAL.DAO
                     .ToListAsync();
                 if (searchName != null)
                 {
-                    bills = bills.Where(bill => string.IsNullOrEmpty(bill.Name) || bill.Name.ToLower().Contains(searchName.ToLower())).ToList();
+                    bills = bills.Where(bill => bill.Name!.ToLower().Contains(searchName.ToLower())).ToList();
                 }
                 if (dateFrom.HasValue && dateTo.HasValue)
                 {
-                    bills = bills.Where(bill => DateTime.Compare(bill.Date.Value.Date, dateFrom.Value.Date) >= 0
+                    if (DateTime.Compare((DateTime)dateFrom, (DateTime)dateTo) > 0)
+                    {
+                        DateTime? temp = dateFrom;
+                        dateFrom = dateTo;
+                        dateTo = temp;
+                    }
+                    bills = bills.Where(bill => DateTime.Compare(bill.Date!.Value.Date, dateFrom.Value.Date) >= 0
                             && DateTime.Compare(bill.Date.Value.Date, dateTo.Value.Date) <= 0).ToList();
                 } 
 

@@ -112,99 +112,110 @@ namespace JARS_API.Controllers
         /// <param name="bill">Bill in JSON format</param>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ActionResult> UpdateBill([FromQuery]int bill_id, [FromQuery]int wallet_id, Bill bill)
+        public async Task<ActionResult> UpdateBill([FromQuery] int bill_id, [FromQuery] int wallet_id, Bill bill)
         {
-            var result = await _repository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
-            if (result == null)
+            var currentBill = await _repository.GetBillByBillIdAsync(bill_id, GetCurrentUID());
+            if (currentBill == null)
             {
                 return BadRequest();
             }
-            var walletOwner = await _walletReposiotry.GetWallet(wallet_id);
+            var wallet = await _walletReposiotry.GetWallet(wallet_id);
 
-            if (walletOwner == null)
+            if (wallet == null)
                 return NotFound();
-            if (walletOwner.WalletAmount < bill.LeftAmount)
+
+            if (currentBill.LeftAmount > currentBill.Amount)
             {
-                return BadRequest();
+                return BadRequest("Amount left can't be higher than amount.");
+            }
+
+            if (currentBill.LeftAmount < bill.LeftAmount)
+            {
+                return BadRequest("Amount left can't be higher than amount left to pay.");
+            }
+
+            if (wallet.WalletAmount < (currentBill.LeftAmount - bill.LeftAmount))
+            {
+                return BadRequest($"{wallet.Name} does not have enough money.");
             }
 
             try
             {
                 decimal? leftAmount = 0;
                 decimal? transactionLeftAmount = 0;
-                if (result.LeftAmount == bill.LeftAmount)
+                if (currentBill.LeftAmount == bill.LeftAmount)
                 {
-                    leftAmount = result.LeftAmount;
+                    leftAmount = currentBill.LeftAmount;
                 }
                 else
                 {
                     if (bill.LeftAmount > 0)
                     {
-                        transactionLeftAmount = result.LeftAmount - bill.LeftAmount;
+                        transactionLeftAmount = currentBill.LeftAmount - bill.LeftAmount;
 
                         if (transactionLeftAmount < 0)
                         {
                             leftAmount = 0;
-                            transactionLeftAmount = result.LeftAmount;
+                            transactionLeftAmount = currentBill.LeftAmount;
                         }
                         else
                         {
-                            leftAmount = result.LeftAmount - transactionLeftAmount;
+                            leftAmount = currentBill.LeftAmount - transactionLeftAmount;
                         }
                     }
                     if (bill.LeftAmount == 0)
                     {
                         leftAmount = 0;
-                        transactionLeftAmount = result.Amount;
+                        transactionLeftAmount = currentBill.LeftAmount;
                     }
                 }
 
                 Bill _bill = new Bill
                 {
-                    Id = result.Id,
-                    Date = bill.Date == null ? result.Date : bill.Date,
+                    Id = currentBill.Id,
+                    Date = bill.Date == null ? currentBill.Date : bill.Date,
                     LeftAmount = leftAmount,
-                    Name = bill.Name == null ? result.Name : bill.Name,
-                    Amount = result.Amount,
-                    CategoryId = result.CategoryId,
-                    AccountId = result.AccountId,
-                    ContractId = result.ContractId,
+                    Name = bill.Name == null ? currentBill.Name : bill.Name,
+                    Amount = currentBill.Amount,
+                    CategoryId = currentBill.CategoryId,
+                    AccountId = currentBill.AccountId,
+                    ContractId = currentBill.ContractId,
                 };
                 await _repository.UpdateBillAsync(_bill);
-                
-                if (result.LeftAmount != leftAmount)
-                {                   
+
+                if (currentBill.LeftAmount != leftAmount)
+                {
                     Transaction transaction = new Transaction
                     {
-                        WalletId = walletOwner.Id,
+                        WalletId = wallet.Id,
                         TransactionDate = DateTime.Now,
                         BillId = _bill.Id,
-                        Amount = transactionLeftAmount,
+                        Amount = -transactionLeftAmount,
                     };
                     await _transactionRepository.Add(transaction);
 
-                    Wallet wallet = new Wallet
+                    Wallet _wallet = new Wallet
                     {
-                        Id = walletOwner.Id,
-                        Name = walletOwner.Name,
-                        WalletAmount = walletOwner.WalletAmount - transaction.Amount < 0 ? 0 : walletOwner.WalletAmount - transaction.Amount,
-                        Percentage = walletOwner.Percentage,
-                        AccountId = walletOwner.AccountId,
-                        StartDate = walletOwner.StartDate,
-                        CategoryWallet = walletOwner.CategoryWallet,
+                        Id = wallet.Id,
+                        Name = wallet.Name,
+                        WalletAmount = ((wallet.WalletAmount + transaction.Amount) < 0) ? 0 : (wallet.WalletAmount + transaction.Amount),
+                        Percentage = wallet.Percentage,
+                        AccountId = wallet.AccountId,
+                        StartDate = wallet.StartDate,
+                        CategoryWallet = wallet.CategoryWallet,
                     };
                     await _walletReposiotry.UpdateWallet(wallet);
                 }
                 return Ok(_bill);
             }
             catch (DbUpdateConcurrencyException)
-            {             
+            {
                 if (_repository.GetBillByBillIdAsync(bill.Id, GetCurrentUID()) == null)
                 {
                     return NotFound();
                 }
                 else { throw; }
-            }         
+            }
         }
 
         [HttpDelete("{id}")]
@@ -220,11 +231,12 @@ namespace JARS_API.Controllers
                 if (billDetail.Count == 0)
                 {
                     await _repository.DeleteBillAsync(bill);
-                } else
+                }
+                else
                 {
                     return BadRequest("Bill detail still remain for this bill");
                 }
-                
+
             }
             catch (Exception)
             {
@@ -234,7 +246,7 @@ namespace JARS_API.Controllers
             return Ok(bill);
         }
 
-        [HttpGet("{id}")] 
+        [HttpGet("{id}")]
         public async Task<ActionResult<Bill>> GetBill(int id)
         {
             return await _repository.GetBillByBillIdAsync(id, GetCurrentUID());

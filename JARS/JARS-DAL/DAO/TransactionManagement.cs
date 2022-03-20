@@ -4,7 +4,7 @@ namespace JARS_DAL.DAO;
 
 public class TransactionManagement
 {
-    private static TransactionManagement instance = null;
+    private static TransactionManagement instance = null!;
     private static readonly object instanceLock = new object();
 
     private TransactionManagement() { }
@@ -22,12 +22,28 @@ public class TransactionManagement
             }
         }
     }
+
+    public async Task<IEnumerable<Transaction>> GetTransactionsFromDate(DateTime date)
+    {
+        try
+        {
+            var context = new JarsDatabaseContext();
+            return await context.Transactions
+                .Where(transaction =>((DateTime)transaction.TransactionDate!).Date >= date.Date)
+                .ToListAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
     public async Task<IEnumerable<Transaction>> GetTransactions(string uid)
     {
         try
         {
             var context = new JarsDatabaseContext();
-            return await context.Transactions.Where(t => t.Wallet.Account.Id == uid).ToListAsync();
+            return await context.Transactions.Where(t => t.Wallet!.Account!.Id == uid).ToListAsync();
         }
         catch (Exception)
         {
@@ -40,7 +56,7 @@ public class TransactionManagement
         {
             var context = new JarsDatabaseContext();
             return await context.Transactions
-                .FirstOrDefaultAsync(t => (t.Id == id)&&(t.Wallet.Account.Id == uid));
+                .FirstOrDefaultAsync(t => (t.Id == id)&&(t.Wallet!.Account!.Id == uid));
         }
         catch (Exception)
         {
