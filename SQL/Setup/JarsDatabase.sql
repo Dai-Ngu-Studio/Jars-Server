@@ -105,7 +105,7 @@ IF OBJECT_ID('ScheduleType', 'U') IS NULL
 BEGIN
   CREATE TABLE [ScheduleType]
   (
-    [ID] int IDENTITY(1, 1),
+    [ID] int,
     --PK--
     [Name] nvarchar(max),
 
@@ -229,6 +229,6 @@ BEGIN
 
     PRIMARY KEY ([FcmToken]),
 
-    FOREIGN KEY ([AccountId]) REFERENCES Account([ID]),
+    FOREIGN KEY ([AccountID]) REFERENCES Account([ID]),
   );
 END;
