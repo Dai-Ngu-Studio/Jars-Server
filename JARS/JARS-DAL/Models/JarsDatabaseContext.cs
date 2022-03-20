@@ -61,7 +61,7 @@ namespace JARS_DAL.Models
             modelBuilder.Entity<AccountDevice>(entity =>
             {
                 entity.HasKey(e => e.FcmToken)
-                    .HasName("PK__AccountD__F325AEE357572930");
+                    .HasName("PK__AccountD__F325AEE3BC77EB52");
 
                 entity.ToTable("AccountDevice");
 
@@ -229,7 +229,9 @@ namespace JARS_DAL.Models
             {
                 entity.ToTable("ScheduleType");
 
-                entity.Property(e => e.Id).HasColumnName("ID");
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
             });
 
             modelBuilder.Entity<Transaction>(entity =>
