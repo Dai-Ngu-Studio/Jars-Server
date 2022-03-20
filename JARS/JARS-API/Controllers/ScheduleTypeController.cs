@@ -27,16 +27,12 @@ namespace JARS_API.Controllers
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                var user = await _accountRepository.GetAsync(uid);
-                if (user != null && user.IsAdmin)
+                var scheduleTypes = await _scheduleTypeRepository.GetListAsync();
+                if (scheduleTypes != null)
                 {
-                    var scheduleTypes = await _scheduleTypeRepository.GetListAsync();
-                    if (scheduleTypes != null)
-                    {
-                        return scheduleTypes.ToList();
-                    }
-                    return NoContent();
+                    return scheduleTypes.ToList();
                 }
+                return NoContent();
             }
             return Unauthorized();
         }
@@ -48,16 +44,12 @@ namespace JARS_API.Controllers
             string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (uid != null)
             {
-                var user = await _accountRepository.GetAsync(uid);
-                if (user != null && user.IsAdmin)
+                var scheduleType = await _scheduleTypeRepository.GetAsync(id);
+                if (scheduleType == null)
                 {
-                    var scheduleType = await _scheduleTypeRepository.GetAsync(id);
-                    if (scheduleType == null)
-                    {
-                        return NotFound();
-                    }
-                    return scheduleType;
+                    return NotFound();
                 }
+                return scheduleType;
             }
             return Unauthorized();
         }
