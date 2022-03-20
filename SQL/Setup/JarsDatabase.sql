@@ -221,7 +221,7 @@ IF OBJECT_ID('AccountDevice', 'U') IS NULL
 BEGIN
   CREATE TABLE [AccountDevice]
   (
-    [FcmToken] varchar(1000),
+    [FcmToken] varchar(800),
     --PK--
     [AccountID] varchar(128),
     --FK--
