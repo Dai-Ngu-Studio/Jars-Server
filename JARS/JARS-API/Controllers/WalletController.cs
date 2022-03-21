@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using JARS_API.BusinessModels;
 
 namespace JARS_API.Controllers
 {
@@ -39,6 +40,14 @@ namespace JARS_API.Controllers
         public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
             return await repository.GetWallet(id);
+        }
+       [HttpGet("wallet-spend/{id}")]
+        public async Task<ActionResult<TransactionWallet>> GetWalletSpend(int id)
+        {   if(await repository.getWalletTransaction(id) == null)
+            {
+                return BadRequest("The wallet may not exitst");
+            }
+            return await repository.getWalletTransaction(id);
         }
         //POST /wallets/
         [HttpPost]
