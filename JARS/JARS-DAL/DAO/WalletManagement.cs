@@ -167,48 +167,52 @@ namespace JARS_DAL.DAO
                
                 jarDB.Wallets.AddRange(wallets);
                 await jarDB.SaveChangesAsync();
-                 List<Transaction> transactions = new List<Transaction>()
+                if(totalAmount > 0)
                 {
-                    new Transaction()
+                    List<Transaction> transactions = new List<Transaction>()
                     {
-                        WalletId =  wallets[0].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[0].WalletAmount
-                    },
-                    new Transaction()
-                    {
-                        WalletId =  wallets[1].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[1].WalletAmount
-                    },
-                    new Transaction()
-                    {
-                        WalletId =  wallets[2].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[2].WalletAmount
-                    },
-                    new Transaction()
-                    {
-                        WalletId =  wallets[3].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[3].WalletAmount
-                    },
-                    new Transaction()
-                    {
-                        WalletId =  wallets[4].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[4].WalletAmount
-                    },
-                    new Transaction()
-                    {
-                        WalletId =  wallets[5].Id,
-                        TransactionDate = DateTime.Now,
-                        Amount = wallets[5].WalletAmount                       
-                    }
-                };
+                        new Transaction()
+                        {
+                            WalletId =  wallets[0].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[0].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[1].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[1].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[2].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[2].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[3].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[3].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[4].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[4].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[5].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[5].WalletAmount
+                        }
+                    };
 
-                jarDB.Transactions.AddRange(transactions);
-                await jarDB.SaveChangesAsync();
+                    jarDB.Transactions.AddRange(transactions);
+                    await jarDB.SaveChangesAsync();
+                }
+               
             }
             catch (Exception ex)
             {
