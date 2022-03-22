@@ -41,13 +41,33 @@ namespace JARS_API.Controllers
         {
             return await repository.GetWallet(id);
         }
-       [HttpGet("wallet-spend/{id}")]
+        [HttpGet("wallet-spend/{id}")]
         public async Task<ActionResult<TransactionWallet>> GetWalletSpend(int id)
-        {   if(await repository.getWalletTransaction(id) == null)
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
             {
-                return BadRequest("The wallet may not exitst");
+                if (await repository.getWalletTransaction(uid, id) == null)
+                {
+                    return BadRequest("The wallet may not exitst");
+                }
             }
-            return await repository.getWalletTransaction(id);
+            return await repository.getWalletTransaction(uid,id);
+        }
+        [HttpGet("six-wallets-spend")]
+        public async Task<ActionResult<List<TransactionWallet>>> GetSixWalletSpend()
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                if (await repository.getTransactionWallets(uid) == null)
+                {
+                    return BadRequest("user may not init 6 jars");
+                }
+            }
+            return await repository.getTransactionWallets(uid);
         }
         //POST /wallets/
         [HttpPost]
