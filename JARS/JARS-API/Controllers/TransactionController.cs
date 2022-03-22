@@ -1,4 +1,5 @@
 #nullable disable
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JARS_DAL.Models;
@@ -15,15 +16,118 @@ namespace JARS_API.Controllers
     public class TransactionController : ControllerBase
     {
         private ITransactionRepository _transactionRep;
+
         public TransactionController(ITransactionRepository repository)
         {
             _transactionRep = repository;
         }
+
         // GET: api/Transaction
         [HttpGet]
         public async Task<IEnumerable<Transaction>> GetTransactions()
         {
             return await _transactionRep.GetTransactions(GetCurrentUID());
+        }
+
+        [HttpGet("weekly")]
+        public async Task<IEnumerable<TransactionWeekly>> GetReportWeeklyTransactions()
+        {
+            decimal expenseWeek1Ago = 0;
+            decimal expenseWeek2Ago = 0;
+            decimal expenseWeek3Ago = 0;
+            decimal expenseWeek4Ago = 0;
+            decimal incomeWeek1Ago = 0;
+            decimal incomeWeek2Ago = 0;
+            decimal incomeWeek3Ago = 0;
+            decimal incomeWeek4Ago = 0;
+            CultureInfo myCI = new CultureInfo("en-US");
+            Calendar myCal = myCI.Calendar;
+
+            // Gets the DTFI properties required by GetWeekOfYear.
+            CalendarWeekRule myCWR = myCI.DateTimeFormat.CalendarWeekRule;
+            DayOfWeek myFirstDOW = myCI.DateTimeFormat.FirstDayOfWeek;
+
+            IEnumerable<Transaction> transactionsWeek1 = new JarsDatabaseContext().Transactions
+                .Include(x => x.Wallet)
+                .ThenInclude(x => x.Account)
+                .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
+            transactionsWeek1 = transactionsWeek1.Where(x =>
+                myCal.GetWeekOfYear(DateTime.Now, myCWR, myFirstDOW) -
+                myCal.GetWeekOfYear((DateTime) (x.TransactionDate), myCWR, myFirstDOW) == 0);
+            foreach (var transaction in transactionsWeek1)
+            {
+                if (transaction.Amount > 0)
+                {
+                    incomeWeek1Ago += (decimal) (transaction.Amount);
+                }
+                else expenseWeek1Ago -= (decimal) (transaction.Amount);
+            }
+
+            IEnumerable<Transaction> transactionsWeek2 = new JarsDatabaseContext().Transactions
+                .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
+            transactionsWeek2 = transactionsWeek2.Where(x =>
+                myCal.GetWeekOfYear(DateTime.Now, myCWR, myFirstDOW) -
+                myCal.GetWeekOfYear((DateTime) (x.TransactionDate), myCWR, myFirstDOW) == 1);
+            foreach (var transaction in transactionsWeek2)
+            {
+                if (transaction.Amount > 0)
+                {
+                    incomeWeek1Ago += (decimal) (transaction.Amount);
+                }
+                else expenseWeek1Ago -= (decimal) (transaction.Amount);
+            }
+
+            IEnumerable<Transaction> transactionsWeek3 = new JarsDatabaseContext().Transactions
+                .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
+            transactionsWeek3 = transactionsWeek3.Where(x =>
+                myCal.GetWeekOfYear(DateTime.Now, myCWR, myFirstDOW) -
+                myCal.GetWeekOfYear((DateTime) (x.TransactionDate), myCWR, myFirstDOW) == 2);
+            foreach (var transaction in transactionsWeek3)
+            {
+                if (transaction.Amount > 0)
+                {
+                    incomeWeek1Ago += (decimal) (transaction.Amount);
+                }
+                else expenseWeek1Ago -= (decimal) (transaction.Amount);
+            }
+            
+            IEnumerable<Transaction> transactionsWeek4 = new JarsDatabaseContext().Transactions
+                .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
+            transactionsWeek4 = transactionsWeek4.Where(x =>
+                myCal.GetWeekOfYear(DateTime.Now, myCWR, myFirstDOW) -
+                myCal.GetWeekOfYear((DateTime) (x.TransactionDate), myCWR, myFirstDOW) == 3);
+            foreach (var transaction in transactionsWeek4)
+            {
+                if (transaction.Amount > 0)
+                {
+                    incomeWeek1Ago += (decimal) (transaction.Amount);
+                }
+                else expenseWeek1Ago -= (decimal) (transaction.Amount);
+            }
+
+            List<TransactionWeekly> transactionsWeeklys = new List<TransactionWeekly>();
+
+            transactionsWeeklys.Add(new TransactionWeekly
+            {
+                income = incomeWeek1Ago,
+                expense = expenseWeek1Ago,
+            });
+            transactionsWeeklys.Add(new TransactionWeekly
+            {
+                income = incomeWeek2Ago,
+                expense = expenseWeek2Ago,
+            });
+            transactionsWeeklys.Add(new TransactionWeekly
+            {
+                income = incomeWeek2Ago,
+                expense = expenseWeek2Ago,
+            });
+            transactionsWeeklys.Add(new TransactionWeekly
+            {
+                income = incomeWeek2Ago,
+                expense = expenseWeek2Ago,
+            });
+            return transactionsWeeklys;
         }
 
         // GET: api/Transaction/5
@@ -50,6 +154,7 @@ namespace JARS_API.Controllers
             {
                 return BadRequest();
             }
+
             try
             {
                 await _transactionRep.Update(transaction);
@@ -60,8 +165,12 @@ namespace JARS_API.Controllers
                 {
                     return NotFound();
                 }
-                else { throw; }
+                else
+                {
+                    throw;
+                }
             }
+
             return Ok(transaction);
         }
 
@@ -73,12 +182,24 @@ namespace JARS_API.Controllers
             try
             {
                 await _transactionRep.Add(transaction);
+                JarsDatabaseContext context = new JarsDatabaseContext();
+                var id = GetCurrentUID();
+                var wallets = context.Wallets.Where(x => x.AccountId == id).ToList();
+                foreach (var wallet in wallets)
+                {
+                    var amount = transaction.Amount * (wallet.Percentage / 100);
+                    transaction.Amount -= amount;
+                    wallet.WalletAmount += amount;
+                }
+
+                context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
             }
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+
+            return CreatedAtAction("GetTransaction", new {id = transaction.Id}, transaction);
         }
 
         // DELETE: api/Transaction/5
