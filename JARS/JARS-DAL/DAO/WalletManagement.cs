@@ -10,7 +10,7 @@ namespace JARS_DAL.DAO
 {
     public class WalletManagement
     {
-        private static WalletManagement instance;
+        private static WalletManagement? instance;
         private static readonly object instanceLock = new object();
         private WalletManagement()
         {
@@ -18,7 +18,8 @@ namespace JARS_DAL.DAO
         }
         public static WalletManagement Instance
         {
-            get { 
+            get
+            {
                 lock (instanceLock)
                 {
                     if (instance == null)
@@ -26,7 +27,7 @@ namespace JARS_DAL.DAO
                         instance = new WalletManagement();
                     }
                 }
-                return instance; 
+                return instance;
             }
         }
         public async Task<int> countWalletsByUserID(String uid)
@@ -35,12 +36,11 @@ namespace JARS_DAL.DAO
             return await jarsDB.Wallets.Where(w => w.AccountId == uid).CountAsync();
         }
         public async Task<IEnumerable<Wallet>> GetWallets(string id)
-        {            
+        {
             try
             {
-                var jarsDB = new  JarsDatabaseContext();
+                var jarsDB = new JarsDatabaseContext();
                 return await jarsDB.Wallets.Where(wallet => wallet.AccountId == id).ToListAsync();
-
             }
             catch (Exception ex)
             {
@@ -49,7 +49,6 @@ namespace JARS_DAL.DAO
         }
         public async Task<Wallet> GetWallet(int id)
         {
-            
             try
             {
                 var jarsDB = new JarsDatabaseContext();
@@ -61,7 +60,7 @@ namespace JARS_DAL.DAO
             }
         }
         public async Task AddWallet(Wallet wallet)
-        {   
+        {
             try
             {
                 var jarDB = new JarsDatabaseContext();
@@ -73,7 +72,7 @@ namespace JARS_DAL.DAO
                 throw new Exception(ex.InnerException.Message);
             }
         }
-        public async Task Add6DefaultJars(string id,decimal totalAmount)
+        public async Task Add6DefaultJars(string id, decimal totalAmount)
         {
             try
             {
@@ -82,7 +81,7 @@ namespace JARS_DAL.DAO
                 var jarDB = new JarsDatabaseContext();
                 if (jarDB.CategoryWallets.FirstOrDefault(c => c.Name == defaultCategoryWalletName) == null)
                 {
-                     categoryWallet = new CategoryWallet()
+                    categoryWallet = new CategoryWallet()
                     {
                         Name = "FromSalary",
                         CurrentCategoryLevel = 0,
@@ -95,8 +94,8 @@ namespace JARS_DAL.DAO
                 {
                     categoryWallet = jarDB.CategoryWallets.FirstOrDefault(c => c.Name == defaultCategoryWalletName);
                 }
-               
-               
+
+
                 List<Wallet> wallets = new List<Wallet>{
                     new Wallet()
                     {
@@ -107,7 +106,7 @@ namespace JARS_DAL.DAO
                         Percentage = 55,
                         StartDate = DateTime.Now,
                         WalletAmount = (totalAmount*55)/100,
-                        
+
                     },
                     new Wallet()
                     {
@@ -164,10 +163,10 @@ namespace JARS_DAL.DAO
                 categoryWallet.ParentCategoryId = categoryWallet.Id;
                 jarDB.CategoryWallets.Update(categoryWallet);
                 await jarDB.SaveChangesAsync();
-               
+
                 jarDB.Wallets.AddRange(wallets);
                 await jarDB.SaveChangesAsync();
-                if(totalAmount > 0)
+                if (totalAmount > 0)
                 {
                     List<Transaction> transactions = new List<Transaction>()
                     {
@@ -212,33 +211,34 @@ namespace JARS_DAL.DAO
                     jarDB.Transactions.AddRange(transactions);
                     await jarDB.SaveChangesAsync();
                 }
-               
+
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.InnerException.Message);
             }
         }
-        public async Task<TransactionWallet> GetSpendOfAWallet(int id,string uid)
+        public async Task<TransactionWallet> GetSpendOfAWallet(int id, string uid)
         {
             var jarDB = new JarsDatabaseContext();
-            List<Transaction> tranQuery= new List<Transaction>();
+            List<Transaction> tranQuery = new List<Transaction>();
             TransactionWallet transactionWallet = new TransactionWallet();
             transactionWallet.totalAdded = 0;
             transactionWallet.totalSpend = 0;
-           
+
             try
             {
                 tranQuery = await jarDB.Transactions.Where(t => t.WalletId == id && t.Wallet!.Account!.Id == uid).ToListAsync();
-               
-                if (tranQuery.Count() > 0) {
-                    transactionWallet.Id = id;
-                    transactionWallet.walletName = GetWallet(id).Result.Name;
+                transactionWallet.Id = id;
+                transactionWallet.walletName = GetWallet(id).Result.Name;
+
+                if (tranQuery.Count() > 0)
+                {
                     foreach (var trans in tranQuery)
                     {
                         if (trans.Amount != null && trans.Amount > 0)
                         {
-                            transactionWallet.totalAdded += trans.Amount;                          
+                            transactionWallet.totalAdded += trans.Amount;
                         }
                         else if (trans.Amount < 0)
                         {
@@ -255,19 +255,18 @@ namespace JARS_DAL.DAO
                         }
                     }
                 }
-              
+
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.InnerException.Message);
             }
             return transactionWallet;
         }
         public async Task<List<TransactionWallet>> GetSpendOfSixWallet(string uid)
-        {           
-            IEnumerable<Wallet> waQuery ;
-            List<TransactionWallet> transactionWallets = new List<TransactionWallet>();          
+        {
+            IEnumerable<Wallet> waQuery;
+            List<TransactionWallet> transactionWallets = new List<TransactionWallet>();
 
             try
             {
@@ -278,12 +277,7 @@ namespace JARS_DAL.DAO
                     {
                         transactionWallets.Add(GetSpendOfAWallet(wallet.Id, uid).Result);
                     }
-
                 }
-               
-
-
-
             }
             catch (Exception ex)
             {
@@ -292,11 +286,10 @@ namespace JARS_DAL.DAO
             }
             return transactionWallets;
         }
-        public async Task UpdateWallet (Wallet wallet)
+        public async Task UpdateWallet(Wallet wallet)
         {
             try
             {
-
                 var jarDB = new JarsDatabaseContext();
                 jarDB.Wallets.Update(wallet);
                 await jarDB.SaveChangesAsync();
@@ -311,7 +304,7 @@ namespace JARS_DAL.DAO
             try
             {
                 Wallet _wallet = await GetWallet(id);
-                if(_wallet != null)
+                if (_wallet != null)
                 {
                     var jarsDB = new JarsDatabaseContext();
                     jarsDB.Wallets.Remove(_wallet);
