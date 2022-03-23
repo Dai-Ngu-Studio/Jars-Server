@@ -91,7 +91,7 @@ namespace JARS_API.Controllers
                 }
                 else expenseWeek1Ago -= (decimal) (transaction.Amount);
             }
-            
+
             IEnumerable<Transaction> transactionsWeek4 = new JarsDatabaseContext().Transactions
                 .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
             transactionsWeek4 = transactionsWeek4.Where(x =>
@@ -180,7 +180,7 @@ namespace JARS_API.Controllers
         [HttpPost("income")]
         public async Task<ActionResult> PostTransactionIncome(IncomeTransaction incomeTransaction)
         {
-            try 
+            try
             {
                 JarsDatabaseContext context = new JarsDatabaseContext();
                 var id = GetCurrentUID();
@@ -189,29 +189,38 @@ namespace JARS_API.Controllers
                 {
                     var amount = incomeTransaction.Amount * (wallet.Percentage / 100);
                     wallet.WalletAmount += amount;
-                    Note note = new Note
+                    Note note = null;
+                    if (string.IsNullOrEmpty(incomeTransaction.NoteComment) &&
+                        string.IsNullOrEmpty(incomeTransaction.NoteImage))
                     {
-                        Comments = incomeTransaction.NoteComment,
-                        AddedDate = DateTime.Now,
-                        Image = incomeTransaction.NoteImage,
+                        note = new Note
+                        {
+                            Comments = incomeTransaction.NoteComment,
+                            AddedDate = DateTime.Now,
+                            Image = incomeTransaction.NoteImage,
+                        };
+                        context.Notes.Add(note);
+                        context.SaveChanges();
+                    }
 
-                    };
-                    context.Notes.Add(note);
-                    context.SaveChanges();
+
                     Transaction transaction = new Transaction
                     {
                         Amount = amount,
                         WalletId = wallet.Id,
-                        NoteId = note.Id,
+                        NoteId = note != null ? note.Id : null,
                         TransactionDate = DateTime.Now
                     };
                     context.Transactions.Add(transaction);
                     context.SaveChanges();
-                    note.TransactionId = transaction.Id;
-                    context.Notes.Update(note);
-                    context.SaveChanges();
+                    if (note != null)
+                    {
+                        note.TransactionId = transaction.Id;
+                        context.Notes.Update(note);
+                        context.SaveChanges();
+                    }
+                    
                 }
-                
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -220,6 +229,7 @@ namespace JARS_API.Controllers
 
             return Ok();
         }
+
         [HttpPost]
         public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
         {
@@ -245,6 +255,7 @@ namespace JARS_API.Controllers
 
             return CreatedAtAction("GetTransaction", new {id = transaction.Id}, transaction);
         }
+
         // DELETE: api/Transaction/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTransaction(int id)
