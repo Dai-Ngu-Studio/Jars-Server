@@ -30,6 +30,11 @@ namespace JARS_DAL.Repository
 
         public Task UpdateWallet(Wallet wallet) =>WalletManagement.Instance.UpdateWallet(wallet);
 
-       
+        
+
+        public Task<List<TransactionWallet>> getTransactionWallets(string uid) => WalletManagement.Instance.GetSpendOfSixWallet(uid);
+
+        public Task<TransactionWallet> getWalletTransaction(string uid, int id) => WalletManagement.Instance.GetSpendOfAWallet(id, uid);
+      
     }
 }

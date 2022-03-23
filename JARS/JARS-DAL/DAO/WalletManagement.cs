@@ -77,16 +77,26 @@ namespace JARS_DAL.DAO
         {
             try
             {
-                
+                string defaultCategoryWalletName = "FromSalary";
+                CategoryWallet categoryWallet = null;
                 var jarDB = new JarsDatabaseContext();
-                CategoryWallet categoryWallet = new CategoryWallet()
+                if (jarDB.CategoryWallets.FirstOrDefault(c => c.Name == defaultCategoryWalletName) == null)
                 {
-                    Name = "FromSalary",
-                    CurrentCategoryLevel = 0,
-                    
-                };
-                jarDB.CategoryWallets.Add(categoryWallet);
-                await jarDB.SaveChangesAsync();
+                     categoryWallet = new CategoryWallet()
+                    {
+                        Name = "FromSalary",
+                        CurrentCategoryLevel = 0,
+
+                    };
+                    jarDB.CategoryWallets.Add(categoryWallet);
+                    await jarDB.SaveChangesAsync();
+                }
+                else
+                {
+                    categoryWallet = jarDB.CategoryWallets.FirstOrDefault(c => c.Name == defaultCategoryWalletName);
+                }
+               
+               
                 List<Wallet> wallets = new List<Wallet>{
                     new Wallet()
                     {
@@ -97,6 +107,7 @@ namespace JARS_DAL.DAO
                         Percentage = 55,
                         StartDate = DateTime.Now,
                         WalletAmount = (totalAmount*55)/100,
+                        
                     },
                     new Wallet()
                     {
@@ -156,11 +167,130 @@ namespace JARS_DAL.DAO
                
                 jarDB.Wallets.AddRange(wallets);
                 await jarDB.SaveChangesAsync();
+                if(totalAmount > 0)
+                {
+                    List<Transaction> transactions = new List<Transaction>()
+                    {
+                        new Transaction()
+                        {
+                            WalletId =  wallets[0].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[0].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[1].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[1].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[2].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[2].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[3].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[3].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[4].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[4].WalletAmount
+                        },
+                        new Transaction()
+                        {
+                            WalletId =  wallets[5].Id,
+                            TransactionDate = DateTime.Now,
+                            Amount = wallets[5].WalletAmount
+                        }
+                    };
+
+                    jarDB.Transactions.AddRange(transactions);
+                    await jarDB.SaveChangesAsync();
+                }
+               
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.InnerException.Message);
             }
+        }
+        public async Task<TransactionWallet> GetSpendOfAWallet(int id,string uid)
+        {
+            var jarDB = new JarsDatabaseContext();
+            List<Transaction> tranQuery= new List<Transaction>();
+            TransactionWallet transactionWallet = new TransactionWallet();
+            transactionWallet.totalAdded = 0;
+            transactionWallet.totalSpend = 0;
+           
+            try
+            {
+                tranQuery = await jarDB.Transactions.Where(t => t.WalletId == id && t.Wallet!.Account!.Id == uid).ToListAsync();
+               
+                if (tranQuery.Count() > 0) {
+                    transactionWallet.Id = id;
+                    transactionWallet.walletName = GetWallet(id).Result.Name;
+                    foreach (var trans in tranQuery)
+                    {
+                        if (trans.Amount != null && trans.Amount > 0)
+                        {
+                            transactionWallet.totalAdded += trans.Amount;                          
+                        }
+                        else if (trans.Amount < 0)
+                        {
+                            transactionWallet.totalSpend += trans.Amount;
+                        }
+
+                        if (transactionWallet.totalAdded == null || transactionWallet.totalAdded == 0)
+                        {
+                            transactionWallet.totalAdded = 0;
+                        }
+                        else if (transactionWallet.totalSpend == null || transactionWallet.totalAdded == 0)
+                        {
+                            transactionWallet.totalSpend = 0;
+                        }
+                    }
+                }
+              
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.InnerException.Message);
+            }
+            return transactionWallet;
+        }
+        public async Task<List<TransactionWallet>> GetSpendOfSixWallet(string uid)
+        {           
+            IEnumerable<Wallet> waQuery ;
+            List<TransactionWallet> transactionWallets = new List<TransactionWallet>();          
+
+            try
+            {
+                waQuery = await GetWallets(uid);
+                if (waQuery.Count() > 0)
+                {
+                    foreach (var wallet in waQuery)
+                    {
+                        transactionWallets.Add(GetSpendOfAWallet(wallet.Id, uid).Result);
+                    }
+
+                }
+               
+
+
+
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.InnerException.Message);
+            }
+            return transactionWallets;
         }
         public async Task UpdateWallet (Wallet wallet)
         {

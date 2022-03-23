@@ -16,6 +16,8 @@ namespace JARS_DAL.Repository
         Task AddWallet(Wallet wallet);
         Task Add6DefaultJars(string id, decimal totalAmount);
         Task<int> countWallets(string uid);
-
+        Task<TransactionWallet> getWalletTransaction(string uid,int id);
+     
+        Task<List<TransactionWallet>> getTransactionWallets(string uid);
     }
 }

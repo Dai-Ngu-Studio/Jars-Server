@@ -131,10 +131,10 @@ namespace JARS_API.Controllers
                     new Metric { Name = "totalUsers" },
                 },
                 DateRanges = {
-                    new DateRange { StartDate = dateRanges[0], EndDate = dateRanges[1], Name = "13 to 12 days ago" },
-                    new DateRange { StartDate = dateRanges[2], EndDate = dateRanges[3], Name = "11 to 10 days ago" },
-                    new DateRange { StartDate = dateRanges[4], EndDate = dateRanges[5], Name = "9 to 8 days ago" },
-                    new DateRange { StartDate = dateRanges[6], EndDate = dateRanges[7], Name = "7 to 6 days ago" },
+                    new DateRange { StartDate = dateRanges[0], EndDate = dateRanges[1], Name = "13-12 days ago" },
+                    new DateRange { StartDate = dateRanges[2], EndDate = dateRanges[3], Name = "11-10 days ago" },
+                    new DateRange { StartDate = dateRanges[4], EndDate = dateRanges[5], Name = "9-8 days ago" },
+                    new DateRange { StartDate = dateRanges[6], EndDate = dateRanges[7], Name = "7-6 days ago" },
                 },
             };
 
@@ -148,9 +148,9 @@ namespace JARS_API.Controllers
                     new Metric { Name = "totalUsers" },
                 },
                 DateRanges = {
-                    new DateRange { StartDate = dateRanges[8], EndDate = dateRanges[9], Name = "5 to 4 days ago" },
-                    new DateRange { StartDate = dateRanges[10], EndDate = dateRanges[11], Name = "3 to 2 days ago" },
-                    new DateRange { StartDate = dateRanges[12], EndDate = currentDate, Name = "yesterday and today" },
+                    new DateRange { StartDate = dateRanges[8], EndDate = dateRanges[9], Name = "5-4 days ago" },
+                    new DateRange { StartDate = dateRanges[10], EndDate = dateRanges[11], Name = "3-2 days ago" },
+                    new DateRange { StartDate = dateRanges[12], EndDate = currentDate, Name = "yesterday-today" },
                 },
             };
 
@@ -175,9 +175,9 @@ namespace JARS_API.Controllers
             {
                 if (row.DimensionValues[0].Value == "Ho Chi Minh City")
                 {
-                    farActive28Reports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[0].Value));
-                    farNewReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[1].Value));
-                    farTotalReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[2].Value));
+                    farActive28Reports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[0].Value)));
+                    farNewReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[1].Value)));
+                    farTotalReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[2].Value)));
                 }
             }
 
@@ -185,9 +185,9 @@ namespace JARS_API.Controllers
             {
                 if (row.DimensionValues[0].Value == "Ho Chi Minh City")
                 {
-                    closeActive28Reports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[0].Value));
-                    closeNewReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[1].Value));
-                    closeTotalReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, row.MetricValues[2].Value));
+                    closeActive28Reports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[0].Value)));
+                    closeNewReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[1].Value)));
+                    closeTotalReports.Add(new AnalyticsReport(row.DimensionValues[1].Value, int.Parse(row.MetricValues[2].Value)));
                 }
             }
 

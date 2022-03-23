@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using JARS_API.BusinessModels;
 
 namespace JARS_API.Controllers
 {
@@ -39,6 +40,34 @@ namespace JARS_API.Controllers
         public async Task<ActionResult<Wallet>> GetWallet(int id)
         {
             return await repository.GetWallet(id);
+        }
+        [HttpGet("wallet-spend/{id}")]
+        public async Task<ActionResult<TransactionWallet>> GetWalletSpend(int id)
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                if (await repository.getWalletTransaction(uid, id) == null)
+                {
+                    return BadRequest("The wallet may not exitst");
+                }
+            }
+            return await repository.getWalletTransaction(uid,id);
+        }
+        [HttpGet("six-wallets-spend")]
+        public async Task<ActionResult<List<TransactionWallet>>> GetSixWalletSpend()
+        {
+            ClaimsPrincipal httpUser = HttpContext.User as ClaimsPrincipal;
+            string? uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (uid != null)
+            {
+                if (await repository.getTransactionWallets(uid) == null)
+                {
+                    return BadRequest("user may not init 6 jars");
+                }
+            }
+            return await repository.getTransactionWallets(uid);
         }
         //POST /wallets/
         [HttpPost]
