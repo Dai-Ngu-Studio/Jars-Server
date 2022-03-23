@@ -7,6 +7,7 @@ using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text;
+using JARS_API.BusinessModels;
 
 namespace JARS_API.Controllers
 {
@@ -176,6 +177,49 @@ namespace JARS_API.Controllers
 
         // POST: api/Transaction
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("income")]
+        public async Task<ActionResult> PostTransactionIncome(IncomeTransaction incomeTransaction)
+        {
+            try 
+            {
+                JarsDatabaseContext context = new JarsDatabaseContext();
+                var id = GetCurrentUID();
+                var wallets = context.Wallets.Where(x => x.AccountId == id).ToList();
+                foreach (var wallet in wallets)
+                {
+                    var amount = incomeTransaction.Amount * (wallet.Percentage / 100);
+                    wallet.WalletAmount += amount;
+                    Note note = new Note
+                    {
+                        Comments = incomeTransaction.NoteComment,
+                        AddedDate = DateTime.Now,
+                        Image = incomeTransaction.NoteImage,
+
+                    };
+                    context.Notes.Add(note);
+                    context.SaveChanges();
+                    Transaction transaction = new Transaction
+                    {
+                        Amount = amount,
+                        WalletId = wallet.Id,
+                        NoteId = note.Id,
+                        TransactionDate = DateTime.Now
+                    };
+                    context.Transactions.Add(transaction);
+                    context.SaveChanges();
+                    note.TransactionId = transaction.Id;
+                    context.Notes.Update(note);
+                    context.SaveChanges();
+                }
+                
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return Ok();
+        }
         [HttpPost]
         public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
         {
@@ -201,7 +245,6 @@ namespace JARS_API.Controllers
 
             return CreatedAtAction("GetTransaction", new {id = transaction.Id}, transaction);
         }
-
         // DELETE: api/Transaction/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTransaction(int id)
