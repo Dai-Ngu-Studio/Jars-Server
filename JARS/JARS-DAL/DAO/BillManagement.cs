@@ -38,10 +38,7 @@ namespace JARS_DAL.DAO
             {
                 var jarsDB = new JarsDatabaseContext();
                 var bills = await jarsDB.Bills
-                    .Where(s => s.AccountId == uid)
-                    .Skip(page * size)
-                    .Take(size)
-                    .ToListAsync();
+                    .Where(s => s.AccountId == uid).ToListAsync();
                 if (searchName != null)
                 {
                     bills = bills.Where(bill => bill.Name!.ToLower().Contains(searchName.ToLower())).ToList();
@@ -58,22 +55,20 @@ namespace JARS_DAL.DAO
                             && DateTime.Compare(bill.Date.Value.Date, dateTo.Value.Date) <= 0).ToList();
                 } 
 
-                switch (sortOrder)
+                if (sortOrder != null)
                 {
-                    case "asc":
-                        bills = bills.OrderBy(s => s.Date).ToList();
-                        break;
-                    case "desc":
-                        bills = bills.OrderByDescending(s => s.Date).ToList();
-                        break;
-                    case "z-a":
-                        bills = bills.OrderByDescending(s => s.Name).ToList();
-                        break;
-                    default:
-                        bills = bills.OrderBy(s => s.Name).ToList();
-                        break;
-                }
-                return bills;
+                    switch (sortOrder)
+                    {
+                        case "asc":
+                            bills = bills.OrderBy(s => s.Date).ToList();
+                            break;
+                        case "desc":
+                            bills = bills.OrderByDescending(s => s.Date).ToList();
+                            break;
+                    }
+                }                
+                return bills.Skip(page * size)
+                    .Take(size);
             }
             catch (Exception ex)
             {
