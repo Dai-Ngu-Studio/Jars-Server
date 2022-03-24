@@ -10,7 +10,7 @@ namespace JARS_DAL.Repository
 {
     public class ContractRepository : IContractRepository
     {
-        public Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size) 
+        public Task<IEnumerable<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size) 
                     => ContractManagement.Instance.GetAllContractAsync(uid, searchName, sortOrder, page, size);
         public Task<Contract> GetContractByContractIdAsync(int? id, string uid) => ContractManagement.Instance.GetContractByContractIdAsync(id, uid);
         public Task CreateContractAsync(Contract contract) => ContractManagement.Instance.CreateContractAsync(contract);
