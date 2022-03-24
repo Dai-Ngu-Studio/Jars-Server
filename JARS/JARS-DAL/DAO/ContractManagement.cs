@@ -141,7 +141,35 @@ namespace JARS_DAL.DAO
 
             return activeContracts;
         }
+        public async Task<IEnumerable<Contract>> CreateBillByContractDemo()
+        {
+            List<Contract> activeContracts;
+            try
+            {
+                var jarsDB = new JarsDatabaseContext();
+                activeContracts = jarsDB.Contracts
+                    .Include(c => c.Account)
+                    .ThenInclude(a => a.AccountDevices)
+                    .Where(c => (c.EndDate >= DateTime.Now) && (c.StartDate <= DateTime.Now))
+                    .Where(c => c.ScheduleTypeId == 4)
+                    .ToList();
+                foreach (var contract in activeContracts)
+                {
+                    DateTime startDate = contract.StartDate??DateTime.Now;
+                    if (!jarsDB.Bills.Any(b => b.Name == contract.Name))
+                    {
+                        await AddBillWithContract(contract);
+                    }
+                }
+                // return await jarsDB.Contracts.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
 
+            return activeContracts;
+        }
         private async Task AddBillWithContract(Contract contract)
         {
             Bill bill = new Bill
