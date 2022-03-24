@@ -38,7 +38,7 @@ namespace JARS_DAL.DAO
 
         public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
         {
-            var jarsDB = new JarsDatabaseContext();
+            var jarsDB = new JarsDatabaseContext();         
             var contracts = await jarsDB.Contracts
                 .Where(c => c.AccountId == uid)
                 .Skip(page * size)
@@ -70,7 +70,7 @@ namespace JARS_DAL.DAO
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
-            return await jarsDB.Contracts
+            return await jarsDB.Contracts.Include(c => c.Note)
                 .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
         }
 
