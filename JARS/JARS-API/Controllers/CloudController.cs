@@ -94,7 +94,10 @@ namespace JARS_API.Controllers
                 StorageClient storageClient = StorageClient.Create();
                 MemoryStream stream = new MemoryStream(bodyByte);
                 Google.Apis.Storage.v1.Data.Object gObject = storageClient.UploadObject(bucketName, $"{Guid.NewGuid()}{fileExtension}", dataType, stream);
-                return Ok($"{GoogleStorage}{gObject.Bucket}/{gObject.Name}");
+
+                Dictionary<string, string> jsonResponse = new Dictionary<string, string>();
+                jsonResponse.Add("imageUrl", $"{GoogleStorage}{gObject.Bucket}/{gObject.Name}");
+                return Ok(jsonResponse);
             }
             catch (Exception)
             {

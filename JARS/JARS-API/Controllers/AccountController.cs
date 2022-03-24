@@ -277,17 +277,15 @@ namespace JARS_API.Controllers
                         }
                         return Ok(account);
                     }
-                    catch (DbUpdateConcurrencyException ex)
+                    catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
-                        // return StatusCode(500);
-                        return BadRequest(ex.StackTrace);
+                        return StatusCode(500);
                     }
-                    catch (DbUpdateException ex)
+                    catch (DbUpdateException)
                     {
                         // to-do logging
-                        // return StatusCode(500);
-                        return BadRequest(ex.StackTrace);
+                        return StatusCode(500);
                     }
                     catch (Exception ex)
                     {
@@ -328,17 +326,15 @@ namespace JARS_API.Controllers
                         }
                         return Ok(newAccount);
                     }
-                    catch (DbUpdateConcurrencyException ex)
+                    catch (DbUpdateConcurrencyException)
                     {
                         // to-do logging
-                        // return StatusCode(500);
-                        return BadRequest(ex.StackTrace);
+                        return StatusCode(500);
                     }
-                    catch (DbUpdateException ex)
+                    catch (DbUpdateException)
                     {
                         // to-do logging
-                        // return StatusCode(500);
-                        return BadRequest(ex.StackTrace);
+                        return StatusCode(500);
                     }
                     catch (Exception ex)
                     {
@@ -353,38 +349,5 @@ namespace JARS_API.Controllers
         {
             return _accountRepository.GetAsync(id) != null;
         }
-
-        ///// <summary>
-        ///// This method is used to verify if a token is valid. It should only be used in development.
-        ///// </summary>
-        ///// <param name="json">The body of the request should have Content-Type 'application/json', the key "token" with the token as the value.</param>
-        ///// <returns>
-        ///// <para>200 OK if token is valid</para>
-        ///// <para>401 BAD REQUEST if token is invalid</para>
-        ///// </returns>
-        //[HttpPost("verify-token")]
-        //public async Task<ActionResult> VerifyToken([FromBody] JsonElement json)
-        //{
-        //    var auth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
-        //    string? token = json.GetProperty("token").GetString();
-        //    try
-        //    {
-        //        var response = await auth.VerifyIdTokenAsync(token);
-        //        if (response != null)
-        //        {
-        //            string uid = ((FirebaseToken)response).Uid;
-        //            return Ok();
-        //        }
-        //    }
-        //    catch (FirebaseAuthException)
-        //    {
-        //        return BadRequest("Invalid token. The token might have expired.");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    return BadRequest();
-        //}
     }
 }

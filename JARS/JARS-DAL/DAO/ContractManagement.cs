@@ -154,7 +154,8 @@ namespace JARS_DAL.DAO
                 Date = DateTime.Now,
                 Name = contract.Name,
                 LeftAmount = contract.Amount,
-                ContractId = contract.Id
+                ContractId = contract.Id,
+                AccountId = contract.AccountId
             };
             await BillManagement.Instance.CreateBillAsync(bill);
         }
