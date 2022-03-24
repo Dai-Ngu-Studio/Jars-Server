@@ -7,6 +7,7 @@ using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text;
+using JARS_API.BusinessModels;
 
 namespace JARS_API.Controllers
 {
@@ -90,7 +91,7 @@ namespace JARS_API.Controllers
                 }
                 else expenseWeek1Ago -= (decimal) (transaction.Amount);
             }
-            
+
             IEnumerable<Transaction> transactionsWeek4 = new JarsDatabaseContext().Transactions
                 .Where(t => t.Wallet!.Account!.Id == GetCurrentUID()).ToList();
             transactionsWeek4 = transactionsWeek4.Where(x =>
@@ -176,30 +177,123 @@ namespace JARS_API.Controllers
 
         // POST: api/Transaction
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
+        [HttpPost("income")]
+        public async Task<ActionResult> PostTransactionIncome(IncomeTransaction incomeTransaction)
         {
             try
             {
-                await _transactionRep.Add(transaction);
                 JarsDatabaseContext context = new JarsDatabaseContext();
                 var id = GetCurrentUID();
                 var wallets = context.Wallets.Where(x => x.AccountId == id).ToList();
                 foreach (var wallet in wallets)
                 {
-                    var amount = transaction.Amount * (wallet.Percentage / 100);
-                    transaction.Amount -= amount;
+                    var amount = incomeTransaction.Amount * (wallet.Percentage / 100);
                     wallet.WalletAmount += amount;
-                }
+                    Note note = null;
+                    if (!string.IsNullOrEmpty(incomeTransaction.NoteComment) ||
+                        !string.IsNullOrEmpty(incomeTransaction.NoteImage))
+                    {
+                        note = new Note
+                        {
+                            Comments = incomeTransaction.NoteComment,
+                            AddedDate = DateTime.Now,
+                            Image = incomeTransaction.NoteImage,
+                        };
+                        context.Notes.Add(note);
+                        context.SaveChanges();
+                    }
 
-                context.SaveChangesAsync();
+
+                    Transaction transaction = new Transaction
+                    {
+                        Amount = amount,
+                        WalletId = wallet.Id,
+                        NoteId = note != null ? note.Id : null,
+                        TransactionDate = DateTime.Now
+                    };
+                    context.Transactions.Add(transaction);
+                    context.SaveChanges();
+                    if (note != null)
+                    {
+                        note.TransactionId = transaction.Id;
+                        context.Notes.Update(note);
+                        context.SaveChanges();
+                    }
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
                 throw;
             }
 
-            return CreatedAtAction("GetTransaction", new {id = transaction.Id}, transaction);
+            return Ok();
+        }
+
+        [HttpPost("expense")]
+        public async Task<ActionResult> PostTransactionExpense(ExpenseTransaction expenseTransaction)
+        {
+            try
+            {
+                JarsDatabaseContext context = new JarsDatabaseContext();
+                var id = GetCurrentUID();
+                var wallet =
+                    context.Wallets.FirstOrDefault(x => x.AccountId == id && x.Id == expenseTransaction.WalletId);
+                if (wallet == null)
+                {
+                    return BadRequest();
+                }
+
+                if (wallet.WalletAmount < expenseTransaction.Amount)
+                {
+                    return BadRequest(new
+                    {
+                        msg = "Not enough money"
+                    });
+                }
+                if (expenseTransaction.Amount > 0)
+                {
+                    return BadRequest(new 
+                    {
+                        msg = "Expense amount must be less than zero"
+                    });
+                }
+                wallet.WalletAmount += expenseTransaction.Amount;
+                Note note = null;
+                if (!string.IsNullOrEmpty(expenseTransaction.NoteComment) ||
+                    !string.IsNullOrEmpty(expenseTransaction.NoteImage))
+                {
+                    note = new Note
+                    {
+                        Comments = expenseTransaction.NoteComment,
+                        AddedDate = DateTime.Now,
+                        Image = expenseTransaction.NoteImage,
+                    };
+                    context.Notes.Add(note);
+                    context.SaveChanges();
+                }
+                
+                Transaction transaction = new Transaction
+                {
+                    Amount = expenseTransaction.Amount,
+                    WalletId = wallet.Id,
+                    NoteId = note != null ? note.Id : null,
+                    TransactionDate = DateTime.Now
+                };
+                context.Transactions.Add(transaction);
+                context.SaveChanges();
+                if (note != null)
+                {
+                    note.TransactionId = transaction.Id;
+                    context.Notes.Update(note);
+                    context.SaveChanges();
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return Ok();
         }
 
         // DELETE: api/Transaction/5

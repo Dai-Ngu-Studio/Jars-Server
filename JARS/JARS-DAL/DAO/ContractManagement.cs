@@ -38,7 +38,7 @@ namespace JARS_DAL.DAO
 
         public async Task<IEnumerable<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
         {
-            var jarsDB = new JarsDatabaseContext();
+            var jarsDB = new JarsDatabaseContext();         
             var contracts = await jarsDB.Contracts
                 .Where(c => c.AccountId == uid)            
                 .ToListAsync();
@@ -66,7 +66,7 @@ namespace JARS_DAL.DAO
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
-            return await jarsDB.Contracts
+            return await jarsDB.Contracts.Include(c => c.Note)
                 .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
         }
 
@@ -150,7 +150,8 @@ namespace JARS_DAL.DAO
                 Date = DateTime.Now,
                 Name = contract.Name,
                 LeftAmount = contract.Amount,
-                ContractId = contract.Id
+                ContractId = contract.Id,
+                AccountId = contract.AccountId
             };
             await BillManagement.Instance.CreateBillAsync(bill);
         }

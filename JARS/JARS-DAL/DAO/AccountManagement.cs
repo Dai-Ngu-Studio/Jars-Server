@@ -108,9 +108,9 @@ namespace JARS_DAL.DAO
                 var account = await jarsDB.Accounts
                     .Include(account => account.AccountDevices)
                     .Include(account => account.Wallets)
+                    .Include(account => account.Bills).ThenInclude(bill => bill.BillDetails)
                     .Include(account => account.Wallets).ThenInclude(wallet => wallet.Transactions).ThenInclude(transaction => transaction.Note)
-                    .Include(account => account.Contracts).ThenInclude(contract => contract.Bills).ThenInclude(bill => bill.BillDetails)
-                    .Include(account => account.Contracts).ThenInclude(contract => contract.Bills)
+                    .Include(account => account.Contracts)
                     .FirstOrDefaultAsync(account => account.Id.Equals(id));
                 return account;
             }
