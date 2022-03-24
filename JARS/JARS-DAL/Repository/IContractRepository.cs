@@ -14,5 +14,6 @@ namespace JARS_DAL.Repository
         Task CreateContractAsync(Contract contract);
         Task UpdateContractAsync(Contract contract);
         Task<IEnumerable<Contract>> CreateBillByContract();
+        Task<IEnumerable<Contract>> CreateBillByContractDemo();
     }
 }
