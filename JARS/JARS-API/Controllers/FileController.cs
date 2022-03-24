@@ -6,18 +6,21 @@ using JARS_DAL.Repository;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text;
+
 namespace JARS_API.Controllers;
 
 [Route("api/v1/files")]
 [Authorize]
 [ApiController]
-public class FileController :ControllerBase
+public class FileController : ControllerBase
 {
     private ITransactionRepository _transactionRep;
+
     public FileController(ITransactionRepository repository)
     {
         _transactionRep = repository;
     }
+
     // GET: api/Transaction
     [HttpGet("transactions")]
     public async Task<FileResult> GetFileTransactions()
@@ -26,13 +29,18 @@ public class FileController :ControllerBase
         builder.AppendLine("Amount,Wallet name,Date");
 
         var list = await _transactionRep.GetTransactions(GetCurrentUID());
+
         foreach (var transaction in list)
         {
-            builder.AppendLine($"{transaction.Amount},{transaction.Wallet.Name},{transaction.TransactionDate}");
-        }
-        return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "Transaction_log.csv");
+            string walletName = transaction.Wallet != null ? transaction.Wallet.Name : "";
 
+            builder.AppendLine($"{transaction.Amount},{walletName},{transaction.TransactionDate}");
+        }
+
+        return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv",
+            "Transaction_" + DateTime.Now.ToString("yyyyMMddTHHmmss") + ".csv");
     }
+
     private string GetCurrentUID()
     {
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

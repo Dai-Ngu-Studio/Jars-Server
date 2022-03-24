@@ -43,7 +43,7 @@ public class TransactionManagement
         try
         {
             var context = new JarsDatabaseContext();
-            return await context.Transactions.Where(t => t.Wallet!.Account!.Id == uid).ToListAsync();
+            return await context.Transactions.Include(transaction => transaction.Wallet).Where(t => t.Wallet!.Account!.Id == uid).ToListAsync();
         }
         catch (Exception)
         {
