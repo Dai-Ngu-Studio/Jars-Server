@@ -190,8 +190,8 @@ namespace JARS_API.Controllers
                     var amount = incomeTransaction.Amount * (wallet.Percentage / 100);
                     wallet.WalletAmount += amount;
                     Note note = null;
-                    if (string.IsNullOrEmpty(incomeTransaction.NoteComment) &&
-                        string.IsNullOrEmpty(incomeTransaction.NoteImage))
+                    if (!string.IsNullOrEmpty(incomeTransaction.NoteComment) &&
+                        !string.IsNullOrEmpty(incomeTransaction.NoteImage))
                     {
                         note = new Note
                         {
