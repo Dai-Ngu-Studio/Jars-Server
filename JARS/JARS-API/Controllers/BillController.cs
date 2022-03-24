@@ -204,7 +204,7 @@ namespace JARS_API.Controllers
                         StartDate = wallet.StartDate,
                         CategoryWallet = wallet.CategoryWallet,
                     };
-                    await _walletReposiotry.UpdateWallet(wallet);
+                    await _walletReposiotry.UpdateWallet(_wallet);
                 }
                 return Ok(_bill);
             }

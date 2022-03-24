@@ -176,9 +176,14 @@ namespace JARS_API.Controllers
                     Amount = contract.Amount == null ? result.Amount : amount,
                     Name = contract.Name == null ? result.Name : contract.Name,
                     AccountId = result.AccountId,
+                    ScheduleTypeId = contract.ScheduleTypeId.Value,
+                    NoteId = contract.NoteId,
                 };
                 await _repository.UpdateContractAsync(_contract);
-
+                if(contract.Note != null)
+                {
+                await _noteRepository.Update(contract.Note);
+                }
                 if (contract.Amount != null)
                 {
                     var contractBills = await _billRepository.GetAllBillByContractIdAsync(id);

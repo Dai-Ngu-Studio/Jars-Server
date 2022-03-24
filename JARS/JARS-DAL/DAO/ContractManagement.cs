@@ -36,41 +36,37 @@ namespace JARS_DAL.DAO
             }
         }
 
-        public async Task<IReadOnlyList<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
+        public async Task<IEnumerable<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
         {
-            var jarsDB = new JarsDatabaseContext();
+            var jarsDB = new JarsDatabaseContext();         
             var contracts = await jarsDB.Contracts
-                .Where(c => c.AccountId == uid)
-                .Skip(page * size)
-                .Take(size)
+                .Where(c => c.AccountId == uid)            
                 .ToListAsync();
 
             if (searchName != null)
             {
                 contracts = contracts.Where(contract => contract.Name!.ToLower().Contains(searchName.ToLower())).ToList();
             }
-            switch (sortOrder)
+            if (sortOrder != null)
             {
-                case "asc":
-                    contracts = contracts.OrderBy(s => s.StartDate).ToList();
-                    break;
-                case "desc":
-                    contracts = contracts.OrderByDescending(s => s.StartDate).ToList();
-                    break;
-                case "z-a":
-                    contracts = contracts.OrderByDescending(s => s.Name).ToList();
-                    break;
-                default:
-                    contracts = contracts.OrderBy(s => s.Name).ToList();
-                    break;
-            }
-            return contracts;
+                switch (sortOrder)
+                {
+                    case "asc":
+                        contracts = contracts.OrderBy(s => s.StartDate).ToList();
+                        break;
+                    case "desc":
+                        contracts = contracts.OrderByDescending(s => s.StartDate).ToList();
+                        break;
+                }
+            }          
+            return contracts.Skip(page * size)
+                .Take(size);
         }
 
         public async Task<Contract> GetContractByContractIdAsync(int? id, string uid)
         {
             var jarsDB = new JarsDatabaseContext();
-            return await jarsDB.Contracts
+            return await jarsDB.Contracts.Include(c => c.Note)
                 .SingleOrDefaultAsync(c => c.AccountId == uid && c.Id == id);
         }
 
