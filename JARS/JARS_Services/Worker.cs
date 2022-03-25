@@ -54,12 +54,14 @@ public class Worker : BackgroundService
                 .GetAwaiter().GetResult();
             FcmTokenHandler.HandleBatchResponse(batchResponse, messages).GetAwaiter();
         }
-        catch (FirebaseMessagingException)
+        catch (FirebaseMessagingException ex)
         {
+            _logger.LogInformation(ex.StackTrace!);
+
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // log
+            _logger.LogInformation(ex.StackTrace!);
         }
 
         _logger.LogInformation(
