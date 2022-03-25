@@ -36,17 +36,20 @@ namespace JARS_DAL.DAO
             }
         }
 
-        public async Task<IEnumerable<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder, int page, int size)
+        public async Task<IEnumerable<Contract>> GetAllContractAsync(string uid, string? searchName, string? sortOrder,
+            int page, int size)
         {
-            var jarsDB = new JarsDatabaseContext();         
+            var jarsDB = new JarsDatabaseContext();
             var contracts = await jarsDB.Contracts
-                .Where(c => c.AccountId == uid)            
+                .Where(c => c.AccountId == uid)
                 .ToListAsync();
 
             if (searchName != null)
             {
-                contracts = contracts.Where(contract => contract.Name!.ToLower().Contains(searchName.ToLower())).ToList();
+                contracts = contracts.Where(contract => contract.Name!.ToLower().Contains(searchName.ToLower()))
+                    .ToList();
             }
+
             if (sortOrder != null)
             {
                 switch (sortOrder)
@@ -58,7 +61,8 @@ namespace JARS_DAL.DAO
                         contracts = contracts.OrderByDescending(s => s.StartDate).ToList();
                         break;
                 }
-            }          
+            }
+
             return contracts.Skip(page * size)
                 .Take(size);
         }
@@ -111,10 +115,9 @@ namespace JARS_DAL.DAO
                     .ToList();
                 foreach (var contract in activeContracts)
                 {
-                    DateTime startDate = contract.StartDate??DateTime.Now;
+                    DateTime startDate = contract.StartDate ?? DateTime.Now;
                     switch (contract.ScheduleTypeId)
                     {
-
                         case DAILY:
                             await AddBillWithContract(contract);
                             break;
@@ -123,12 +126,14 @@ namespace JARS_DAL.DAO
                             {
                                 await AddBillWithContract(contract);
                             }
+
                             break;
                         case MONTHLY:
                             if (startDate.Day == DateTime.Now.Day)
                             {
                                 await AddBillWithContract(contract);
                             }
+
                             break;
                     }
                 }
@@ -141,23 +146,25 @@ namespace JARS_DAL.DAO
 
             return activeContracts;
         }
+
         public async Task<IEnumerable<Contract>> CreateBillByContractDemo()
         {
             List<Contract> activeContracts;
+            List<Contract> processcingContracts = new List<Contract>();
             try
             {
                 var jarsDB = new JarsDatabaseContext();
                 activeContracts = jarsDB.Contracts
                     .Include(c => c.Account)
                     .ThenInclude(a => a.AccountDevices)
-                    .Where(c => (c.EndDate >= DateTime.Now) && (c.StartDate <= DateTime.Now))
-                    .Where(c => c.ScheduleTypeId == 4)
+                    .Where(c => (c.EndDate >= DateTime.Now) && (c.StartDate <= DateTime.Now) && c.ScheduleTypeId == 4)
                     .ToList();
                 foreach (var contract in activeContracts)
                 {
-                    DateTime startDate = contract.StartDate??DateTime.Now;
+                    DateTime startDate = contract.StartDate ?? DateTime.Now;
                     if (!jarsDB.Bills.Any(b => b.Name == contract.Name))
                     {
+                        processcingContracts.Add(contract);
                         await AddBillWithContract(contract);
                     }
                 }
@@ -168,8 +175,9 @@ namespace JARS_DAL.DAO
                 throw;
             }
 
-            return activeContracts;
+            return processcingContracts;
         }
+
         private async Task AddBillWithContract(Contract contract)
         {
             Bill bill = new Bill

@@ -42,7 +42,10 @@ public class Worker : BackgroundService
                 Message messageForA = new MessageBuilder().AddToken(accountDevice.FcmToken).AddNotification(noti)
                     .Build();
                 messages.Add(messageForA);
+                _logger.LogInformation(accountDevice.FcmToken);
+
             }
+
         }
 
         try
