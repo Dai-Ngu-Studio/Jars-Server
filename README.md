@@ -1,3 +1,3 @@
 # Jars-Server
 
-jars-serverr
+jars-server demo
